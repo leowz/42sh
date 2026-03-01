@@ -14,7 +14,7 @@ TEST_PATH	= tests
 # ----- Base flags -----
 CFLAGS		= $(foreach D, $(HEADER_PATH), -I$(D)) \
 			  -Wall -Wextra -Werror \
-			  -MD -MP -std=gnu99
+			  -MD -MP -std=gnu99 -g
 
 LDFLAGS		= -L$(LIB_PATH) -lft -lreadline -ltermcap
 
@@ -26,9 +26,7 @@ DBGFLAGS	= -g -fsanitize=address -fsanitize=undefined -fsanitize=leak -DDEBUG
 #   1. Remove #ifdef/#else/#endif in the test file.
 #   2. Remove #ifdef/#endif around MU_RUN in test_runner.c.
 #   3. Remove the corresponding -D flag here.
-TEST_FLAGS	=
-# For example: Uncomment once srcs/history/ is implemented:
-# TEST_FLAGS += -DTEST_HISTORY_ENABLED
+TEST_FLAGS	= -DTEST_HISTORY_ENABLED
 
 # ----- Source discovery (recursive) -----
 SRCS		= $(shell find $(SRC_PATH) -name '*.c')

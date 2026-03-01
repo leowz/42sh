@@ -9,12 +9,21 @@ static int	shell_init(t_shell *shell, char **envp)
 	shell->shell_pgid = getpid();
 	shell->env_dirty = 1;
 	(void)envp;
+	if (shell->interactive)
+	{
+		history_init(shell);
+	}
 	return (0);
 }
 
 static void	shell_cleanup(t_shell *shell)
 {
-	(void)shell;
+	if (shell->history_file)
+	{
+		history_save(shell->history_file);
+		free(shell->history_file);
+		shell->history_file = NULL;
+	}
 }
 
 /*
@@ -22,7 +31,7 @@ static void	shell_cleanup(t_shell *shell)
 **
 ** Interactive mode  → readline("42sh$ ")
 **   Returns a malloc'd string, or NULL on EOF (Ctrl-D on empty line).
-**   readline already handles cursor movement, history arrows, Ctrl-C, etc.
+**   readline handles cursor movement, history arrows, Ctrl-C, etc.
 **
 ** Non-interactive   → getline(stdin)
 **   Used when stdin is a pipe or file (scripts, -c testing).
@@ -52,18 +61,16 @@ static char	*read_line(t_shell *shell)
 int	main(int argc, char **argv, char **envp)
 {
 	t_shell	shell;
-	shell_init(&shell, envp);
 	char	*line;
 
 	(void)argc;
 	(void)argv;
+	shell_init(&shell, envp);
 	while (shell.running)
 	{
 		line = read_line(&shell);
 		if (!line)
 		{
-			if (shell.interactive)
-				ft_putendl_fd("exit", STDERR_FILENO);
 			break ;
 		}
 		if (*line == '\0')
@@ -71,6 +78,8 @@ int	main(int argc, char **argv, char **envp)
 			free(line);
 			continue ;
 		}
+		if (shell.interactive)
+			add_history(line);
 		/*
 		** TODO: tokenize → parse → execute
 		** (Modules added incrementally by each team member)

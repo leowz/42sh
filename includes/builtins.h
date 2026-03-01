@@ -48,5 +48,7 @@ int						builtin_fg(struct s_shell *shell, int argc,
 							char **argv);
 int						builtin_bg(struct s_shell *shell, int argc,
 							char **argv);
+int						builtin_history(struct s_shell *shell, int argc,
+							char **argv);
 
 #endif
