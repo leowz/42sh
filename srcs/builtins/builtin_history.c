@@ -1,33 +1,26 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   builtin_history.c                                 :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: pulgamecanica <pulgamecanica@student.42.fr> +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/26 00:00:00 by pulgamecanica    #+#    #+#             */
-/*   Updated: 2026/02/26 00:00:00 by pulgamecanica    ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file builtin_history.c
+ * @brief Implementation of the history builtin command for the 42sh shell.
+ * @author pulgamecanica
+ *
+ * ## Notes
+ * 
+ * - history_list() returns a NULL-terminated array of HIST_ENTRY* (readline).
+ * - history_base is the number assigned to the first entry (typically 1).
+ * - history_length is the total number of entries currently in the list.
+ */
 
 #include "42sh.h"
 #include "builtins.h"
 
-/*
-** builtin_history — display the command history list.
-**
-** Usage: history [n]
-**
-** With no arguments: prints all entries with their history numbers,
-** matching the format of bash / ksh:
-**   <5-wide number>  <command>
-**
-** With a numeric argument n: prints only the last n entries.
-**
-** history_list() returns a NULL-terminated array of HIST_ENTRY* (readline).
-** history_base is the number assigned to the first entry (typically 1).
-** history_length is the total number of entries currently in the list.
-*/
+/**
+ * @brief Print the command history list
+ * @details Prints all entries of the history
+ * 
+ * @param list The list of history entries obtained from readline's history_list()
+ * @param start The starting index in the history list to print from
+ * @param end The ending index in the history list to print to (exclusive)
+ */
 static void	print_entries(HIST_ENTRY **list, int start, int end)
 {
 	int	i;
@@ -40,6 +33,17 @@ static void	print_entries(HIST_ENTRY **list, int start, int end)
 	}
 }
 
+/**
+ * @brief display the command history list
+ * 
+ * @details This function displays the command history list in a format similar to bash and ksh.
+ * 
+ * @param shell The shell context (not used in this function).
+ * @param argc The number of arguments passed to the history command.
+ * @param argv The arguments passed to the history command. If a numeric argument is provided, it specifies how many of the most recent entries to display.
+ * 
+ * @return int Always returns 0.
+ */
 int	builtin_history(struct s_shell *shell, int argc, char **argv)
 {
 	HIST_ENTRY	**list;
