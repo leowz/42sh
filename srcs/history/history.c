@@ -23,6 +23,9 @@ void history_init(t_shell *shell)
 	using_history();
 	shell->history_file = history_file_path();
 	history_load(shell->history_file);
+#ifdef FT_EXTRA_VERBOSE
+	fprintf(stderr, "  \033[2mDebug → History initialized with file '%s'.\033[0m\n", shell->history_file ? shell->history_file : "none");
+#endif
 }
 
 /**
@@ -69,4 +72,7 @@ void	history_save(const char *file_path)
 	if (!file_path)
 		return ;
 	write_history(file_path);
+#ifdef FT_EXTRA_VERBOSE
+	fprintf(stderr, "  \033[2mDebug → History saved to file '%s'.\033[0m\n", file_path);
+#endif
 }

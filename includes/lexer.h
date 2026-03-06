@@ -78,6 +78,11 @@ t_list				*lexer_tokenize(const char *input);
 int					lexer_check_quotes(const char *input, char *unclosed_quote);
 void				lexer_free_tokens(t_list *tokens);
 
+#ifdef FT_EXTRA_VERBOSE
+void				lexer_display(t_list *tokens, const char *input);
+char				*lexer_to_json(t_list *tokens, const char *input);
+#endif
+
 /**
  * @brief Token helpers (used by lexer internally and by tests)
  * @details These functions are used to create and free tokens, check for operators,

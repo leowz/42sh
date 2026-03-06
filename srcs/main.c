@@ -81,10 +81,28 @@ int	main(int argc, char **argv, char **envp)
 		}
 		if (shell.interactive)
 			add_history(line);
-		/*
-		** TODO: tokenize → parse → execute
-		** (Modules added incrementally by each team member)
-		*/
+
+		/* Tokenize, display, and convert to JSON */
+		{
+			t_list	*tokens;
+
+			tokens = lexer_tokenize(line);
+			if (tokens)
+			{
+#ifdef FT_EXTRA_VERBOSE
+				char	*json_path;
+				lexer_display(tokens, line);
+				json_path = lexer_to_json(tokens, line);
+				if (json_path)
+				{
+					printf("  \033[2mJSON → %s\033[0m\n\n", json_path);
+					free(json_path);
+				}
+#endif
+				lexer_free_tokens(tokens);
+			}
+		}
+		history_save(shell.history_file);
 		free(line);
 	}
 	shell_cleanup(&shell);
