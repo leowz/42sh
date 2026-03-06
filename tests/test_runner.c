@@ -36,7 +36,7 @@ int	main(void)
 
 	MU_RUN(test_dlist_suite);
 	MU_RUN(test_list_suite);
-//	MU_RUN(test_history_suite);
+	MU_RUN(test_history_suite);
 	MU_RUN(test_lexer_suite);
 
 	MU_SUMMARY();
