@@ -27,17 +27,6 @@ static void	shell_cleanup(t_shell *shell)
 	}
 }
 
-/*
-** read_line: unified input function.
-**
-** Interactive mode  → readline("42sh$ ")
-**   Returns a malloc'd string, or NULL on EOF (Ctrl-D on empty line).
-**   readline handles cursor movement, history arrows, Ctrl-C, etc.
-**
-** Non-interactive   → getline(stdin)
-**   Used when stdin is a pipe or file (scripts, -c testing).
-**   Returns a malloc'd string, or NULL on EOF / error.
-*/
 static char	*read_line(t_shell *shell)
 {
 	char	*line;

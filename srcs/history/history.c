@@ -1,14 +1,16 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   history.c                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: pulgamecanica <pulgamecanica@student.42.fr> +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/26 00:00:00 by pulgamecanica    #+#    #+#             */
-/*   Updated: 2026/02/26 00:00:00 by pulgamecanica    ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file history.c
+ * @brief Command history management using GNU Readline.
+ *
+ * This module provides functions to initialize the command history subsystem,
+ * determine the history file path, load history from a file, and save history to a file.
+ *
+ * The history file is determined by checking the $HISTFILE environment variable first,
+ * and if that is not set, falling back to $HOME/.sh_history. The history is loaded
+ * into memory at shell startup and saved back to disk on shell exit.
+ *
+ * @author pulgamecanica
+ */
 
 #include "42sh.h"
 
