@@ -68,7 +68,7 @@ extern int	g_mu_failed;
  *
  * Evaluates *expr*. Prints a green **PASS** line on success, or a red
  * **FAIL** line including the source location on failure.
- * Do not call directly — use the #MU_ASSERT macro.
+ * Do not call directly — use the *MU_ASSERT* macro.
  *
  * @param msg   Human-readable description shown in the output line.
  * @param expr  Non-zero = pass, zero = fail.
@@ -103,7 +103,7 @@ static inline void	mu_assert(const char *file, int line,
  *
  * Compares *expected* and *actual* as `int` values.  On failure the
  * output includes both the expected and the actual values.
- * Do not call directly — use the #MU_ASSERT_INT macro.
+ * Do not call directly — use the *MU_ASSERT_INT* macro.
  *
  * @param expected The value the expression should produce.
  * @param actual   The expression under test.
@@ -139,7 +139,7 @@ static inline void	mu_assert_int(const char *file, int line,
  *
  * Compares *expected* and *actual* with strcmp(3).  A NULL *actual* is
  * treated as a failure and printed as `"(null)"` in the output line.
- * Do not call directly — use the #MU_ASSERT_STR macro.
+ * Do not call directly — use the *MU_ASSERT_STR* macro.
  *
  * @param msg      Human-readable label shown in the output line.
  * @param expected The expected C string (must not be NULL).
@@ -177,7 +177,7 @@ static inline void	mu_assert_str(const char *file, int line,
  *
  * Prints a cyan header line with the name of *fn* then calls `fn()`.
  * Typically used in `main()` of test_runner.c.
- * Do not call directly — use the #MU_RUN macro.
+ * Do not call directly — use the *MU_RUN* macro.
  *
  * @param name  Stringified name of the test suite function.
  * @param fn    Function pointer to the test suite.
@@ -200,7 +200,7 @@ static inline void	mu_run(const char *name, void (*fn)(void))
 /**
  * Print the final pass/fail totals and return an exit code.
  *
- * Must be called as the last statement in `main()` via the #MU_SUMMARY
+ * Must be called as the last statement in `main()` via the *MU_SUMMARY*
  * macro.  Returns `0` if all tests passed or `1` if any test failed, so
  * that `make` can propagate the result.
  *

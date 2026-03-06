@@ -1,3 +1,4 @@
+#include "lexer.h"
 #include "42sh.h"
 
 static int	shell_init(t_shell *shell, char **envp)

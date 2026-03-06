@@ -6,7 +6,7 @@
 #    By: zweng <marvin@42.fr>                       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/11/09 18:11:43 by zweng             #+#    #+#              #
-#    Updated: 2022/12/15 14:01:01 by zweng            ###   ########.fr        #
+#    Updated: 2026/02/25 17:50:25 by jguillem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ OBJ_PATH =  obj
 OBJ_NAME =  $(SRC_NAME_STD:.c=.o)
 
 CPPFLAGS = -I$(HEADER_PATH) 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -std=gnu99 -Wall -Wextra -Werror
 
 # ----- part automatic -----
 SRCS := $(addprefix $(STD_PATH)/,$(SRC_NAME_STD))

@@ -4,54 +4,55 @@
 #---------------------------------------------------------------------------
 # Project
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "42sh Tests"
-PROJECT_BRIEF          = "Unit test suite for the 42sh shell"
-PROJECT_NUMBER         = "pulgamecanica"
-OUTPUT_DIRECTORY       = ../docs/test
-CREATE_SUBDIRS         = NO
-OUTPUT_LANGUAGE        = English
+PROJECT_NAME			= "42sh Tests"
+PROJECT_BRIEF			= "Unit test suite for the 42sh shell"
+PROJECT_NUMBER			= "pulgamecanica"
+OUTPUT_DIRECTORY		= ../docs/test
+CREATE_SUBDIRS			= NO
+OUTPUT_LANGUAGE			= English
 
 #---------------------------------------------------------------------------
 # Input
 #---------------------------------------------------------------------------
-INPUT                  = .
-FILE_PATTERNS          = *.h *.c
-RECURSIVE              = NO
-EXCLUDE                =
-EXTRACT_ALL            = NO
-EXTRACT_STATIC         = YES
-EXTRACT_PRIVATE        = NO
-HIDE_UNDOC_MEMBERS     = YES
-HIDE_UNDOC_CLASSES     = YES
+INPUT					= .
+FILE_PATTERNS			= *.h *.c
+RECURSIVE				= NO
+EXCLUDE					=
+EXTRACT_ALL				= NO
+EXTRACT_STATIC			= YES
+EXTRACT_PRIVATE			= NO
+HIDE_UNDOC_MEMBERS		= YES
+HIDE_UNDOC_CLASSES		= YES
 
 #---------------------------------------------------------------------------
 # Build / parsing
 #---------------------------------------------------------------------------
-OPTIMIZE_OUTPUT_FOR_C  = YES
-TYPEDEF_HIDES_STRUCT   = YES
-JAVADOC_AUTOBRIEF      = NO
-MARKDOWN_SUPPORT       = YES
+OPTIMIZE_OUTPUT_FOR_C	= YES
+TYPEDEF_HIDES_STRUCT	= YES
+JAVADOC_AUTOBRIEF		= NO
+MARKDOWN_SUPPORT		= YES
 
 # Treat the module-enable guards as defined so that guarded test functions
 # are documented even before their implementations exist.
-PREDEFINED             = TEST_DLIST_ENABLED \
-                         TEST_HISTORY_ENABLED \
-                         TEST_ARRAY_ENABLED
+PREDEFINED				= TEST_DLIST_ENABLED \
+						  TEST_HISTORY_ENABLED \
+						  TEST_ARRAY_ENABLED \
+						  TEST_LEXER_ENABLED
 
 #---------------------------------------------------------------------------
 # Output: man pages only (html target converts these via man2html)
 #---------------------------------------------------------------------------
-GENERATE_HTML          = NO
-GENERATE_LATEX         = NO
-GENERATE_MAN           = YES
-MAN_OUTPUT             = man
-MAN_EXTENSION          = .9
-MAN_SUBDIR             =
-MAN_LINKS              = YES
+GENERATE_HTML			= NO
+GENERATE_LATEX			= NO
+GENERATE_MAN			= YES
+MAN_OUTPUT				= man
+MAN_EXTENSION			= .9
+MAN_SUBDIR				=
+MAN_LINKS				= YES
 
 #---------------------------------------------------------------------------
 # Verbosity
 #---------------------------------------------------------------------------
-QUIET                  = YES
-WARNINGS               = YES
-WARN_IF_UNDOCUMENTED   = NO
+QUIET					= YES
+WARNINGS				= YES
+WARN_IF_UNDOCUMENTED	= NO
