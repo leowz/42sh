@@ -135,23 +135,30 @@ serve: html
 	@printf $(GREEN)"Press Ctrl+C to stop.\n"$(EOC)
 	@cd docs && python3 -m http.server 8080
 
+# ---- Git hooks ----
+
+install-hooks:
+	@git config core.hooksPath .githooks
+	@printf $(GREEN)"Git hooks installed (core.hooksPath → .githooks)\n"$(EOC)
+
 # ---- Help ----
 
 help:
 	@printf $(WHITE)"42sh Makefile\n"$(EOC)
 	@printf "\n"
 	@printf "Targets:\n"
-	@printf "  "$(GREEN)"all"$(EOC)"     — build $(NAME) (default)\n"
-	@printf "  "$(GREEN)"debug"$(EOC)"   — build with AddressSanitizer + UBSan\n"
-	@printf "  "$(GREEN)"test"$(EOC)"    — build and run the test suite\n"
-	@printf "  "$(GREEN)"docs"$(EOC)"    — generate man pages (core + tests)\n"
-	@printf "  "$(GREEN)"html"$(EOC)"    — convert to HTML + build docs/pages.json\n"
-	@printf "  "$(GREEN)"serve"$(EOC)"   — build HTML and serve at localhost:8080\n"
-	@printf "  "$(RED)"dclean"$(EOC)"  — remove docs/core, docs/test, docs/pages.json\n"
-	@printf "  "$(RED)"clean"$(EOC)"   — remove object files\n"
-	@printf "  "$(RED)"fclean"$(EOC)"  — remove objects, binaries, and docs\n"
-	@printf "  "$(CYAN)"re"$(EOC)"      — rebuild from scratch\n"
-	@printf "  "$(CYAN)"help"$(EOC)"    — show this message\n"
+	@printf "  "$(GREEN)"all"$(EOC)"           — build $(NAME) (default)\n"
+	@printf "  "$(GREEN)"debug"$(EOC)"         — build with AddressSanitizer + UBSan\n"
+	@printf "  "$(GREEN)"test"$(EOC)"          — build and run the test suite\n"
+	@printf "  "$(GREEN)"docs"$(EOC)"          — generate man pages (core + tests)\n"
+	@printf "  "$(GREEN)"html"$(EOC)"          — convert to HTML + build docs/pages.json\n"
+	@printf "  "$(GREEN)"serve"$(EOC)"         — build HTML and serve at localhost:8080\n"
+	@printf "  "$(RED)"dclean"$(EOC)"        — remove docs/core, docs/test, docs/pages.json\n"
+	@printf "  "$(RED)"clean"$(EOC)"         — remove object files\n"
+	@printf "  "$(RED)"fclean"$(EOC)"        — remove objects, binaries, and docs\n"
+	@printf "  "$(CYAN)"re"$(EOC)"            — rebuild from scratch\n"
+	@printf "  "$(CYAN)"install-hooks"$(EOC)" — set up Git hooks from .githooks/\n"
+	@printf "  "$(CYAN)"help"$(EOC)"          — show this message\n"
 	@printf "\n"
 	@printf "Usage:\n"
 	@printf "  make           # build 42sh\n"
@@ -162,4 +169,4 @@ help:
 
 -include $(DEPS)
 
-.PHONY: all debug test docs html dclean serve clean fclean re help
+.PHONY: all debug test docs html dclean serve clean fclean re help install-hooks

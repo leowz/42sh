@@ -1,0 +1,14 @@
+#!/bin/sh
+# Pre-push hook: run the full test suite before allowing a push.
+# Install with: make install-hooks
+
+set -e
+
+printf "\033[1;36m[pre-push] Running make test...\033[0m\n"
+
+if ! make test; then
+  printf "\033[1;31m[pre-push] Tests FAILED — push aborted.\033[0m\n"
+  exit 1
+fi
+
+printf "\033[1;32m[pre-push] All tests passed.\033[0m\n"
