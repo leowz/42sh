@@ -5,7 +5,6 @@
  */
 
 #ifndef HISTORY_H
-
 # define HISTORY_H
 
 typedef struct s_shell	t_shell; /**> Forward declaration to avoid circular dependency with 42sh.h */
