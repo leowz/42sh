@@ -20,7 +20,7 @@ char *ft_strjoin(char *buf, char *add) {
 		len = 0;
 	else
 		len = ft_strlen(buf);
-	newbuf = calloc(sizeof(*newbuf), (len + ft_strlen(add) + 1));
+	newbuf = calloc((len + ft_strlen(add) + 1), sizeof(*newbuf));
 	if (newbuf == NULL)
 		return (NULL);
 	if (buf != NULL)
