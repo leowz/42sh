@@ -37,7 +37,8 @@ MARKDOWN_SUPPORT		= YES
 PREDEFINED				= TEST_DLIST_ENABLED \
 						  TEST_HISTORY_ENABLED \
 						  TEST_ARRAY_ENABLED \
-						  TEST_LEXER_ENABLED
+						  TEST_LEXER_ENABLED \
+						  TEST_BTREE_ENABLED
 
 #---------------------------------------------------------------------------
 # Output: man pages only (html target converts these via man2html)

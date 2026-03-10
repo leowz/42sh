@@ -33,6 +33,7 @@ TEST_FLAGS	=
 TEST_FLAGS += -DTEST_LEXER_ENABLED
 TEST_FLAGS += -DTEST_LIST_ENABLED
 TEST_FLAGS += -DTEST_DLIST_ENABLED
+TEST_FLAGS += -DTEST_BTREE_ENABLED
 
 # ----- Source discovery (recursive) -----
 SRCS		= $(shell find $(SRC_PATH) -name '*.c')

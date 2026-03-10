@@ -29,6 +29,7 @@ void	test_dlist_suite(void);
 void	test_list_suite(void);
 void	test_history_suite(void);
 void	test_lexer_suite(void);
+void	test_btree_suite(void);
 
 int	main(void)
 {
@@ -38,6 +39,7 @@ int	main(void)
 	MU_RUN(test_list_suite);
 //	MU_RUN(test_history_suite);
 	MU_RUN(test_lexer_suite);
+	MU_RUN(test_btree_suite);
 
 	MU_SUMMARY();
 }

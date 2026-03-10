@@ -6,7 +6,7 @@
 /*   By: zweng <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/09 11:44:47 by zweng             #+#    #+#             */
-/*   Updated: 2022/12/25 16:56:33 by zweng            ###   ########.fr       */
+/*   Updated: 2026/03/08 17:16:40 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,13 @@ typedef struct s_dlist
 	struct s_dlist	*prev;
 	struct s_dlist	*next;
 }					t_dlist;
+
+typedef struct s_btree
+{
+	struct s_btree	*left;
+	struct s_btree	*right;
+	void			*item;
+}	t_btree;
 
 typedef struct s_fd
 {
@@ -131,4 +138,8 @@ t_dlist				*ft_dlstadd_back(t_dlist **head, t_dlist *node);
 void				ft_dlstdelone(t_dlist *node, void (*del)(void *));
 void				ft_dlstclear(t_dlist **head, void (*del)(void *));
 size_t				ft_dlstsize(t_dlist *head);
+t_btree				*btree_create_node(void *item);
+void				btree_insert_data(t_btree **root, void *item,
+						int (*cmpf)(void *, void *));
+void				btree_clear(t_btree **root, void (*del)(void *));
 #endif
