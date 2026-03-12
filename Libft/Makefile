@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-CC = gcc
+CC = c99
 
 # ----- part to change -----
 
@@ -28,7 +28,7 @@ OBJ_PATH =  obj
 OBJ_NAME =  $(SRC_NAME_STD:.c=.o)
 
 CPPFLAGS = -I$(HEADER_PATH) 
-CFLAGS = -std=gnu99 -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror
 
 # ----- part automatic -----
 SRCS := $(addprefix $(STD_PATH)/,$(SRC_NAME_STD))

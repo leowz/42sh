@@ -15,7 +15,7 @@ TEST_PATH	= tests
 CFLAGS		= $(foreach D, $(HEADER_PATH), -I$(D)) \
 			  -D_POSIX_C_SOURCE=200809L \
 			  -Wall -Wextra -Werror \
-			  -MD -MP # -std=c99
+			  -MD -MP
 
 
 LDFLAGS		= -L$(LIB_PATH) -lft -lreadline -ltermcap
