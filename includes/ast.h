@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ast.h                                             :+:      :+:    :+:   */
+/*   ast.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 21:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/02/24 00:00:00 by pulgamecanica    ###   ########.fr       */
+/*   Updated: 2026/03/18 10:57:41 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@
 # include "lexer.h"
 
 /*
-** AST node types
+* AST node types
+* Important to don't change the order
 */
 typedef enum e_node_type
 {
@@ -109,7 +110,6 @@ typedef struct s_ast
 */
 t_ast		*ast_new_command(t_cmd *cmd);
 t_ast		*ast_new_binary(t_node_type type, t_ast *left, t_ast *right);
-t_ast		*ast_new_group(t_node_type type, t_ast *child, t_list *redirs);
 void		ast_free(t_ast *node);
 
 /*
