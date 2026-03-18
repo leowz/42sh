@@ -12,21 +12,19 @@
 
 #include "libft.h"
 
-char	*ft_strjoin(char const *s1, char const *s2)
-{
-	char	*ret;
-	size_t	flen;
-	size_t	slen;
+char *ft_strjoin(char *buf, char *add) {
+	char	*newbuf;
+	int		len;
 
-	if (!s1 || !s2)
-		return (0);
-	ret = 0;
-	flen = ft_strlen(s1);
-	slen = ft_strlen(s2);
-	if ((ret = (char *)malloc(sizeof(char) * (flen + slen + 1))))
-	{
-		ft_strcpy(ret, s1);
-		ft_strcat(ret, s2);
-	}
-	return (ret);
+	if (buf == NULL)
+		len = 0;
+	else
+		len = ft_strlen(buf);
+	newbuf = calloc((len + ft_strlen(add) + 1), sizeof(*newbuf));
+	if (newbuf == NULL)
+		return (NULL);
+	if (buf != NULL)
+		ft_strlcat(newbuf, buf, len + 1);
+	ft_strlcat(newbuf, add, len + ft_strlen(add) + 1);
+	return (newbuf);
 }

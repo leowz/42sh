@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>42sh · Lexer Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">42sh <span>lexer</span></div>
+    <p class="subtitle">Interactive tokenization explorer</p>
+  </header>
+
+  <main>
+    <!-- Sidebar: list of sessions -->
+    <aside id="sidebar">
+      <h2>Sessions</h2>
+      <div id="session-list">
+        <p class="hint">Loading…</p>
+      </div>
+      <div class="sidebar-footer">
+        <label class="load-btn">
+          📂 Load JSON manually
+          <input type="file" id="file-picker" accept=".json" multiple hidden />
+        </label>
+      </div>
+    </aside>
+
+    <!-- Main panel -->
+    <section id="panel">
+      <div id="welcome" class="welcome">
+        <p>← Select a session from the sidebar<br/>or load JSON files manually.</p>
+      </div>
+
+      <!-- Token strip + D3 arc diagram -->
+      <div id="viz-container" style="display:none">
+        <div id="input-display"></div>
+        <div id="token-strip"></div>
+        <div id="legend"></div>
+        <div id="arc-toolbar">
+          <button id="toggle-relations" class="toolbar-btn active" title="Toggle same-type relation arcs">
+            <span class="btn-icon">⌒</span> Relations
+          </button>
+        </div>
+        <svg id="arc-diagram"></svg>
+        <div id="detail-panel" hidden>
+          <button id="detail-close">✕</button>
+          <h3 id="detail-type"></h3>
+          <table id="detail-table"></table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

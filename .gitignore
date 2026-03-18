@@ -5,3 +5,8 @@ docs/core/*
 obj
 obj/*
 .DS_Store
+tokenizations
+tokenizations/*
+42sh
+42sh_test
+Libft/libft.a

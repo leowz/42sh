@@ -22,6 +22,7 @@
  */
 
 #ifdef TEST_LEXER_ENABLED
+#endif /* TEST_LEXER_ENABLED */
 
 # include "minunit.h"
 # include "lexer.h"
@@ -610,4 +611,3 @@ void	test_lexer_suite(void)
 	test_tokenize_newline_separator();
 }
 
-#endif /* TEST_LEXER_ENABLED */
