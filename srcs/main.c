@@ -9,11 +9,13 @@ static int	shell_init(t_shell *shell, char **envp)
 	shell->terminal_fd = STDIN_FILENO;
 	shell->shell_pgid = getpid();
 	shell->env_dirty = 1;
-	(void)envp;
 	if (shell->interactive)
 	{
 		history_init(shell);
 	}
+	(void)envp;
+	// init a 42shrc file here if it exists
+	// init variables from envp here
 	return (0);
 }
 
@@ -48,50 +50,86 @@ static char	*read_line(t_shell *shell)
 	return (line);
 }
 
-int	main(int argc, char **argv, char **envp)
+static void parse_options(int argc, char *argv[], t_shell *shell) {
+	int opt;
+	char *cmd_entrypoint;
+
+	cmd_entrypoint = NULL;
+	while ((opt = getopt(argc, argv, "hic:")) != -1) {
+		switch (opt) {
+		case 'c':
+			if (cmd_entrypoint) {
+				fprintf(stderr, "Error: Multiple -c options provided.\n");
+				exit(EXIT_FAILURE);
+			}
+			shell->cmd_entrypoint = optarg;
+			break;
+		case 'i':
+			shell->interactive = 1;
+			break;
+		default: /* '?' */
+			fprintf(stderr, """Usage: %s [-i] [-c command]\n",
+							argv[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
+static void process_line(t_shell *shell, char *line)
+{
+	if (*line == '\0')
+		return ;
+	/* Tokenize, display, and convert to JSON */
+	{
+		t_list	*tokens;
+		(void)shell;
+		tokens = lexer_tokenize(line);
+		if (tokens)
+		{
+			// todo
+#ifdef FT_EXTRA_VERBOSE
+			char	*json_path;
+			lexer_display(tokens, line);
+			json_path = lexer_to_json(tokens, line);
+			if (json_path)
+			{
+				printf("  \033[2mJSON → %s\033[0m\n\n", json_path);
+				free(json_path);
+			}
+#endif
+			lexer_free_tokens(tokens);
+		}
+	}
+}
+
+
+int	main(int argc, char *argv[], char *envp[])
 {
 	t_shell	shell;
-	char	*line;
+	char	*raw_line, *line;
 
 	(void)argc;
 	(void)argv;
 	shell_init(&shell, envp);
+	parse_options(argc, argv, &shell);
 	while (shell.running)
 	{
-		line = read_line(&shell);
-		if (!line)
-		{
-			break ;
-		}
+		raw_line = read_line(&shell);
+		if (!raw_line) break ; // just for now, for example Ctrl-D in interactive mode
+		line = ft_strtrim(raw_line); // "ls -la"
+		free(raw_line);
 		if (*line == '\0')
 		{
 			free(line);
 			continue ;
 		}
-		if (shell.interactive)
+		if (shell.interactive) {
 			add_history(line);
-
-		/* Tokenize, display, and convert to JSON */
-		{
-			t_list	*tokens;
-
-			tokens = lexer_tokenize(line);
-			if (tokens)
-			{
-#ifdef FT_EXTRA_VERBOSE
-				char	*json_path;
-				lexer_display(tokens, line);
-				json_path = lexer_to_json(tokens, line);
-				if (json_path)
-				{
-					printf("  \033[2mJSON → %s\033[0m\n\n", json_path);
-					free(json_path);
-				}
-#endif
-				lexer_free_tokens(tokens);
-			}
+			history_save(shell.history_file);
 		}
-		history_save(shell.history_file);
+
+		process_line(&shell, line);	
+
 		free(line);
 	}
 	shell_cleanup(&shell);

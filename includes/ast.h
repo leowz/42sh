@@ -69,6 +69,16 @@ typedef struct s_cmd
 	t_list	*redirs;
 }	t_cmd;
 
+// ls | grep "*.txt"
+
+// OUT (ls) -> IN (grep)
+
+// HEREDOC
+// OPEN(TMP_FILE) (IN) execve 
+//
+
+
+
 /*
 ** Binary operation data (pipe, &&, ||, ;)
 */
