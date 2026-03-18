@@ -17,6 +17,8 @@ t_ast	*ast_new_binary(t_node_type type, t_ast *left, t_ast *right)
 	t_ast		*ast;
 
 	ast = malloc(sizeof(t_ast));
+	if (!ast)
+		return (NULL);
 	ast->type = type;
 	ast->data.binary.left = left;
 	ast->data.binary.right= right;

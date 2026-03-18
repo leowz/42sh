@@ -60,6 +60,8 @@ t_ast	*parse_subshell(t_parser *p)
 			return (NULL);
 		}
 		redir = malloc(sizeof(t_redir));
+		if (!redir)
+			return (NULL);
 		redir->type = token->type;
 		redir->fd = -1;
 		redir->target = strdup(target->value);

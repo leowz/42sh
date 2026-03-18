@@ -15,6 +15,8 @@ t_ast	*ast_new_command(t_cmd *cmd)
 	t_ast	*ast;
 
 	ast = malloc(sizeof(t_ast));
+	if (!ast)
+		return (NULL);
 	ast->type = NODE_COMMAND;
 	ast->data.cmd = *cmd;
 	return (ast);
@@ -50,10 +52,14 @@ t_ast	*parse_command(t_parser *p)
 			parser_next(p);
 	}
 	command = malloc(sizeof(t_cmd));
+	if (!command)
+		return (NULL);
 	command->assignments = NULL;
 	command->redirs = NULL;
 	command->argc = i;
 	command->argv = malloc(sizeof(char *) * (command->argc + 1));
+	if (!command->argv)
+		return (NULL);
 	command->argv[command->argc] = NULL;
 	p->current = mem;
 	i = 0;
@@ -66,6 +72,8 @@ t_ast	*parse_command(t_parser *p)
 		else
 		{
 			redir = malloc(sizeof(t_redir));
+			if (!redir)
+				return (NULL);
 			redir->type = token->type;
 			token = parser_next(p);
 			if (!token || token->type != TOK_WORD)
