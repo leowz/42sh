@@ -12,6 +12,7 @@ static int	shell_init(t_shell *shell, char **envp)
 	if (shell->interactive)
 	{
 		history_init(shell);
+		signals_setup_interactive();
 	}
 	(void)envp;
 	// init a 42shrc file here if it exists
@@ -108,28 +109,31 @@ int	main(int argc, char *argv[], char *envp[])
 	t_shell	shell;
 	char	*raw_line, *line;
 
-	(void)argc;
-	(void)argv;
 	shell_init(&shell, envp);
 	parse_options(argc, argv, &shell);
 	while (shell.running)
 	{
+		signals_check(&shell);
 		raw_line = read_line(&shell);
-		if (!raw_line) break ; // just for now, for example Ctrl-D in interactive mode
-		line = ft_strtrim(raw_line); // "ls -la"
+		if (!raw_line)
+		{
+			if (shell.interactive)
+				write(STDOUT_FILENO, "exit\n", 5);
+			break ;
+		}
+		line = ft_strtrim(raw_line);
 		free(raw_line);
 		if (*line == '\0')
 		{
 			free(line);
 			continue ;
 		}
-		if (shell.interactive) {
+		if (shell.interactive)
+		{
 			add_history(line);
 			history_save(shell.history_file);
 		}
-
-		process_line(&shell, line);	
-
+		process_line(&shell, line);
 		free(line);
 	}
 	shell_cleanup(&shell);
