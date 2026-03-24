@@ -6,7 +6,7 @@
 /*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 21:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/18 10:57:41 by jguillem         ###   ########.fr       */
+/*   Updated: 2026/03/21 14:44:49 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,9 @@ typedef struct s_ast
 	t_node_type	type;
 	union
 	{
-		t_cmd		cmd;
-		t_binary	binary;
-		t_group		group;
+		t_cmd		*cmd;
+		t_binary	*binary;
+		t_group		*group;
 	}	data;
 }	t_ast;
 

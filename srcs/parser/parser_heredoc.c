@@ -135,11 +135,11 @@ void	ast_walk(t_ast *node)
 		return ;
 	printf("%s\n", types[node->type]);
 	if (node->type == NODE_COMMAND)
-		collect_heredocs_from_command(&(node->data.cmd));
+		collect_heredocs_from_command(node->data.cmd);
 	else if (node->type == NODE_SUBSHELL)
 	{
-		collect_heredocs_from_subshell(&(node->data.group));
-		ast_walk(node->data.group.child);
+		collect_heredocs_from_subshell(node->data.group);
+		ast_walk(node->data.group->child);
 	}
 	else if (node->type == NODE_PIPE
 		|| node->type == NODE_AND
@@ -147,7 +147,7 @@ void	ast_walk(t_ast *node)
 		|| node->type == NODE_SEQUENCE
 		|| node->type == NODE_BACKGROUND)
 	{
-		ast_walk(node->data.binary.left);
-		ast_walk(node->data.binary.right);
+		ast_walk(node->data.binary->left);
+		ast_walk(node->data.binary->right);
 	}
 }

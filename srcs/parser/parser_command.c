@@ -18,50 +18,70 @@ t_ast	*ast_new_command(t_cmd *cmd)
 	if (!ast)
 		return (NULL);
 	ast->type = NODE_COMMAND;
-	ast->data.cmd = *cmd;
+	ast->data.cmd = cmd;
 	return (ast);
 }
 
-/**
- * @param p struct s_parser
- * @brief handle commands and detect subshells
- * @return a pointer on a struct s_ast
- */
 t_ast	*parse_command(t_parser *p)
 {
-	t_cmd	*command;
 	t_token	*token;
-	t_list	*mem;
-	t_redir	*redir;
-	int		i;
 
 	token = parser_peek(p);
-	if (token && token->type == TOK_LPAREN)
-		return (parse_subshell(p));
-	if (!token || (token->type != TOK_WORD && !is_redir(token->type)))
+	if (!token)
 		return (NULL);
-	mem = p->current;
-	i = 0;
+	if (token->type == TOK_LPAREN)
+		return (parse_subshell(p));
+	else if (token->type == TOK_WORD && strcmp(token->value, "{") == 0)
+		return (parse_block(p));
+	return (parse_simple_command(p));
+}
+
+static t_cmd	*command_init(void)
+{
+	t_cmd	*command;
+
+	command = malloc(sizeof(t_cmd));
+	if (!command)
+		return (NULL);
+	command->argv = NULL;
+	command->argc = 0;
+	command->assignments = NULL;
+	command->redirs = NULL;
+	return (command);
+}
+
+static char	**command_size(t_parser *p, t_cmd *command)
+{
+	t_token	*token;
+	t_list	*start;
+	char	**argv;
+
+	start = p->current;
 	while ((token = parser_peek(p))
 		&& (token->type == TOK_WORD || is_redir(token->type)))
 	{
 		token = parser_next(p);
 		if (token->type == TOK_WORD)
-			i++;
+			command->argc++;
 		else
 			parser_next(p);
 	}
-	command = malloc(sizeof(t_cmd));
-	if (!command)
+	if (command->argc == 0)
 		return (NULL);
-	command->assignments = NULL;
-	command->redirs = NULL;
-	command->argc = i;
-	command->argv = malloc(sizeof(char *) * (command->argc + 1));
-	if (!command->argv)
+	argv = malloc(sizeof(char *) * (command->argc + 1));
+	if (!argv)
 		return (NULL);
-	command->argv[command->argc] = NULL;
-	p->current = mem;
+	argv[command->argc] = NULL;
+	p->current = start;
+	return (argv);
+}
+
+static t_ast	*command_build(t_parser *p, t_cmd *command)
+{
+	int		i;
+	t_token	*token;
+	t_redir	*redir;
+
 	i = 0;
 	while ((token = parser_peek(p))
 		&& (token->type == TOK_WORD || is_redir(token->type)))
@@ -75,16 +95,66 @@ t_ast	*parse_command(t_parser *p)
 			if (!redir)
 				return (NULL);
 			redir->type = token->type;
+			redir->fd = token->io_number; 
 			token = parser_next(p);
 			if (!token || token->type != TOK_WORD)
 			{
 				p->error = strdup("syntax error: bad redirection");
 				return (NULL);
 			}
-			redir->fd = -1; 
 			redir->target = strdup(token->value);
 			ft_lstappend(&(command->redirs), ft_lstnew(redir));
 		}
 	}
 	return (ast_new_command(command));
+}
+
+static int	is_assignment(char *str)
+{
+	int	equal;
+
+	equal = 0;
+	if (!str)
+		return (0);
+	if (*str == '=' || (!isalpha(*str) && *str != '_'))
+		return (0);
+	while (*str)
+	{
+		if (*str == '=')
+			equal = 1;
+		else if (!isalnum(*str) && *str != '_')
+			return (0);
+		str++;
+	}
+	return (equal);
+}
+
+static void	parse_assignment(t_parser *p, t_cmd *command)
+{
+	t_token	*token;
+	while ((token = parser_peek(p))
+		&& token->type == TOK_WORD
+		&& is_assignment(token->value))
+	{
+		token = parser_next(p);
+		ft_lstappend(&command->assignments, ft_lstnew(token->value));
+	}
+}
+
+/**
+ * @param p struct s_parser
+ * @brief handle commands and detect subshells
+ * @return a pointer on a struct s_ast
+ */
+t_ast	*parse_simple_command(t_parser *p)
+{
+	t_cmd	*command;
+
+	command = command_init();
+	if (!command)
+		return (NULL);
+	parse_assignment(p, command);
+	if (!(command->argv = command_size(p, command)))
+		return (NULL);
+	return (command_build(p, command));
 }

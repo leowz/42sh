@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "parser.h"
 #include "42sh.h"
 
 static int	shell_init(t_shell *shell, char **envp)
@@ -88,6 +89,12 @@ int	main(int argc, char **argv, char **envp)
 					free(json_path);
 				}
 #endif
+				{
+					t_ast	*ast;
+
+					ast = parser_parse(tokens);
+				   	ast_free(ast);		
+				}
 				lexer_free_tokens(tokens);
 			}
 		}

@@ -15,13 +15,21 @@
 t_ast	*ast_new_binary(t_node_type type, t_ast *left, t_ast *right)
 {
 	t_ast		*ast;
+	t_binary	*binary;
 
 	ast = malloc(sizeof(t_ast));
 	if (!ast)
 		return (NULL);
+	binary = malloc(sizeof(t_binary));
+	if (!binary)
+	{
+		free(ast);
+		return (NULL);
+	}
+	binary->left = left;
+	binary->right = right;
 	ast->type = type;
-	ast->data.binary.left = left;
-	ast->data.binary.right= right;
+	ast->data.binary = binary;
 	return (ast);
 }
 

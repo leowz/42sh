@@ -6,7 +6,7 @@
 /*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 21:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/18 10:49:02 by jguillem         ###   ########.fr       */
+/*   Updated: 2026/03/21 20:08:38 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,9 +51,11 @@ int		is_redir(t_token_type type);
 t_token	*parser_peek(t_parser *p);
 t_token	*parser_next(t_parser *p);
 t_ast	*parse_subshell(t_parser *p);
+t_ast	*parse_block(t_parser *p);
 t_ast	*parse_command(t_parser *p);
+t_ast	*parse_simple_command(t_parser *p);
 t_ast	*parse_pipeline(t_parser *p);
 t_ast	*parse_and_or(t_parser *p);
-t_ast	*parse_sequence(t_parser *p);
+t_ast	*parse_list(t_parser *p);
 
 #endif
