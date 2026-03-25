@@ -2,9 +2,12 @@
 
 void	redir_free(t_redir *redir)
 {
-	free(redir->target);
-	free(redir->heredoc_delim);
-	free(redir->heredoc_content);	
+	if (redir->target)
+		free(redir->target);
+	if (redir->heredoc_delim)
+		free(redir->heredoc_delim);
+	if (redir->heredoc_content)
+		free(redir->heredoc_content);	
 }
 
 static void	cmd_free(t_cmd	*cmd)

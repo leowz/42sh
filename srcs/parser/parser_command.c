@@ -50,12 +50,28 @@ static t_cmd	*command_init(void)
 	return (command);
 }
 
+static void	parser_error_unexpected(t_parser *p, t_token *token)
+{
+	char	buf[256];
+
+	if (!token || token->type == TOK_EOF)
+		p->error = strdup("syntax error near unexpected token `newline'");
+	else
+	{
+		snprintf(buf, sizeof(buf),
+			"syntax error near unexpected token `%s'",
+			token->value);
+		p->error = strdup(buf);
+	}
+}
+
 static char	**command_size(t_parser *p, t_cmd *command)
 {
 	t_token	*token;
 	t_list	*start;
 	char	**argv;
 
+	while (parser_accept(p, TOK_NEWLINE));
 	start = p->current;
 	while ((token = parser_peek(p))
 		&& (token->type == TOK_WORD || is_redir(token->type)))
@@ -67,7 +83,10 @@ static char	**command_size(t_parser *p, t_cmd *command)
 			parser_next(p);
 	}
 	if (command->argc == 0)
+	{
+		parser_error_unexpected(p, token);
 		return (NULL);
+	}
 	argv = malloc(sizeof(char *) * (command->argc + 1));
 	if (!argv)
 		return (NULL);
@@ -94,12 +113,15 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 			redir = malloc(sizeof(t_redir));
 			if (!redir)
 				return (NULL);
+			redir->heredoc_delim = NULL;
+			redir->heredoc_content = NULL;
+			redir->heredoc_quoted = 0;
 			redir->type = token->type;
 			redir->fd = token->io_number; 
 			token = parser_next(p);
 			if (!token || token->type != TOK_WORD)
 			{
-				p->error = strdup("syntax error: bad redirection");
+				parser_error_unexpected(p, token);
 				return (NULL);
 			}
 			redir->target = strdup(token->value);

@@ -217,6 +217,113 @@ static void test_multiple_background_chain(void)
 	ast_free(ast);
 }
 
+static void test_trailing_background(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("cmd1 & cmd2 &"));
+
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_SEQUENCE, ast->type);
+
+	t_ast *left = ast->data.binary->left;
+	t_ast *right = ast->data.binary->right;
+
+	MU_ASSERT_INT(NODE_BACKGROUND, left->type);
+	MU_ASSERT_INT(NODE_BACKGROUND, right->type);
+
+	MU_ASSERT_STR("cmd1", "cmd1",
+			left->data.group->child->data.cmd->argv[0]);
+	MU_ASSERT_STR("cmd2", "cmd2",
+			right->data.group->child->data.cmd->argv[0]);
+
+	ast_free(ast);
+}
+static void test_pipe_newline(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("ls |\n grep foo"));
+
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_PIPE, ast->type);
+
+	MU_ASSERT_STR("left", "ls",
+			ast->data.binary->left->data.cmd->argv[0]);
+	MU_ASSERT_STR("right", "grep",
+			ast->data.binary->right->data.cmd->argv[0]);
+	MU_ASSERT_STR("arg", "foo",
+			ast->data.binary->right->data.cmd->argv[1]);
+	ast_free(ast);
+}
+
+static void test_and_newline(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("true &&\n echo ok"));
+
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_AND, ast->type);
+
+	MU_ASSERT_STR("left", "true",
+			ast->data.binary->left->data.cmd->argv[0]);
+	MU_ASSERT_STR("right", "echo",
+			ast->data.binary->right->data.cmd->argv[0]);
+	MU_ASSERT_STR("arg", "ok",
+			ast->data.binary->right->data.cmd->argv[1]);
+
+	ast_free(ast);
+}
+
+static void	test_only_pipe(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("|"));
+
+	MU_ASSERT("ast NULL", !ast);
+
+	ast_free(ast);
+}
+
+static void test_only_and(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("&&"));
+
+	MU_ASSERT("ast NULL", !ast);
+
+	ast_free(ast);
+}
+
+static void	test_only_or_and(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("|| &&"));
+
+	MU_ASSERT("ast NULL", !ast);
+
+	ast_free(ast);
+}
+
+static void	test_unclose_parenthesis(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("(ls"));
+
+	MU_ASSERT("ast NULL", !ast);
+
+	ast_free(ast);
+}
+
+static void	test_unopen_parenthesis(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize(")"));
+
+	MU_ASSERT("ast NULL", !ast);
+
+	ast_free(ast);
+}
+
+static void	test_redirs_in_a_row(void)
+{
+	t_ast	*ast = parser_parse(lexer_tokenize("> < file"));
+
+	MU_ASSERT("ast NULL", !ast);
+
+	ast_free(ast);
+}
+
 void	test_parser_suite(void)
 {
 	test_simple_command();
@@ -233,4 +340,13 @@ void	test_parser_suite(void)
 	test_multiple_redirs();
 	test_background_separator();
 	test_multiple_background_chain();
+	test_trailing_background();
+	test_pipe_newline();
+	test_and_newline();
+	test_only_pipe();
+	test_only_and();
+	test_only_or_and();
+	test_unclose_parenthesis();
+	test_unopen_parenthesis();
+	test_redirs_in_a_row();
 }

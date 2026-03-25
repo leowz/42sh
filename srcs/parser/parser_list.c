@@ -39,6 +39,7 @@ t_ast	*parse_list(t_parser *p)
 	t_node_type	operator;
 	int			op;
 
+	operator = -1;
 	left = parse_and_or(p);
 	if (!left)
 		return (NULL);
@@ -49,8 +50,12 @@ t_ast	*parse_list(t_parser *p)
 			|| (current->type == TOK_WORD && strcmp(current->value, "}") == 0))
 			return (left);
 		if (operator == NODE_BACKGROUND)
+		{
 		   left = ast_new_binary(operator, left, NULL);
-		right = parse_and_or(p);
+		   if (current->type == TOK_EOF)
+			   return (left);
+		}
+		right = parse_list(p);
 		left = ast_new_binary(NODE_SEQUENCE, left, right);
 	}
 	return (left);

@@ -9,9 +9,7 @@
 
 /**
  * TODO :
- *	- implement free ast memory
- *	- check what is missing or doesn't fit with the plan
- *	- implement tests
+ * 	- handle heredoc_delim and heredoc_quoted
  */
 
 /**
@@ -38,14 +36,15 @@ t_ast	*parser_parse(t_list *tokens)
 	ast = parse_list(&p);
 	if (p.error)
 	{
+		fprintf(stderr, "%s\n", p.error);
 		ast_free(ast);
 		return (NULL);
 	}
 	token = parser_peek(&p);
 	if (!token || token->type != TOK_EOF)
 	{
+		fprintf(stderr, "syntax error: EOF not found\n");
 		ast_free(ast);
-		p.error = strdup("Syntax error: EOF not found");
 		return (NULL);
 	}
 	return (ast);
