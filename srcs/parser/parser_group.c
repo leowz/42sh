@@ -70,9 +70,13 @@ t_ast	*parse_subshell(t_parser *p)
 		redir = malloc(sizeof(t_redir));
 		if (!redir)
 			return (NULL);
+		redir->heredoc_delim = NULL;
+		redir->heredoc_content = NULL;
+		redir->heredoc_quoted = 0;
 		redir->type = token->type;
 		redir->fd = token->io_number;
 		redir->target = strdup(target->value);
+		heredoc_expand_config(redir);
 		ft_lstappend(&redirs, ft_lstnew(redir));
 		token = parser_peek(p);
 	}
@@ -118,9 +122,13 @@ t_ast	*parse_block(t_parser *p)
 		redir = malloc(sizeof(t_redir));
 		if (!redir)
 			return (NULL);
+		redir->heredoc_delim = NULL;
+		redir->heredoc_content = NULL;
+		redir->heredoc_quoted = 0;
 		redir->type = token->type;
 		redir->fd = token->io_number;
 		redir->target = strdup(target->value);
+		heredoc_expand_config(redir);
 		ft_lstappend(&redirs, ft_lstnew(redir));
 		token = parser_peek(p);
 	}

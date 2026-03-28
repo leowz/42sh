@@ -80,7 +80,7 @@ static void	collect_heredocs_from_list(t_list *lst)
 	{
 		redir = lst->content;
 		if (redir && redir->type == TOK_HEREDOC)
-			redir->heredoc_content = read_heredoc(redir->target, "> ");
+			redir->heredoc_content = read_heredoc(redir->heredoc_delim, "> ");
 		lst = lst->next;
 	}
 }
@@ -114,26 +114,40 @@ static void	collect_heredocs_from_subshell(t_group *group)
 		collect_heredocs_from_list(tmp);
 	}
 }
+
+void	heredoc_expand_config(t_redir *redir)
+{
+	char	quote;
+	char	*end;
+
+	if (redir->type == TOK_HEREDOC)
+	{
+		if (redir->target[0] == '\'' || redir->target[0] == '"')
+		{
+			redir->heredoc_quoted = 1;
+			quote = redir->target[0];
+			end = strrchr(redir->target, quote);
+			if (end > redir->target)
+			{
+				redir->heredoc_delim
+					= strndup(redir->target + 1, end - redir->target - 1);
+			}
+			else
+				redir->heredoc_delim = strdup(redir->target);
+		}
+		else
+			redir->heredoc_delim = strdup(redir->target);
+	}
+}
+
 /**
  * @param node : a pointer on a struct s_ast
  * @brief traverses the ast tree and collect heredocs content
  */
 void	ast_walk(t_ast *node)
 {
-	static const char	*types[] = {
-		"COMMAND",
-		"PIPE",
-		"AND",
-		"OR",
-		"SEQUENCE",
-		"SUBSHELL",
-		"BLOCK",
-		"BACKGROUND"
-	};
-
 	if (!node)
 		return ;
-	printf("%s\n", types[node->type]);
 	if (node->type == NODE_COMMAND)
 		collect_heredocs_from_command(node->data.cmd);
 	else if (node->type == NODE_SUBSHELL)

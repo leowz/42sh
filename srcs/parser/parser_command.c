@@ -82,9 +82,11 @@ static char	**command_size(t_parser *p, t_cmd *command)
 		else
 			parser_next(p);
 	}
-	if (command->argc == 0)
+	if (command->argc == 0 && !command->assignments)
 	{
-		parser_error_unexpected(p, token);
+		p->current = start;
+		if (parser_peek(p)->type != TOK_HEREDOC)
+			parser_error_unexpected(p, token);
 		return (NULL);
 	}
 	argv = malloc(sizeof(char *) * (command->argc + 1));
@@ -125,6 +127,7 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 				return (NULL);
 			}
 			redir->target = strdup(token->value);
+			heredoc_expand_config(redir);
 			ft_lstappend(&(command->redirs), ft_lstnew(redir));
 		}
 	}
@@ -159,7 +162,7 @@ static void	parse_assignment(t_parser *p, t_cmd *command)
 		&& is_assignment(token->value))
 	{
 		token = parser_next(p);
-		ft_lstappend(&command->assignments, ft_lstnew(token->value));
+		ft_lstappend(&command->assignments, ft_lstnew(strdup(token->value)));
 	}
 }
 
@@ -176,7 +179,9 @@ t_ast	*parse_simple_command(t_parser *p)
 	if (!command)
 		return (NULL);
 	parse_assignment(p, command);
-	if (!(command->argv = command_size(p, command)))
+	if (!(command->argv = command_size(p, command))
+		&& parser_peek(p)->type != TOK_HEREDOC
+		&& !command->assignments)
 		return (NULL);
 	return (command_build(p, command));
 }
