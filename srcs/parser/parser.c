@@ -4,13 +4,12 @@
  * @author jguillem
  */
 
+/**
+ * TODO : parser_collect() function ...
+ */
+
 #include <fcntl.h>
 #include "parser.h"
-
-/**
- * TODO :
- * 	- handle heredoc_delim and heredoc_quoted
- */
 
 /**
  * @param tokens pointer on a struct s_list of tokens
@@ -23,6 +22,7 @@
  * @details parse_command (read simple command) -> parse_subshell
  * @details parse_subshell recurse on parse_list
  * @details parse_heredoc walk ast and collect heredocs
+ * @return t_ast struct
  */
 t_ast	*parser_parse(t_list *tokens)
 {

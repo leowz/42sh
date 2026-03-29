@@ -1,5 +1,15 @@
 #include "parser.h"
 
+/**
+ * @file memory.c
+ * @brief file for free memory functions
+ * @author jguillem
+ */
+
+/**
+ * @param redir t_redir struct
+ * @brief free t_redir helper
+ */
 void	redir_free(t_redir *redir)
 {
 	if (!redir)
@@ -13,6 +23,10 @@ void	redir_free(t_redir *redir)
 	free(redir);
 }
 
+/**
+ * @param argv array of strings
+ * @brief free argv
+ */
 static void	free_argv(char **argv)
 {
 	int	i;
@@ -27,6 +41,10 @@ static void	free_argv(char **argv)
 	}
 }
 
+/**
+ * @param redir t_cmd struct
+ * @brief free t_cmd
+ */
 static void	cmd_free(t_cmd	*cmd)
 {
 	if (!cmd)
@@ -43,6 +61,10 @@ static void	cmd_free(t_cmd	*cmd)
 	free(cmd);
 }
 
+/**
+ * @param redir t_ast struct
+ * @brief free ast recursively
+ */
 void	ast_free(t_ast *node)
 {
 	if (!node)

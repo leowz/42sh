@@ -22,6 +22,11 @@ t_ast	*ast_new_command(t_cmd *cmd)
 	return (ast);
 }
 
+/**
+ * @param p t_parser struct
+ * @brief handle (subshell) and (block) then parser command
+ * @return t_ast struct
+ */
 t_ast	*parse_command(t_parser *p)
 {
 	t_token	*token;
@@ -36,6 +41,9 @@ t_ast	*parse_command(t_parser *p)
 	return (parse_simple_command(p));
 }
 
+/**
+ * @brief initialize t_cmd struct
+ */
 static t_cmd	*command_init(void)
 {
 	t_cmd	*command;
@@ -50,6 +58,11 @@ static t_cmd	*command_init(void)
 	return (command);
 }
 
+/**
+ * @param p t_parser struct
+ * @param token t_token struct
+ * @brief handle t_parser error field
+ */
 static void	parser_error_unexpected(t_parser *p, t_token *token)
 {
 	char	buf[256];
@@ -65,6 +78,12 @@ static void	parser_error_unexpected(t_parser *p, t_token *token)
 	}
 }
 
+/**
+ * @param p t_parser struct
+ * @param command t_cmd struct
+ * @brief allocate memory of t_cmd struct argv field
+ * @return char **argv
+ */
 static char	**command_size(t_parser *p, t_cmd *command)
 {
 	t_token	*token;
@@ -97,6 +116,12 @@ static char	**command_size(t_parser *p, t_cmd *command)
 	return (argv);
 }
 
+/**
+ * @param p t_parser struct
+ * @param command t_cmd struct
+ * @brief fill the t_cmd struct
+ * @return t_ast struct
+ */
 static t_ast	*command_build(t_parser *p, t_cmd *command)
 {
 	int		i;
@@ -134,6 +159,11 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 	return (ast_new_command(command));
 }
 
+/**
+ * @param str char *
+ * @brief check for valid assignment
+ * @return 0 | 1
+ */
 static int	is_assignment(char *str)
 {
 	int	equal;
@@ -154,6 +184,11 @@ static int	is_assignment(char *str)
 	return (equal);
 }
 
+/**
+ * @param p t_parser struct
+ * @param command t_cmd struct
+ * @brief append assignments to t_cmd struct
+ */
 static void	parse_assignment(t_parser *p, t_cmd *command)
 {
 	t_token	*token;

@@ -27,6 +27,7 @@ static char	*result_concat(char *begin, size_t *len, size_t read, char *src)
 	}
 	result = tmp;
 	memcpy(result + *len, src, read);
+	result[*len + read] = '\0';
 	*len += read;
 	return (result);
 }
@@ -41,29 +42,32 @@ static char	*read_heredoc(const char *delimiter, const char *prompt)
 {
 	char		*line;
 	char		*result;
-	size_t		n;
-	ssize_t		read;
 	size_t		result_len;
 
-	n = 0;
 	result = NULL;
 	line = NULL;
 	result_len = 0;
 	while (1)
 	{
-		printf("%s", prompt);
-		read = getline(&line, &n, stdin);
-		if (read == -1)
+		line = readline(prompt);
+		if (!line)
+		{
+			fprintf(stderr,
+				"\nwarning: here-document delimited by end-of-file (wanted`%s')\n",
+				delimiter);
 			break;
-		line[strcspn(line, "\n")] = '\0';
+		}
 		if (strcmp(line, delimiter) == 0)
-			break ;
-		result = result_concat(result, &result_len, (size_t)read, line);
+		{
+			free(line);
+			break;
+		}
+		result = result_concat(result, &result_len, strlen(line), line);
 		result = result_concat(result, &result_len, 1, "\n");
+		free(line);
 		if (!result)
 			break ;
 	}
-	free(line);
 	return (result);
 }
 
@@ -102,9 +106,9 @@ static void	collect_heredocs_from_command(t_cmd *cmd)
 
 /**
  * @param group : struct s_group pointer
- * @brief collect redirections of subshells
+ * @brief collect redirections of group
  */
-static void	collect_heredocs_from_subshell(t_group *group)
+static void	collect_heredocs_from_group(t_group *group)
 {
 	t_list	*tmp;
 
@@ -115,6 +119,10 @@ static void	collect_heredocs_from_subshell(t_group *group)
 	}
 }
 
+/**
+ * @param redir : t_redir struct
+ * @brief fill the heredoc_delim and heredoc_quoted fields of the t_redir struct
+ */
 void	heredoc_expand_config(t_redir *redir)
 {
 	char	quote;
@@ -150,9 +158,9 @@ void	ast_walk(t_ast *node)
 		return ;
 	if (node->type == NODE_COMMAND)
 		collect_heredocs_from_command(node->data.cmd);
-	else if (node->type == NODE_SUBSHELL)
+	else if (node->type == NODE_SUBSHELL || node->type == NODE_BLOCK)
 	{
-		collect_heredocs_from_subshell(node->data.group);
+		collect_heredocs_from_group(node->data.group);
 		ast_walk(node->data.group->child);
 	}
 	else if (node->type == NODE_PIPE
