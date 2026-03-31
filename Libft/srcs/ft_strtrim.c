@@ -6,7 +6,7 @@
 /*   By: zweng <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/11 13:37:45 by zweng             #+#    #+#             */
-/*   Updated: 2022/12/23 16:46:30 by zweng            ###   ########.fr       */
+/*   Updated: 2026/03/31 20:02:17 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ char	*ft_strtrim(char const *s)
 	sp = s;
 	while (*sp)
 		sp++;
+	if (sp == s)
+		return (ft_strnew(0));
 	sp--;
 	while ((pft_iswhitespace(*fp) || pft_iswhitespace(*sp)) && fp <= sp)
 	{

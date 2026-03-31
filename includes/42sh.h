@@ -33,20 +33,21 @@
  */
 typedef struct s_shell
 {
-	t_list		*aliases;         /**< `t_alias*` list; alias table. */
-	t_job			*current_job;     /**< Most recent job (`%+` / `%%`). */
-	char			**env;            /**< Cached NULL-terminated array for execve. */
-	int				env_dirty;        /**< 1 when `env` needs rebuild before next execve. */
-	int				exit_confirmed;   /**< Double-exit guard when stopped jobs exist. */
-	char			*history_file;    /**< Path from $HISTFILE or $HOME/.sh_history. */
-	int				interactive;      /**< 1 if stdin is a TTY (prompt + readline active). */
-	t_list		*jobs;            /**< `t_job*` list; all known jobs. */
-	int				last_exit_status; /**< Value of `$?`. */
-	struct termios	original_termios; /**< Saved terminal attributes, restored on exit. */
-	int				running;          /**< Main loop flag; set to 0 to exit. */
-	pid_t			shell_pgid;       /**< Shell's own process group id. */
-	int				terminal_fd;      /**< File descriptor of the controlling terminal. */
-	t_list		*variables;       /**< `t_var*` list; all shell/env variables. */
+  t_list	*aliases;         /**< `t_alias*` list; alias table. */
+  t_job		*current_job;     /**< Most recent job (`%+` / `%%`). */
+  char		*cmd_entrypoint;  /**< Command-line entry point. NULL unless value specified with option -c */
+  char		**env;            /**< Cached NULL-terminated array for execve. */
+  int		env_dirty;        /**< 1 when `env` needs rebuild before next execve. */
+  int		exit_confirmed;   /**< Double-exit guard when stopped jobs exist. */
+  char		*history_file;    /**< Path from $HISTFILE or $HOME/.sh_history. */
+  int		interactive;      /**< 1 if stdin is a TTY (prompt + readline active). Can be forced with option -i */
+  t_list	*jobs;            /**< `t_job*` list; all known jobs. */
+  int		last_exit_status; /**< Value of `$?`. */
+  struct termios original_termios; /**< Saved terminal attributes, restored on exit. */
+  int		running;          /**< Main loop flag; set to 0 to exit. */
+  pid_t		shell_pgid;       /**< Shell's own process group id. */
+  int		terminal_fd;      /**< File descriptor of the controlling terminal. */
+  t_list	*variables;       /**< `t_var*` list; all shell/env variables. */
 }	t_shell;
 
 /** Get the value string of variable `name`, or NULL if unset. */
