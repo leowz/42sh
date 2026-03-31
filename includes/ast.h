@@ -6,7 +6,7 @@
 /*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 21:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/28 13:19:23 by jguillem         ###   ########.fr       */
+/*   Updated: 2026/03/30 20:22:49 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,6 @@ void		ast_free(t_ast *node);
 */
 t_redir		*redir_new(t_token_type type, int fd, char *target);
 void		redir_free(t_redir *redir);
-void		ast_walk(t_ast *node);
-void		heredoc_expand_config(t_redir *redir);
 
 /*
 ** Convenience accessor: get t_redir* from a t_list node.

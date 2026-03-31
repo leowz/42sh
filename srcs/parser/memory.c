@@ -42,7 +42,7 @@ static void	free_argv(char **argv)
 }
 
 /**
- * @param redir t_cmd struct
+ * @param cmd t_cmd struct
  * @brief free t_cmd
  */
 static void	cmd_free(t_cmd	*cmd)
@@ -62,7 +62,7 @@ static void	cmd_free(t_cmd	*cmd)
 }
 
 /**
- * @param redir t_ast struct
+ * @param node t_ast struct
  * @brief free ast recursively
  */
 void	ast_free(t_ast *node)
@@ -85,4 +85,5 @@ void	ast_free(t_ast *node)
 		free(node->data.binary);
 	}
 	free(node);
+	node = NULL;
 }

@@ -13,6 +13,7 @@
 
 /**
  * @param tokens pointer on a struct s_list of tokens
+ * @param shell pointer on a struct s_shell
  * @brief receive a tokens from lexer and build an ast binary tree
  * @details this is the main function of the parser module
  * @details call parse list which wrap all the layers and check for EOF
@@ -24,7 +25,7 @@
  * @details parse_heredoc walk ast and collect heredocs
  * @return t_ast struct
  */
-t_ast	*parser_parse(t_list *tokens)
+t_ast	*parser_parse(t_list *tokens, t_shell *shell)
 {
 	t_parser	p;
 	t_ast		*ast;
@@ -50,6 +51,10 @@ t_ast	*parser_parse(t_list *tokens)
 		return (NULL);
 	}
 	free(p.error);
-	ast_walk(ast);
+	if (parser_collect_heredocs(ast, shell) == -1)
+	{
+		ast_free(ast);
+		return (NULL);
+	}
 	return (ast);
 }

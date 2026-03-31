@@ -214,6 +214,8 @@ t_ast	*parse_simple_command(t_parser *p)
 	if (!command)
 		return (NULL);
 	parse_assignment(p, command);
+	if (parser_peek(p)->type == TOK_LPAREN)
+		return (parse_subshell(p));
 	if (!(command->argv = command_size(p, command))
 		&& parser_peek(p)->type != TOK_HEREDOC
 		&& !command->assignments)

@@ -35,28 +35,18 @@ static t_ast	*ast_new_group(t_node_type type, t_ast *child, t_list *redirs)
 
 /**
  * @param p struct s_parser pointer
- * @brief create a new  NODE_SUBSHELL with its child and redirs
+ * @param child struct s_ast pointer
+ * @paran node enum e_node_type
+ * @brief factorization of the end of parse_subshell and parse_block
  * @return pointer on struct s_ast
  */
-t_ast	*parse_subshell(t_parser *p)
+static t_ast	*parse_group(t_parser *p, t_ast *child, t_node_type node)
 {
-	t_ast	*child;
-	t_list	*redirs;
+	t_list	*redirs = NULL;
+	t_redir	*redir;
 	t_token	*token;
 	t_token	*target;
-	t_redir	*redir;
 
-	if (!parser_accept(p, TOK_LPAREN))
-		return (NULL);
-	child = parse_list(p);
-	if (!child)
-		return (NULL);
-	if (!parser_accept(p, TOK_RPAREN))
-	{
-		p->error = strdup("Syntax error : expected ')'");
-		return (NULL);
-	}
-	redirs = NULL;
 	token = parser_peek(p);
 	while (token && is_redir(token->type))
 	{
@@ -80,7 +70,29 @@ t_ast	*parse_subshell(t_parser *p)
 		ft_lstappend(&redirs, ft_lstnew(redir));
 		token = parser_peek(p);
 	}
-	return (ast_new_group(NODE_SUBSHELL, child, redirs));
+	return (ast_new_group(node, child, redirs));
+}
+
+/**
+ * @param p struct s_parser pointer
+ * @brief create a new  NODE_SUBSHELL with its child and redirs
+ * @return pointer on struct s_ast
+ */
+t_ast	*parse_subshell(t_parser *p)
+{
+	t_ast	*child;
+
+	if (!parser_accept(p, TOK_LPAREN))
+		return (NULL);
+	child = parse_list(p);
+	if (!child)
+		return (NULL);
+	if (!parser_accept(p, TOK_RPAREN))
+	{
+		p->error = strdup("Syntax error : expected ')'");
+		return (NULL);
+	}
+	return (parse_group(p, child, NODE_SUBSHELL));
 }
 
 /**
@@ -91,10 +103,7 @@ t_ast	*parse_subshell(t_parser *p)
 t_ast	*parse_block(t_parser *p)
 {
 	t_ast	*child;
-	t_list	*redirs;
 	t_token	*token;
-	t_token	*target;
-	t_redir	*redir;
 
 	token = parser_next(p);
 	if (!token || token->type != TOK_WORD || strcmp(token->value, "{"))
@@ -108,29 +117,5 @@ t_ast	*parse_block(t_parser *p)
 		p->error = strdup("Syntax error : expected '}'");
 		return (NULL);
 	}
-	redirs = NULL;
-	token = parser_peek(p);
-	while (token && is_redir(token->type))
-	{
-		token = parser_next(p);
-		target = parser_next(p);
-		if (!target || target->type != TOK_WORD)
-		{
-			p->error = strdup("Syntax error : expected filename");
-			return (NULL);
-		}
-		redir = malloc(sizeof(t_redir));
-		if (!redir)
-			return (NULL);
-		redir->heredoc_delim = NULL;
-		redir->heredoc_content = NULL;
-		redir->heredoc_quoted = 0;
-		redir->type = token->type;
-		redir->fd = token->io_number;
-		redir->target = strdup(target->value);
-		heredoc_expand_config(redir);
-		ft_lstappend(&redirs, ft_lstnew(redir));
-		token = parser_peek(p);
-	}
-	return (ast_new_group(NODE_BLOCK, child, redirs));
+	return (parse_group(p, child, NODE_BLOCK));
 }

@@ -92,8 +92,9 @@ int	main(int argc, char **argv, char **envp)
 				{
 					t_ast	*ast;
 
-					ast = parser_parse(tokens);
-				   	ast_free(ast);		
+					ast = parser_parse(tokens, &shell);
+					if (ast)
+						ast_free(ast);		
 				}
 				lexer_free_tokens(tokens);
 			}

@@ -6,7 +6,7 @@
 /*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 21:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/21 20:08:38 by jguillem         ###   ########.fr       */
+/*   Updated: 2026/03/30 21:12:27 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,9 @@ typedef struct s_parser
  *   shell is needed to read from the correct fd and to check SIGINT.
  *   Returns 0 on success, -1 if SIGINT aborted heredoc input.
  */
-t_ast	*parser_parse(t_list *tokens);
+t_ast	*parser_parse(t_list *tokens, t_shell *shell);
 int		parser_collect_heredocs(t_ast *ast, t_shell *shell);
-
+void	heredoc_expand_config(t_redir *redir);
 int		parser_accept(t_parser *p, t_token_type type);
 int		is_redir(t_token_type type);
 t_token	*parser_peek(t_parser *p);
