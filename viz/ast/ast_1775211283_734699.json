@@ -1,0 +1,79 @@
+{
+  "input": "echo hello > out.txt | wc -l && (ls -la || cat file) ; echo done &",
+  "tok_file": "viz/tokenizations/tok_1775211283_734357.json",
+  "tree": {
+    "type": "NODE_SEQUENCE",
+    "left": {
+      "type": "NODE_AND",
+      "left": {
+        "type": "NODE_PIPE",
+        "left": {
+          "type": "NODE_COMMAND",
+          "argv": ["echo", "hello"],
+          "argc": 2,
+          "assignments": [],
+          "redirs": [
+            {
+              "type": ">",
+              "fd": -1,
+              "target": "out.txt",
+              "heredoc_delim": null,
+              "heredoc_quoted": 0
+            }
+          ]
+        },
+        "right": {
+          "type": "NODE_COMMAND",
+          "argv": ["wc", "-l"],
+          "argc": 2,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        }
+      },
+      "right": {
+        "type": "NODE_SUBSHELL",
+        "child": {
+          "type": "NODE_OR",
+          "left": {
+            "type": "NODE_COMMAND",
+            "argv": ["ls", "-la"],
+            "argc": 2,
+            "assignments": [],
+            "redirs": [
+
+            ]
+          },
+          "right": {
+            "type": "NODE_COMMAND",
+            "argv": ["cat", "file"],
+            "argc": 2,
+            "assignments": [],
+            "redirs": [
+
+            ]
+          }
+        },
+        "redirs": [
+
+        ]
+      }
+    },
+    "right": {
+      "type": "NODE_BACKGROUND",
+      "child": {
+        "type": "NODE_COMMAND",
+        "argv": ["echo", "done"],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      },
+      "redirs": [
+
+      ]
+    }
+  }
+}

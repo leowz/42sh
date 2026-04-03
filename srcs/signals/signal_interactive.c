@@ -26,9 +26,9 @@ static void	sigint_handler_interactive(int sig)
 /**
  * @brief Set up signal handlers for interactive mode (at the prompt).
  *
- * SIGINT  — custom handler: newline + redisplay prompt (like bash)
- * SIGQUIT — ignored (Ctrl-\ does nothing at prompt) (for now... I think)
- * SIGTSTP — ignored for now (Ctrl-Z does nothing at prompt, will handle
+ * SIGINT  - custom handler: newline + redisplay prompt (like bash)
+ * SIGQUIT - ignored (Ctrl-\ does nothing at prompt) (for now... I think)
+ * SIGTSTP - ignored for now (Ctrl-Z does nothing at prompt, will handle
  *           fg/bg job control later)
  */
 void	signals_setup_interactive(void)

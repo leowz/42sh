@@ -1,0 +1,26 @@
+{
+  "input": "cat < file.txt >> out.txt",
+  "tok_file": "viz/tokenizations/tok_1775211302_074287.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["cat"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+      {
+        "type": "<",
+        "fd": -1,
+        "target": "file.txt",
+        "heredoc_delim": null,
+        "heredoc_quoted": 0
+      },
+      {
+        "type": ">>",
+        "fd": -1,
+        "target": "out.txt",
+        "heredoc_delim": null,
+        "heredoc_quoted": 0
+      }
+    ]
+  }
+}

@@ -1,20 +1,18 @@
 /**
  * @file parser.c
  * @brief main file of parser module
- * @author jguillem
- */
-
-/**
- * TODO : parser_collect() function ...
+ * @author jguillem, pulgamecanica
  */
 
 #include <fcntl.h>
 #include "parser.h"
 
 /**
+ * @brief receive a tokens from lexer and build an ast binary tree
+ *
  * @param tokens pointer on a struct s_list of tokens
  * @param shell pointer on a struct s_shell
- * @brief receive a tokens from lexer and build an ast binary tree
+ *
  * @details this is the main function of the parser module
  * @details call parse list which wrap all the layers and check for EOF
  * @details parse_list (";" and "&" separators) -> parse_and_or
@@ -23,6 +21,7 @@
  * @details parse_command (read simple command) -> parse_subshell
  * @details parse_subshell recurse on parse_list
  * @details parse_heredoc walk ast and collect heredocs
+ *
  * @return t_ast struct
  */
 t_ast	*parser_parse(t_list *tokens, t_shell *shell)

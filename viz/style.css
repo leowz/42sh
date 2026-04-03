@@ -26,6 +26,16 @@
   --c-paren:       #f778ba;
   --c-eof:         #6e7681;
   --c-error:       #f85149;
+
+  /* AST node type palette */
+  --c-node-command:    #3fb950;
+  --c-node-pipe:       #ff7b72;
+  --c-node-and:        #ffa657;
+  --c-node-or:         #d2a8ff;
+  --c-node-sequence:   #79c0ff;
+  --c-node-subshell:   #f778ba;
+  --c-node-block:      #56d364;
+  --c-node-background: #ffd866;
 }
 
 html { font-size: 15px; }
@@ -100,6 +110,16 @@ main {
   background: rgba(88,166,255,.12);
   color: var(--accent);
 }
+.session-item .badge {
+  display: inline-block;
+  font-size: .6rem;
+  padding: .1rem .35rem;
+  border-radius: 3px;
+  margin-left: .4rem;
+  vertical-align: middle;
+}
+.badge-tok { background: rgba(63,185,80,.2); color: #3fb950; }
+.badge-ast { background: rgba(88,166,255,.2); color: #58a6ff; }
 .hint { padding: .75rem 1rem; color: var(--muted); font-size: .8rem; }
 .sidebar-footer {
   border-top: 1px solid var(--border);
@@ -158,6 +178,37 @@ main {
   font-weight: 700;
 }
 
+/* ─── Tabs ──────────────────────────────────────────────────────── */
+#tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+}
+.tab {
+  padding: .55rem 1.2rem;
+  font-size: .85rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color .15s, border-color .15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab.disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+.tab-pane { display: none; flex-direction: column; gap: 1.2rem; }
+.tab-pane.active { display: flex; }
+
 /* ─── Token strip ───────────────────────────────────────────────── */
 #token-strip {
   display: flex;
@@ -201,7 +252,7 @@ main {
 }
 
 /* ─── Arc toolbar ───────────────────────────────────────────────── */
-#arc-toolbar {
+#arc-toolbar, #ast-toolbar {
   display: flex;
   gap: .5rem;
   justify-content: flex-end;
@@ -277,7 +328,7 @@ main {
   user-select: none;
 }
 
-/* ─── Detail panel ──────────────────────────────────────────────── */
+/* ─── Detail panel (tokens) ────────────────────────────────────── */
 #detail-panel {
   position: relative;
   background: var(--surface);
@@ -306,6 +357,264 @@ main {
   border-bottom: 1px solid var(--border);
 }
 #detail-table td:first-child { color: var(--muted); width: 120px; }
+
+/* ─── AST container ────────────────────────────────────────────── */
+#ast-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  min-height: 400px;
+  height: 500px;
+  resize: vertical;
+}
+#ast-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+#ast-svg:active { cursor: grabbing; }
+
+/* AST tree nodes */
+.ast-link {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 2;
+  transition: stroke .2s;
+}
+.ast-link.highlighted {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.ast-node { cursor: pointer; }
+
+.ast-node-rect {
+  rx: 8;
+  ry: 8;
+  stroke-width: 2;
+  transition: filter .15s, stroke-width .15s;
+}
+.ast-node:hover .ast-node-rect {
+  filter: brightness(1.3) drop-shadow(0 0 8px rgba(255,255,255,.2));
+  stroke-width: 3;
+}
+.ast-node.selected .ast-node-rect {
+  stroke: #fff;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 12px rgba(255,255,255,.25));
+}
+
+.ast-node-label {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  font-weight: 600;
+}
+.ast-node-sublabel {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 10px;
+  fill: rgba(255,255,255,.7);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.ast-collapse-icon {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  fill: rgba(255,255,255,.6);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* ─── AST detail panel ─────────────────────────────────────────── */
+#ast-detail {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+}
+#ast-detail-close {
+  position: absolute;
+  top: .6rem; right: .8rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+}
+#ast-detail-close:hover { color: var(--text); }
+#ast-detail-type {
+  font-size: .95rem;
+  margin-bottom: .6rem;
+  font-family: 'Fira Code', monospace;
+}
+#ast-detail-body {
+  font-size: .82rem;
+}
+#ast-detail-body table {
+  border-collapse: collapse;
+  width: 100%;
+}
+#ast-detail-body td {
+  padding: .3rem .6rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+#ast-detail-body td:first-child {
+  color: var(--muted);
+  width: 120px;
+  white-space: nowrap;
+}
+#ast-detail-body code {
+  background: rgba(255,255,255,.06);
+  padding: .15rem .4rem;
+  border-radius: 4px;
+  font-size: .8rem;
+}
+#ast-detail-body .redir-list {
+  list-style: none;
+  padding: 0;
+}
+#ast-detail-body .redir-list li {
+  padding: .2rem 0;
+  font-family: 'Fira Code', monospace;
+  font-size: .8rem;
+}
+#ast-detail-body .redir-op { color: var(--c-redir-out); font-weight: 600; }
+#ast-detail-body .redir-fd { color: var(--muted); }
+#ast-detail-body .redir-target { color: var(--c-word); }
+
+/* AST legend */
+#ast-pane .ast-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .9rem;
+  padding: .6rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ─── Settings modal ───────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay[hidden] { display: none; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 480px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0,0,0,.5);
+  animation: modal-in .2s ease-out;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(.95) translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: .2rem .4rem;
+  border-radius: 4px;
+  transition: background .15s, color .15s;
+}
+.modal-close:hover {
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+}
+.modal-body {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.setting-label {
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+.setting-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.setting-chip {
+  padding: .35rem .8rem;
+  border-radius: 6px;
+  font-size: .8rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.setting-chip:hover {
+  color: var(--text);
+  border-color: #555;
+}
+.setting-chip.active {
+  background: rgba(88,166,255,.15);
+  color: var(--accent);
+  border-color: rgba(88,166,255,.5);
+}
+/* Curve preview */
+#curve-preview {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: block;
+}
+#curve-preview .preview-path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+#curve-preview .preview-dot {
+  fill: var(--accent);
+}
 
 /* ─── Scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }

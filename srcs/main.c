@@ -90,22 +90,36 @@ static void process_line(t_shell *shell, char *line)
 		{
 			// todo
 #ifdef FT_EXTRA_VERBOSE
-			char	*json_path;
+			char	*tok_json;
 			lexer_display(tokens, line);
-			json_path = lexer_to_json(tokens, line);
-			if (json_path)
-			{
-				printf("  \033[2mJSON → %s\033[0m\n\n", json_path);
-				free(json_path);
-			}
+			tok_json = lexer_to_json(tokens, line);
+			if (tok_json)
+				printf("  \033[2mJSON → %s\033[0m\n\n", tok_json);
 #endif
 			{
 				t_ast	*ast;
 
 				ast = parser_parse(tokens, shell);
 				if (ast)
-					ast_free(ast);		
+				{
+#ifdef FT_EXTRA_VERBOSE
+					char	*ast_json;
+
+					ast_display(ast, line);
+					ast_json = ast_to_json(ast, line, tok_json);
+					if (ast_json)
+					{
+						printf("  \033[2mAST  → %s\033[0m\n\n",
+							ast_json);
+						free(ast_json);
+					}
+#endif
+					ast_free(ast);
+				}
 			}
+#ifdef FT_EXTRA_VERBOSE
+			free(tok_json);
+#endif
 			lexer_free_tokens(tokens);
 		}
 	}
