@@ -1,0 +1,13 @@
+{
+  "input": "'adsfasdfasd",
+  "tok_file": "viz/tokenizations/tok_1775403937_503323.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["'adsfasdfasd"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

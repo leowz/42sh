@@ -1,0 +1,13 @@
+{
+  "input": "\"ijkljlk kkn '' nhj\"",
+  "tok_file": "viz/tokenizations/tok_1775403950_911821.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["\"ijkljlk kkn '' nhj\""],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

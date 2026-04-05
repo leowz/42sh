@@ -47,7 +47,7 @@ t_ast	*parse_list(t_parser *p)
 	{
 		current = parser_peek(p);
 		if (!current || current->type == TOK_EOF
-			|| (current->type == TOK_WORD && strcmp(current->value, "}") == 0))
+			|| (current->type == TOK_WORD && current->type == TOK_RBRACE))
 			return (left);
 		if (operator == NODE_BACKGROUND)
 		{
