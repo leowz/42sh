@@ -1,34 +1,20 @@
-==641840== Memcheck, a memory error detector
-==641840== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==641840== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
-==641840== Command: ./42sh
-==641840== Parent PID: 641830
-==641840== 
-==641840== 
-==641840== HEAP SUMMARY:
-==641840==     in use at exit: 238,972 bytes in 592 blocks
-==641840==   total heap usage: 889 allocs, 297 frees, 309,588 bytes allocated
-==641840== 
-==641840== 32 bytes in 1 blocks are definitely lost in loss record 18 of 81
-==641840==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==641840==    by 0x10CDAD: command_init (parser_command.c:51)
-==641840==    by 0x10D312: parse_simple_command (parser_command.c:213)
-==641840==    by 0x10CD95: parse_command (parser_command.c:41)
-==641840==    by 0x10A7B4: parse_pipeline (parser_pipeline.c:19)
-==641840==    by 0x10B463: parse_and_or (parser_and_or.c:42)
-==641840==    by 0x10A8CB: parse_list (parser_list.c:43)
-==641840==    by 0x10A96B: parse_list (parser_list.c:58)
-==641840==    by 0x10D66E: parser_parse (parser.c:36)
-==641840==    by 0x10DD07: process_line (main.c:102)
-==641840==    by 0x10DEDC: main (main.c:158)
-==641840== 
-==641840== 
-==641840== ---- Print suppression ? --- [Return/N/n/Y/y/C/c] ---- ==641840== LEAK SUMMARY:
-==641840==    definitely lost: 32 bytes in 1 blocks
-==641840==    indirectly lost: 0 bytes in 0 blocks
-==641840==      possibly lost: 0 bytes in 0 blocks
-==641840==    still reachable: 0 bytes in 0 blocks
-==641840==         suppressed: 238,940 bytes in 591 blocks
-==641840== 
-==641840== For lists of detected and suppressed errors, rerun with: -s
-==641840== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
+==126789== Memcheck, a memory error detector
+==126789== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==126789== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==126789== Command: ./42sh
+==126789== Parent PID: 126783
+==126789== 
+==126789== 
+==126789== HEAP SUMMARY:
+==126789==     in use at exit: 239,169 bytes in 603 blocks
+==126789==   total heap usage: 863 allocs, 260 frees, 266,771 bytes allocated
+==126789== 
+==126789== LEAK SUMMARY:
+==126789==    definitely lost: 0 bytes in 0 blocks
+==126789==    indirectly lost: 0 bytes in 0 blocks
+==126789==      possibly lost: 0 bytes in 0 blocks
+==126789==    still reachable: 0 bytes in 0 blocks
+==126789==         suppressed: 239,169 bytes in 603 blocks
+==126789== 
+==126789== For lists of detected and suppressed errors, rerun with: -s
+==126789== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
