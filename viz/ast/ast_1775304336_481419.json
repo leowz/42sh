@@ -1,0 +1,13 @@
+{
+  "input": "kksks",
+  "tok_file": "viz/tokenizations/tok_1775304336_480451.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["kksks"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

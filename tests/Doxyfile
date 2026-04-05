@@ -41,7 +41,7 @@ PREDEFINED				= TEST_DLIST_ENABLED \
 						  TEST_BTREE_ENABLED
 
 #---------------------------------------------------------------------------
-# Output: man pages only (html target converts these via man2html)
+# Output: man pages + XML (XML consumed by Sphinx/Breathe)
 #---------------------------------------------------------------------------
 GENERATE_HTML			= NO
 GENERATE_LATEX			= NO
@@ -50,6 +50,8 @@ MAN_OUTPUT				= man
 MAN_EXTENSION			= .9
 MAN_SUBDIR				=
 MAN_LINKS				= YES
+GENERATE_XML			= YES
+XML_OUTPUT				= xml
 
 #---------------------------------------------------------------------------
 # Verbosity

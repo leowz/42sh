@@ -21,7 +21,7 @@ CFLAGS		= $(foreach D, $(HEADER_PATH), -I$(D)) \
 LDFLAGS		= -L$(LIB_PATH) -lft -lreadline -ltermcap
 
 # ----- Debug flags (only for `make debug`) -----
-DBGFLAGS	= -g -fsanitize=address -fsanitize=undefined -fsanitize=leak -DDEBUG
+DBGFLAGS	= -g -DDEBUG #-fsanitize=address -fsanitize=undefined -fsanitize=leak
 DBGFLAGS	+= -DFT_EXTRA_VERBOSE
 
 # ----- Test feature flags -----
@@ -114,28 +114,32 @@ fclean: clean dclean
 
 re: fclean all
 
+valgrind:
+	valgrind --gen-suppressions=yes --suppressions=suppression.file --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=valgrind-out.txt ./42sh
+
 # ---- Documentation ----
-# Two Doxyfiles:
-#   root Doxyfile  → 42sh core     → docs/core/
-#   tests/Doxyfile → test suite    → docs/test/
-# docs/index.html is the static viewer (version-controlled, never removed).
-# All generation logic lives in scripts/gendocs.sh.
+# Two Doxyfiles produce XML consumed by Sphinx/Breathe:
+#   root Doxyfile  → 42sh core     → docs/core/xml
+#   tests/Doxyfile → test suite    → docs/test/xml
+# Sphinx (with RTD theme) builds the final HTML from docs/*.rst.
 
 docs:
 	@./scripts/gendocs.sh docs
 
 html: docs
-	@./scripts/gendocs.sh html
+	@printf $(GREEN)"Building Sphinx docs...\n"$(EOC)
+	@sphinx-build -b html docs docs/_build/html
+	@printf $(GREEN)"HTML docs ready in docs/_build/html\n"$(EOC)
 
 dclean:
-	@printf $(RED)"Removing generated docs (preserving docs/index.html)...\n"$(EOC)
-	@rm -rf docs/core docs/test docs/pages.json
+	@printf $(RED)"Removing generated docs...\n"$(EOC)
+	@rm -rf docs/core docs/test docs/_build docs/pages.json
 	@printf $(RED)"Docs removed.\n"$(EOC)
 
 serve: html
 	@printf $(GREEN)"Serving docs at http://localhost:8080\n"$(EOC)
 	@printf $(GREEN)"Press Ctrl+C to stop.\n"$(EOC)
-	@cd docs && python3 -m http.server 8080
+	@cd docs/_build/html && python3 -m http.server 8080
 
 # ---- Git hooks ----
 
@@ -152,10 +156,10 @@ help:
 	@printf "  "$(GREEN)"all"$(EOC)"           — build $(NAME) (default)\n"
 	@printf "  "$(GREEN)"debug"$(EOC)"         — build with AddressSanitizer + UBSan\n"
 	@printf "  "$(GREEN)"test"$(EOC)"          — build and run the test suite\n"
-	@printf "  "$(GREEN)"docs"$(EOC)"          — generate man pages (core + tests)\n"
-	@printf "  "$(GREEN)"html"$(EOC)"          — convert to HTML + build docs/pages.json\n"
-	@printf "  "$(GREEN)"serve"$(EOC)"         — build HTML and serve at localhost:8080\n"
-	@printf "  "$(RED)"dclean"$(EOC)"        — remove docs/core, docs/test, docs/pages.json\n"
+	@printf "  "$(GREEN)"docs"$(EOC)"          — generate Doxygen XML + man pages\n"
+	@printf "  "$(GREEN)"html"$(EOC)"          — build Sphinx HTML docs (RTD theme)\n"
+	@printf "  "$(GREEN)"serve"$(EOC)"         — build and serve docs at localhost:8080\n"
+	@printf "  "$(RED)"dclean"$(EOC)"        — remove all generated docs\n"
 	@printf "  "$(RED)"clean"$(EOC)"         — remove object files\n"
 	@printf "  "$(RED)"fclean"$(EOC)"        — remove objects, binaries, and docs\n"
 	@printf "  "$(CYAN)"re"$(EOC)"            — rebuild from scratch\n"
@@ -165,9 +169,9 @@ help:
 	@printf "Usage:\n"
 	@printf "  make           # build 42sh\n"
 	@printf "  make test      # run unit tests\n"
-	@printf "  make serve     # build docs and open viewer\n"
-	@printf "  make docs      # generate man pages only\n"
-	@printf "  make html      # build HTML docs + pages.json\n"
+	@printf "  make serve     # build and serve docs locally\n"
+	@printf "  make docs      # generate Doxygen XML + man pages\n"
+	@printf "  make html      # build Sphinx HTML (RTD theme)\n"
 
 -include $(DEPS)
 

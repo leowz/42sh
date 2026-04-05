@@ -1,0 +1,49 @@
+{
+  "input": "hahahhs || ajds sad && sss|e",
+  "tok_file": "viz/tokenizations/tok_1775303971_567718.json",
+  "tree": {
+    "type": "NODE_AND",
+    "left": {
+      "type": "NODE_OR",
+      "left": {
+        "type": "NODE_COMMAND",
+        "argv": ["hahahhs"],
+        "argc": 1,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["ajds", "sad"],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    },
+    "right": {
+      "type": "NODE_PIPE",
+      "left": {
+        "type": "NODE_COMMAND",
+        "argv": ["sss"],
+        "argc": 1,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["e"],
+        "argc": 1,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    }
+  }
+}

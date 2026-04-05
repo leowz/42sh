@@ -1,0 +1,25 @@
+{
+  "input": "cat /etc/passwd | awk -f '{printf(\"$1\",\"lol\")}'",
+  "tok_file": "viz/tokenizations/tok_1775217978_917284.json",
+  "tree": {
+    "type": "NODE_PIPE",
+    "left": {
+      "type": "NODE_COMMAND",
+      "argv": ["cat", "/etc/passwd"],
+      "argc": 2,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["awk", "-f", "'{printf(\"$1\",\"lol\")}'"],
+      "argc": 3,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}

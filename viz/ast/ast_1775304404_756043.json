@@ -1,0 +1,13 @@
+{
+  "input": "ls sksksks",
+  "tok_file": "viz/tokenizations/tok_1775304404_731920.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["ls", "sksksks"],
+    "argc": 2,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

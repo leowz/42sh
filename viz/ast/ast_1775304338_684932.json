@@ -1,0 +1,13 @@
+{
+  "input": "ls -la",
+  "tok_file": "viz/tokenizations/tok_1775304338_684607.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["ls", "-la"],
+    "argc": 2,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}
