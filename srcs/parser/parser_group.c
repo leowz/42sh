@@ -12,7 +12,7 @@
  * @brief helper function for the parse_subshell function
  * @return pointer on struct s_ast
  */
-static t_ast	*ast_new_group(t_node_type type, t_ast *child, t_list *redirs)
+t_ast	*ast_new_group(t_node_type type, t_ast *child, t_list *redirs)
 {
 	t_ast	*ast;
 	t_group	*group;
