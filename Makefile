@@ -13,7 +13,7 @@ TEST_PATH	= tests
 
 # ----- Base flags -----
 CFLAGS		= $(foreach D, $(HEADER_PATH), -I$(D)) \
-			  -D_POSIX_C_SOURCE=200809L \
+			  -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE \
 			  -Wall -Wextra -Werror \
 			  -MD -MP
 
@@ -31,7 +31,8 @@ DBGFLAGS	+= -DFT_EXTRA_VERBOSE
 #   3. Remove the corresponding -D flag here.
 TEST_FLAGS	=
 # For example: Uncomment once srcs/history/ is implemented:
-TEST_FLAGS	= -DTEST_HISTORY_ENABLED
+TEST_FLAGS += -DTEST_EXECUTOR_ENABLED
+# TEST_FLAGS	= -DTEST_HISTORY_ENABLED
 TEST_FLAGS += -DTEST_LEXER_ENABLED
 TEST_FLAGS += -DTEST_LIST_ENABLED
 TEST_FLAGS += -DTEST_DLIST_ENABLED
@@ -45,7 +46,8 @@ DEPS		= $(OBJS:.o=.d)
 
 # Test sources: all .c under tests/ + project sources except main.c
 TEST_SRCS	= $(shell find $(TEST_PATH) -name '*.c' 2>/dev/null)
-PROJ_NO_MAIN= $(filter-out $(SRC_PATH)/main.c, $(SRCS))
+PROJ_NO_MAIN= $(filter-out $(SRC_PATH)/main.c, \
+			  $(filter-out $(SRC_PATH)/signals/%, $(SRCS)))
 TEST_OBJS	= $(patsubst $(TEST_PATH)/%.c, $(OBJ_PATH)/test/%.o, $(TEST_SRCS)) \
 			  $(patsubst $(SRC_PATH)/%.c,  $(OBJ_PATH)/%.o,      $(PROJ_NO_MAIN))
 
