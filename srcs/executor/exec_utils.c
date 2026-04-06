@@ -1,23 +1,19 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   exec_utils.c                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/27 00:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file exec_utils.c
+ * @brief Utility functions for command execution in 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
 
-/*
-** Convert raw waitpid status to shell exit code.
-** - Normal exit: WEXITSTATUS (0-255)
-** - Killed by signal: 128 + signal number
-*/
+/**
+ * @brief Convert raw waitpid status to shell exit code.
+ * @details - Normal exit: WEXITSTATUS (0-255)
+ * @details - Killed by signal: 128 + signal number
+ * @param wstatus The waitpid status.
+ * @return The shell exit code.
+ */
 int	get_exit_status(int wstatus)
 {
 	if (WIFEXITED(wstatus))
@@ -27,11 +23,14 @@ int	get_exit_status(int wstatus)
 	return (1);
 }
 
-/*
-** Split "NAME=value" at first '=' into separate name and value strings.
-** Caller must free both *name and *value.
-** If no '=' found, *name = dup of assign, *value = dup of "".
-*/
+/**
+ * @brief Split "NAME=value" at first '=' into separate name and value strings.
+ * @details Caller must free both *name and *value.
+ * @details If no '=' found, *name = dup of assign, *value = dup of "".
+ * @param assign The assignment string.
+ * @param name The pointer to store the name.
+ * @param value The pointer to store the value.
+ */
 void	split_assignment(const char *assign, char **name, char **value)
 {
 	const char	*eq;

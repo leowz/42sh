@@ -1,14 +1,8 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   redirections.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/27 00:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file command_search.c
+ * @brief Command search functionality for 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
@@ -98,11 +92,13 @@ static int	apply_one_redir(t_redir *redir)
 	return (0);
 }
 
-/*
-** Set up all redirections in the list.
-** If saved_fds is not NULL, save stdin/stdout/stderr first (for restore).
-** Returns 0 on success, -1 on error.
-*/
+/**
+ * @brief Set up all redirections in the list.
+ * @details If saved_fds is not NULL, save stdin/stdout/stderr first (for restore).
+ * @param redirs The list of redirections.
+ * @param saved_fds The array to store the saved file descriptors.
+ * @return 0 on success, -1 on error.
+ */
 int	setup_redirections(t_list *redirs, int saved_fds[3])
 {
 	t_list	*node;
@@ -127,9 +123,10 @@ int	setup_redirections(t_list *redirs, int saved_fds[3])
 	return (0);
 }
 
-/*
-** Restore stdin/stdout/stderr from saved fds, then close the saved copies.
-*/
+/**
+ * @brief Restore stdin/stdout/stderr from saved fds, then close the saved copies.
+ * @param saved_fds The array of saved file descriptors.
+ */
 void	restore_redirections(int saved_fds[3])
 {
 	dup2(saved_fds[0], 0);

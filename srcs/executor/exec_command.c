@@ -1,23 +1,20 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   exec_command.c                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/02 17:01:26 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file exec_command.c
+ * @brief Command execution functionality for 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
 #include <string.h>
 
-/*
-** Apply assignments permanently to shell variables.
-** Used when command is empty (bare assignment) or in child for execve.
-*/
+/**
+ * @brief Apply assignments permanently to shell variables.
+ * @details Used when command is empty (bare assignment) or in child for execve.
+ * @param shell The shell instance.
+ * @param assigns The list of assignments.
+ * @param do_export Whether to export the variables.
+ */
 static void	apply_assignments(t_shell *shell, t_list *assigns, int do_export)
 {
 	t_list	*node;
@@ -37,10 +34,13 @@ static void	apply_assignments(t_shell *shell, t_list *assigns, int do_export)
 	}
 }
 
-/*
-** Handle empty command (just assignments and/or redirections).
-** Example: FOO=bar  or  FOO=bar > file
-*/
+/**
+ * @brief Handle empty command (just assignments and/or redirections).
+ * @details Example: FOO=bar  or  FOO=bar > file
+ * @param shell The shell instance.
+ * @param cmd The command structure.
+ * @return 0 on success, 1 on failure.
+ */
 static int	exec_assignment_only(t_shell *shell, t_cmd *cmd)
 {
 	int	saved_fds[3];
@@ -55,11 +55,15 @@ static int	exec_assignment_only(t_shell *shell, t_cmd *cmd)
 	return (0);
 }
 
-/*
-** Save old values, apply temporary assignments for builtin scope.
-** old_names/old_vals arrays store what to restore afterward.
-** Returns count of saved assignments.
-*/
+/**
+ * @brief Save old values, apply temporary assignments for builtin scope.
+ * @details old_names/old_vals arrays store what to restore afterward.
+ * @param shell The shell instance.
+ * @param assigns The list of assignments.
+ * @param old_names Array to store old variable names.
+ * @param old_vals Array to store old variable values.
+ * @return Count of saved assignments.
+ */
 static int	save_and_apply_assigns(t_shell *shell, t_list *assigns,
 		char **old_names, char **old_vals)
 {
@@ -86,9 +90,13 @@ static int	save_and_apply_assigns(t_shell *shell, t_list *assigns,
 	return (i);
 }
 
-/*
-** Restore old variable values after builtin execution.
-*/
+/**
+ * @brief Restore old variable values after builtin execution.
+ * @param shell The shell instance.
+ * @param old_names Array of old variable names.
+ * @param old_vals Array of old variable values.
+ * @param count Number of assignments to restore.
+ */
 static void	restore_assigns(t_shell *shell, char **old_names,
 		char **old_vals, int count)
 {
@@ -107,10 +115,14 @@ static void	restore_assigns(t_shell *shell, char **old_names,
 	}
 }
 
-/*
-** Execute a builtin with temporary assignments and redirections.
-** Assignments are scoped to this command only, then restored.
-*/
+/**
+ * @brief Execute a builtin with temporary assignments and redirections.
+ * @details Assignments are scoped to this command only, then restored.
+ * @param shell The shell instance.
+ * @param cmd The command structure.
+ * @param fn The builtin function to execute.
+ * @return The exit status of the builtin.
+ */
 static int	exec_builtin(t_shell *shell, t_cmd *cmd, t_builtin_fn fn)
 {
 	int		saved_fds[3];
@@ -132,9 +144,11 @@ static int	exec_builtin(t_shell *shell, t_cmd *cmd, t_builtin_fn fn)
 	return (status);
 }
 
-/*
-** Child process: apply assignments, set up redirections, exec.
-*/
+/**
+ * @brief Child process: apply assignments, set up redirections, exec.
+ * @param shell The shell instance.
+ * @param cmd The command structure.
+ */
 static void	exec_child(t_shell *shell, t_cmd *cmd)
 {
 	char	*path;

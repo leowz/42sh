@@ -1,14 +1,8 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   executor.c                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/02 16:53:32 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file executor.c
+ * @brief Command execution functionality for 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
@@ -16,7 +10,7 @@
 static int	dispatch_node(t_shell *shell, t_ast *ast)
 {
 	if (ast->type == NODE_COMMAND)
-		return (execute_simple_command(shell, &ast->data.cmd));
+		return (execute_simple_command(shell, ast->data.cmd));
 	if (ast->type == NODE_PIPE)
 		return (execute_pipeline(shell, ast));
 	if (ast->type == NODE_AND)

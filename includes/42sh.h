@@ -71,9 +71,6 @@ char	**var_get_environ(t_shell *shell);
 /** Populate `shell->variables` from the process's initial `envp`. */
 void	var_init_from_environ(t_shell *shell, char **envp);
 
-/** Process any pending signals; called in the main loop before each prompt. */
-void	signals_check(t_shell *shell);
-
 /** Cast a `t_list` node's content to `t_var *`. */
 # define LST_VAR(n)		((t_var *)(n)->content)
 

@@ -2,7 +2,7 @@
 
 ---
 
-# 42sh
+# 42sh - [read the documentation here](https://leowz.github.io/42sh/)
 
 A POSIX-flavoured shell implemented in C as a group project at 42 School.
 The shell supports interactive line editing, command history, job control,

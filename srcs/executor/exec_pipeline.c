@@ -1,23 +1,21 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   exec_pipeline.c                                   :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/27 00:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file exec_pipeline.c
+ * @brief Pipeline command execution functionality for 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
 #include <string.h>
 
-/*
-** Flatten nested PIPE nodes left-to-right into a flat array.
-** Example: (A | B) | C  =>  [A, B, C]
-*/
+/**
+ * @brief Flatten nested PIPE nodes left-to-right into a flat array.
+ * @details Example: (A | B) | C  =>  [A, B, C]
+ * @param ast The abstract syntax tree node.
+ * @param cmds The array to store the pipeline commands.
+ * @param max The maximum number of commands to store.
+ * @return The number of commands collected.
+ */
 static int	collect_pipeline(t_ast *ast, t_ast **cmds, int max)
 {
 	int	n;
@@ -27,16 +25,18 @@ static int	collect_pipeline(t_ast *ast, t_ast **cmds, int max)
 		cmds[0] = ast;
 		return (1);
 	}
-	n = collect_pipeline(ast->data.binary.left, cmds, max);
+	n = collect_pipeline(ast->data.binary->left, cmds, max);
 	if (n >= max)
 		return (n);
-	cmds[n] = ast->data.binary.right;
+	cmds[n] = ast->data.binary->right;
 	return (n + 1);
 }
 
-/*
-** Close all pipe fds in the array.
-*/
+/**
+ * @brief Close all pipe fds in the array.
+ * @param pipes The array of pipe file descriptors.
+ * @param count The number of pipes to close.
+ */
 static void	close_pipes(int pipes[][2], int count)
 {
 	int	i;
@@ -50,10 +50,14 @@ static void	close_pipes(int pipes[][2], int count)
 	}
 }
 
-/*
-** Execute a single pipeline stage in the child process.
-** Wire stdin/stdout from pipes, then exec or run builtin.
-*/
+/**
+ * @brief Execute a single pipeline stage in the child process.
+ * @details Wire stdin/stdout from pipes, then exec or run builtin.
+ * @param shell The shell instance.
+ * @param cmd_ast The abstract syntax tree node for the command.
+ * @param pipes The array of pipe file descriptors.
+ * @param info The information array for the pipeline stage.
+ */
 static void	pipe_child(t_shell *shell, t_ast *cmd_ast,
 		int pipes[][2], int info[3])
 {
@@ -71,26 +75,28 @@ static void	pipe_child(t_shell *shell, t_ast *cmd_ast,
 	close_pipes(pipes, n - 1);
 	if (cmd_ast->type == NODE_COMMAND)
 	{
-		expand_command(shell, &cmd_ast->data.cmd);
-		if (setup_redirections(cmd_ast->data.cmd.redirs, NULL) == -1)
+		expand_command(shell, cmd_ast->data.cmd);
+		if (setup_redirections(cmd_ast->data.cmd->redirs, NULL) == -1)
 			_exit(1);
-		if (!cmd_ast->data.cmd.argv || !cmd_ast->data.cmd.argv[0])
+		if (!cmd_ast->data.cmd->argv || !cmd_ast->data.cmd->argv[0])
 			_exit(0);
-		if (builtin_get(cmd_ast->data.cmd.argv[0]))
+		if (builtin_get(cmd_ast->data.cmd->argv[0]))
 		{
-			status = builtin_get(cmd_ast->data.cmd.argv[0])(shell,
-					cmd_ast->data.cmd.argc, cmd_ast->data.cmd.argv);
+			status = builtin_get(cmd_ast->data.cmd->argv[0])(shell,
+					cmd_ast->data.cmd->argc, cmd_ast->data.cmd->argv);
 			_exit(status);
 		}
-		exec_pipeline_external(shell, &cmd_ast->data.cmd);
+		exec_pipeline_external(shell, cmd_ast->data.cmd);
 	}
 	status = executor_execute(shell, cmd_ast);
 	exit(status);
 }
 
-/*
-** exec external command in pipeline child (does not return).
-*/
+/**
+ * @brief Execute external command in pipeline child (does not return).
+ * @param shell The shell instance.
+ * @param cmd The command structure.
+ */
 void	exec_pipeline_external(t_shell *shell, t_cmd *cmd)
 {
 	char	*path;

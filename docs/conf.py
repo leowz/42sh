@@ -11,17 +11,15 @@ extensions = [
 
 # -- Breathe (Doxygen XML → Sphinx) -----------------------------------------
 breathe_projects = {
-    "core": "core/xml",
-    "tests": "test/xml",
+    "core": "_doxygen/core/xml",
+    "tests": "_doxygen/test/xml",
 }
 breathe_default_project = "core"
 
 # -- General -----------------------------------------------------------------
 exclude_patterns = [
     "_build",
-    "core/xml",    # doxygen XML output — not Sphinx sources
-    "core/man",    # doxygen man output
-    "test",        # doxygen test output
+    "_doxygen",    # doxygen output (XML + man) — not Sphinx sources
     "assets",
     "index.html",  # old custom HTML
     "pages.json",

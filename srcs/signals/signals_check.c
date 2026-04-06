@@ -3,8 +3,8 @@
 /**
  * @brief Process any pending signal that was caught during the last prompt.
  *
- * Called in the main loop before each prompt iteration.
- * Sets $? to the appropriate value (130 for SIGINT = 128 + 2).
+ * @details Called in the main loop before each prompt iteration.
+ * @details Sets $? to the appropriate value (130 for SIGINT = 128 + 2).
  */
 void	signals_check(t_shell *shell)
 {

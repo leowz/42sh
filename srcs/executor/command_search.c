@@ -1,21 +1,18 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   command_search.c                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/27 00:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file command_search.c
+ * @brief Command search functionality for 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
 
-/*
-** Build "dir/name" path. Caller must free the result.
-*/
+/**
+ * @brief Build "dir/name" path. Caller must free the result.
+ * @param dir The directory path.
+ * @param name The file name.
+ * @return The full path, or NULL if allocation fails.
+ */
 static char	*build_path(const char *dir, const char *name)
 {
 	char	*tmp;
@@ -29,10 +26,12 @@ static char	*build_path(const char *dir, const char *name)
 	return (full);
 }
 
-/*
-** Search each directory in PATH for an executable named `name`.
-** Returns heap-allocated full path, or NULL if not found.
-*/
+/**
+ * @brief Search each directory in PATH for an executable named `name`.
+ * @param path_var The PATH environment variable.
+ * @param name The command name.
+ * @return Heap-allocated full path, or NULL if not found.
+ */
 static void	free_split(char **arr)
 {
 	int	i;
@@ -43,6 +42,12 @@ static void	free_split(char **arr)
 	free(arr);
 }
 
+/**
+ * @brief Search each directory in PATH for an executable named `name`.
+ * @param path_var The PATH environment variable.
+ * @param name The command name.
+ * @return Heap-allocated full path, or NULL if not found.
+ */
 static char	*search_path(const char *path_var, const char *name)
 {
 	char	**dirs;
@@ -68,12 +73,14 @@ static char	*search_path(const char *path_var, const char *name)
 	return (NULL);
 }
 
-/*
-** Find an executable command.
-** - If name contains '/', treat it as a path directly.
-** - Otherwise search each directory in $PATH.
-** Returns heap-allocated path on success, NULL on failure.
-*/
+/**
+ * @brief Find an executable command.
+ * @details - If name contains '/', treat it as a path directly.
+ * @details - Otherwise search each directory in $PATH.
+ * @param shell The shell instance.
+ * @param name The command name.
+ * @return Heap-allocated path on success, NULL on failure.
+ */
 char	*find_command(t_shell *shell, const char *name)
 {
 	const char	*path_var;

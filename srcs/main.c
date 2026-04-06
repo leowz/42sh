@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "parser.h"
+#include "executor.h"
 #include "42sh.h"
 
 static int	shell_init(t_shell *shell, char **envp)
@@ -77,52 +78,59 @@ static void parse_options(int argc, char *argv[], t_shell *shell) {
 	}
 }
 
+#ifdef FT_EXTRA_VERBOSE
+static void _display(t_list *tokens, t_ast *ast, char *line)
+{
+	char	*tok_json;
+	lexer_display(tokens, line);
+	tok_json = lexer_to_json(tokens, line);
+	if (tok_json)
+		printf("  \033[2mJSON → %s\033[0m\n\n", tok_json);
+
+	char	*ast_json;
+
+	ast_display(ast, line);
+	ast_json = ast_to_json(ast, line, tok_json);
+	if (ast_json)
+	{
+		printf("  \033[2mAST  → %s\033[0m\n\n",
+			ast_json);
+		free(ast_json);
+	}
+	free(tok_json);
+
+}
+#endif
+
 static void process_line(t_shell *shell, char *line)
 {
-	if (*line == '\0')
-		return ;
 	/* Tokenize, display, and convert to JSON */
+	t_list *tokens;
+	t_ast  *ast;
+
+	tokens = lexer_tokenize(line);
+	if (!tokens)
 	{
-		t_list	*tokens;
-		(void)shell;
-		tokens = lexer_tokenize(line);
-		if (tokens)
-		{
-			// todo
-#ifdef FT_EXTRA_VERBOSE
-			char	*tok_json;
-			lexer_display(tokens, line);
-			tok_json = lexer_to_json(tokens, line);
-			if (tok_json)
-				printf("  \033[2mJSON → %s\033[0m\n\n", tok_json);
-#endif
-			{
-				t_ast	*ast;
-
-				ast = parser_parse(tokens, shell);
-				if (ast)
-				{
-#ifdef FT_EXTRA_VERBOSE
-					char	*ast_json;
-
-					ast_display(ast, line);
-					ast_json = ast_to_json(ast, line, tok_json);
-					if (ast_json)
-					{
-						printf("  \033[2mAST  → %s\033[0m\n\n",
-							ast_json);
-						free(ast_json);
-					}
-#endif
-					ast_free(ast);
-				}
-			}
-#ifdef FT_EXTRA_VERBOSE
-			free(tok_json);
-#endif
-			lexer_free_tokens(tokens);
-		}
+		fprintf(stderr, "Error: Failed to tokenize input.\n");
+		return;
 	}
+
+	ast = parser_parse(tokens, shell);
+
+#ifdef FT_EXTRA_VERBOSE
+	_display(tokens, ast, line);
+#endif
+
+	lexer_free_tokens(tokens);
+	if (!ast)
+	{
+		fprintf(stderr, "Error: Failed to parse tokens into AST.\n");
+		return;
+	}
+
+	executor_execute(shell, ast);
+
+	ast_free(ast); //this will leak!!!
 }
 
 

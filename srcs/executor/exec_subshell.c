@@ -1,23 +1,21 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   exec_subshell.c                                   :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/27 00:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/27 00:00:00 by wengzhang        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file command_search.c
+ * @brief Command search functionality for 42sh.
+ * @author wengzhang, pulgamecanica
+ */
 
 #include "42sh.h"
 #include "executor.h"
+#include "signals.h"
 #include <string.h>
 
-/*
-** ( cmd ) - runs in a forked child (subshell).
-** Variables modified inside do NOT affect the parent.
-*/
+/**
+ * @brief Execute a command in a subshell.
+ * @details ( cmd ) - runs in a forked child (subshell).
+ * @param shell The shell instance.
+ * @param ast The abstract syntax tree node.
+ * @return The exit status of the command.
+ */
 int	execute_subshell(t_shell *shell, t_ast *ast)
 {
 	pid_t	pid;
@@ -34,35 +32,41 @@ int	execute_subshell(t_shell *shell, t_ast *ast)
 	if (pid == 0)
 	{
 		signals_setup_child();
-		if (setup_redirections(ast->data.group.redirs, NULL) == -1)
+		if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 			_exit(1);
-		status = executor_execute(shell, ast->data.group.child);
+		status = executor_execute(shell, ast->data.group->child);
 		_exit(status);
 	}
 	waitpid(pid, &wstatus, 0);
 	return (get_exit_status(wstatus));
 }
 
-/*
-** { cmd; } - runs in the current shell, but with its own redirections.
-** Variables modified inside DO affect the current shell.
-*/
+/**
+ * @brief Execute a command block.
+ * @details { cmd; } - runs in the current shell, but with its own redirections.
+ * @param shell The shell instance.
+ * @param ast The abstract syntax tree node.
+ * @return The exit status of the command.
+ */
 int	execute_block(t_shell *shell, t_ast *ast)
 {
 	int	saved_fds[3];
 	int	status;
 
-	if (setup_redirections(ast->data.group.redirs, saved_fds) == -1)
+	if (setup_redirections(ast->data.group->redirs, saved_fds) == -1)
 		return (1);
-	status = executor_execute(shell, ast->data.group.child);
+	status = executor_execute(shell, ast->data.group->child);
 	restore_redirections(saved_fds);
 	return (status);
 }
 
-/*
-** cmd & - runs in a forked child with its own process group.
-** Stdin redirected from /dev/null. Parent returns immediately.
-*/
+/**
+ * @brief Execute a background command.
+ * @details cmd & - runs in a forked child with its own process group.
+ * @param shell The shell instance.
+ * @param ast The abstract syntax tree node.
+ * @return The exit status of the command.
+ */
 int	execute_background(t_shell *shell, t_ast *ast)
 {
 	pid_t	pid;
@@ -86,9 +90,9 @@ int	execute_background(t_shell *shell, t_ast *ast)
 			dup2(devnull, STDIN_FILENO);
 			close(devnull);
 		}
-		if (setup_redirections(ast->data.group.redirs, NULL) == -1)
+		if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 			_exit(1);
-		status = executor_execute(shell, ast->data.group.child);
+		status = executor_execute(shell, ast->data.group->child);
 		_exit(status);
 	}
 	ft_putstr_fd("[", 2);

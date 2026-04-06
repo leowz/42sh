@@ -11,10 +11,10 @@
 
 set -e
 
-CORE_MAN="docs/core/man/man9"
-TEST_MAN="docs/test/man/man9"
-CORE_HTML="docs/core"
-TEST_HTML="docs/test"
+CORE_MAN="docs/_doxygen/core/man/man9"
+TEST_MAN="docs/_doxygen/test/man/man9"
+CORE_HTML="docs/_doxygen/core_html"
+TEST_HTML="docs/_doxygen/test_html"
 
 GREEN="\033[1;32m"
 RED="\033[1;31m"
@@ -101,6 +101,7 @@ gen_pages_json() {
 # ---------------------------------------------------------------------------
 
 cmd_docs() {
+    mkdir -p docs/_doxygen/core docs/_doxygen/test
     info "[1/2] Generating core man pages..."
     doxygen Doxyfile
     info "[2/2] Generating test man pages..."

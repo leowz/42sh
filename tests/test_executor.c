@@ -239,9 +239,12 @@ static void	test_redirections_output(void)
 	redir.fd = -1;
 	redir.target = strdup("/tmp/42sh_test_redir_out");
 	redirs = ft_lstnew(&redir);
-	MU_ASSERT_INT(0, setup_redirections(redirs, saved_fds));
-	write(1, "test output\n", 12);
-	restore_redirections(saved_fds);
+	{
+		int ret = setup_redirections(redirs, saved_fds);
+		write(1, "test output\n", 12);
+		restore_redirections(saved_fds);
+		MU_ASSERT_INT(0, ret);
+	}
 
 	/* Verify file contents */
 	fd = open("/tmp/42sh_test_redir_out", O_RDONLY);
@@ -275,9 +278,12 @@ static void	test_redirections_append(void)
 	redir.fd = -1;
 	redir.target = strdup("/tmp/42sh_test_redir_append");
 	redirs = ft_lstnew(&redir);
-	MU_ASSERT_INT(0, setup_redirections(redirs, saved_fds));
-	write(1, "second\n", 7);
-	restore_redirections(saved_fds);
+	{
+		int ret = setup_redirections(redirs, saved_fds);
+		write(1, "second\n", 7);
+		restore_redirections(saved_fds);
+		MU_ASSERT_INT(0, ret);
+	}
 
 	/* Verify append */
 	fd = open("/tmp/42sh_test_redir_append", O_RDONLY);
@@ -400,9 +406,10 @@ static t_ast	*make_true_cmd(void)
 
 	ast = calloc(1, sizeof(t_ast));
 	ast->type = NODE_COMMAND;
-	ast->data.cmd.argv = calloc(2, sizeof(char *));
-	ast->data.cmd.argv[0] = strdup("/usr/bin/true");
-	ast->data.cmd.argc = 1;
+	ast->data.cmd = calloc(1, sizeof(t_cmd));
+	ast->data.cmd->argv = calloc(2, sizeof(char *));
+	ast->data.cmd->argv[0] = strdup("/usr/bin/true");
+	ast->data.cmd->argc = 1;
 	return (ast);
 }
 
@@ -412,9 +419,10 @@ static t_ast	*make_false_cmd(void)
 
 	ast = calloc(1, sizeof(t_ast));
 	ast->type = NODE_COMMAND;
-	ast->data.cmd.argv = calloc(2, sizeof(char *));
-	ast->data.cmd.argv[0] = strdup("/usr/bin/false");
-	ast->data.cmd.argc = 1;
+	ast->data.cmd = calloc(1, sizeof(t_cmd));
+	ast->data.cmd->argv = calloc(2, sizeof(char *));
+	ast->data.cmd->argv[0] = strdup("/usr/bin/false");
+	ast->data.cmd->argc = 1;
 	return (ast);
 }
 
@@ -422,15 +430,16 @@ static void	free_cmd_ast(t_ast *ast)
 {
 	if (!ast)
 		return ;
-	if (ast->type == NODE_COMMAND)
+	if (ast->type == NODE_COMMAND && ast->data.cmd)
 	{
-		if (ast->data.cmd.argv)
+		if (ast->data.cmd->argv)
 		{
 			int i = 0;
-			while (ast->data.cmd.argv[i])
-				free(ast->data.cmd.argv[i++]);
-			free(ast->data.cmd.argv);
+			while (ast->data.cmd->argv[i])
+				free(ast->data.cmd->argv[i++]);
+			free(ast->data.cmd->argv);
 		}
+		free(ast->data.cmd);
 	}
 	free(ast);
 }
@@ -443,15 +452,16 @@ static t_ast	*make_echo_to_file(const char *filepath, const char *text)
 
 	ast = calloc(1, sizeof(t_ast));
 	ast->type = NODE_COMMAND;
-	ast->data.cmd.argv = calloc(3, sizeof(char *));
-	ast->data.cmd.argv[0] = strdup("/bin/echo");
-	ast->data.cmd.argv[1] = strdup(text);
-	ast->data.cmd.argc = 2;
+	ast->data.cmd = calloc(1, sizeof(t_cmd));
+	ast->data.cmd->argv = calloc(3, sizeof(char *));
+	ast->data.cmd->argv[0] = strdup("/bin/echo");
+	ast->data.cmd->argv[1] = strdup(text);
+	ast->data.cmd->argc = 2;
 	redir = calloc(1, sizeof(t_redir));
 	redir->type = TOK_REDIR_OUT;
 	redir->fd = -1;
 	redir->target = strdup(filepath);
-	ast->data.cmd.redirs = ft_lstnew(redir);
+	ast->data.cmd->redirs = ft_lstnew(redir);
 	return (ast);
 }
 
@@ -461,20 +471,21 @@ static void	free_echo_ast(t_ast *ast)
 
 	if (!ast)
 		return ;
-	if (ast->data.cmd.redirs)
+	if (ast->data.cmd->redirs)
 	{
-		r = REDIR(ast->data.cmd.redirs);
+		r = REDIR(ast->data.cmd->redirs);
 		free(r->target);
 		free(r);
-		free(ast->data.cmd.redirs);
+		free(ast->data.cmd->redirs);
 	}
-	if (ast->data.cmd.argv)
+	if (ast->data.cmd->argv)
 	{
 		int i = 0;
-		while (ast->data.cmd.argv[i])
-			free(ast->data.cmd.argv[i++]);
-		free(ast->data.cmd.argv);
+		while (ast->data.cmd->argv[i])
+			free(ast->data.cmd->argv[i++]);
+		free(ast->data.cmd->argv);
 	}
+	free(ast->data.cmd);
 	free(ast);
 }
 
@@ -489,12 +500,14 @@ static void	test_execute_and(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	and_node.data.binary = calloc(1, sizeof(t_binary));
+
 	/* true && true => 0 */
 	left = make_true_cmd();
 	right = make_true_cmd();
 	and_node.type = NODE_AND;
-	and_node.data.binary.left = left;
-	and_node.data.binary.right = right;
+	and_node.data.binary->left = left;
+	and_node.data.binary->right = right;
 	status = executor_execute(&shell, &and_node);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(left);
@@ -503,8 +516,8 @@ static void	test_execute_and(void)
 	/* true && false => 1 */
 	left = make_true_cmd();
 	right = make_false_cmd();
-	and_node.data.binary.left = left;
-	and_node.data.binary.right = right;
+	and_node.data.binary->left = left;
+	and_node.data.binary->right = right;
 	status = executor_execute(&shell, &and_node);
 	MU_ASSERT("true && false != 0", status != 0);
 	free_cmd_ast(left);
@@ -514,8 +527,8 @@ static void	test_execute_and(void)
 	unlink("/tmp/42sh_and_skip");
 	left = make_false_cmd();
 	right = make_echo_to_file("/tmp/42sh_and_skip", "should_not_run");
-	and_node.data.binary.left = left;
-	and_node.data.binary.right = right;
+	and_node.data.binary->left = left;
+	and_node.data.binary->right = right;
 	status = executor_execute(&shell, &and_node);
 	MU_ASSERT("false && ... != 0", status != 0);
 	MU_ASSERT("right not executed", access("/tmp/42sh_and_skip", F_OK) != 0);
@@ -525,13 +538,14 @@ static void	test_execute_and(void)
 	/* false && false => 1 */
 	left = make_false_cmd();
 	right = make_false_cmd();
-	and_node.data.binary.left = left;
-	and_node.data.binary.right = right;
+	and_node.data.binary->left = left;
+	and_node.data.binary->right = right;
 	status = executor_execute(&shell, &and_node);
 	MU_ASSERT("false && false != 0", status != 0);
 	free_cmd_ast(left);
 	free_cmd_ast(right);
 
+	free(and_node.data.binary);
 	stub_shell_cleanup(&shell);
 }
 
@@ -546,12 +560,14 @@ static void	test_execute_or(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	or_node.data.binary = calloc(1, sizeof(t_binary));
+
 	/* false || true => 0 */
 	left = make_false_cmd();
 	right = make_true_cmd();
 	or_node.type = NODE_OR;
-	or_node.data.binary.left = left;
-	or_node.data.binary.right = right;
+	or_node.data.binary->left = left;
+	or_node.data.binary->right = right;
 	status = executor_execute(&shell, &or_node);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(left);
@@ -561,8 +577,8 @@ static void	test_execute_or(void)
 	unlink("/tmp/42sh_or_skip");
 	left = make_true_cmd();
 	right = make_echo_to_file("/tmp/42sh_or_skip", "should_not_run");
-	or_node.data.binary.left = left;
-	or_node.data.binary.right = right;
+	or_node.data.binary->left = left;
+	or_node.data.binary->right = right;
 	status = executor_execute(&shell, &or_node);
 	MU_ASSERT_INT(0, status);
 	MU_ASSERT("or right not executed", access("/tmp/42sh_or_skip", F_OK) != 0);
@@ -573,8 +589,8 @@ static void	test_execute_or(void)
 	/* false || false => 1 */
 	left = make_false_cmd();
 	right = make_false_cmd();
-	or_node.data.binary.left = left;
-	or_node.data.binary.right = right;
+	or_node.data.binary->left = left;
+	or_node.data.binary->right = right;
 	status = executor_execute(&shell, &or_node);
 	MU_ASSERT("false || false != 0", status != 0);
 	free_cmd_ast(left);
@@ -583,13 +599,14 @@ static void	test_execute_or(void)
 	/* true || true => 0 */
 	left = make_true_cmd();
 	right = make_true_cmd();
-	or_node.data.binary.left = left;
-	or_node.data.binary.right = right;
+	or_node.data.binary->left = left;
+	or_node.data.binary->right = right;
 	status = executor_execute(&shell, &or_node);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(left);
 	free_cmd_ast(right);
 
+	free(or_node.data.binary);
 	stub_shell_cleanup(&shell);
 }
 
@@ -604,12 +621,14 @@ static void	test_execute_sequence(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	seq_node.data.binary = calloc(1, sizeof(t_binary));
+
 	/* true ; false => 1 (returns last) */
 	left = make_true_cmd();
 	right = make_false_cmd();
 	seq_node.type = NODE_SEQUENCE;
-	seq_node.data.binary.left = left;
-	seq_node.data.binary.right = right;
+	seq_node.data.binary->left = left;
+	seq_node.data.binary->right = right;
 	status = executor_execute(&shell, &seq_node);
 	MU_ASSERT("sequence returns right status", status != 0);
 	free_cmd_ast(left);
@@ -618,8 +637,8 @@ static void	test_execute_sequence(void)
 	/* false ; true => 0 */
 	left = make_false_cmd();
 	right = make_true_cmd();
-	seq_node.data.binary.left = left;
-	seq_node.data.binary.right = right;
+	seq_node.data.binary->left = left;
+	seq_node.data.binary->right = right;
 	status = executor_execute(&shell, &seq_node);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(left);
@@ -628,8 +647,8 @@ static void	test_execute_sequence(void)
 	/* Both sides always execute */
 	left = make_echo_to_file("/tmp/42sh_seq_left", "left_ran");
 	right = make_echo_to_file("/tmp/42sh_seq_right", "right_ran");
-	seq_node.data.binary.left = left;
-	seq_node.data.binary.right = right;
+	seq_node.data.binary->left = left;
+	seq_node.data.binary->right = right;
 	executor_execute(&shell, &seq_node);
 	MU_ASSERT("seq left executed", access("/tmp/42sh_seq_left", F_OK) == 0);
 	MU_ASSERT("seq right executed", access("/tmp/42sh_seq_right", F_OK) == 0);
@@ -638,6 +657,7 @@ static void	test_execute_sequence(void)
 	free_echo_ast(left);
 	free_echo_ast(right);
 
+	free(seq_node.data.binary);
 	stub_shell_cleanup(&shell);
 }
 
@@ -674,9 +694,10 @@ static void	test_execute_external_command(void)
 	/* Command not found => 127 */
 	ast = calloc(1, sizeof(t_ast));
 	ast->type = NODE_COMMAND;
-	ast->data.cmd.argv = calloc(2, sizeof(char *));
-	ast->data.cmd.argv[0] = strdup("zzz_nonexistent_42sh_cmd");
-	ast->data.cmd.argc = 1;
+	ast->data.cmd = calloc(1, sizeof(t_cmd));
+	ast->data.cmd->argv = calloc(2, sizeof(char *));
+	ast->data.cmd->argv[0] = strdup("zzz_nonexistent_42sh_cmd");
+	ast->data.cmd->argc = 1;
 	status = executor_execute(&shell, ast);
 	MU_ASSERT_INT(127, status);
 	free_cmd_ast(ast);
@@ -716,17 +737,18 @@ static void	test_execute_builtin_command(void)
 	/* builtin echo with output redirect */
 	memset(&ast, 0, sizeof(ast));
 	ast.type = NODE_COMMAND;
-	ast.data.cmd.argv = calloc(3, sizeof(char *));
-	ast.data.cmd.argv[0] = strdup("echo");
-	ast.data.cmd.argv[1] = strdup("builtin_test");
-	ast.data.cmd.argc = 2;
+	ast.data.cmd = calloc(1, sizeof(t_cmd));
+	ast.data.cmd->argv = calloc(3, sizeof(char *));
+	ast.data.cmd->argv[0] = strdup("echo");
+	ast.data.cmd->argv[1] = strdup("builtin_test");
+	ast.data.cmd->argc = 2;
 
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_REDIR_OUT;
 		redir->fd = -1;
 		redir->target = strdup("/tmp/42sh_test_builtin");
-		ast.data.cmd.redirs = ft_lstnew(redir);
+		ast.data.cmd->redirs = ft_lstnew(redir);
 	}
 
 	status = executor_execute(&shell, &ast);
@@ -742,14 +764,15 @@ static void	test_execute_builtin_command(void)
 
 	/* Cleanup */
 	{
-		t_redir *r = REDIR(ast.data.cmd.redirs);
+		t_redir *r = REDIR(ast.data.cmd->redirs);
 		free(r->target);
 		free(r);
-		free(ast.data.cmd.redirs);
+		free(ast.data.cmd->redirs);
 	}
-	free(ast.data.cmd.argv[0]);
-	free(ast.data.cmd.argv[1]);
-	free(ast.data.cmd.argv);
+	free(ast.data.cmd->argv[0]);
+	free(ast.data.cmd->argv[1]);
+	free(ast.data.cmd->argv);
+	free(ast.data.cmd);
 
 	stub_set_builtin(NULL, NULL);
 	stub_shell_cleanup(&shell);
@@ -771,19 +794,21 @@ static void	test_execute_assignment_only(void)
 	/* FOO=bar (no command) */
 	memset(&ast, 0, sizeof(ast));
 	ast.type = NODE_COMMAND;
-	ast.data.cmd.argv = calloc(1, sizeof(char *));
-	ast.data.cmd.argv[0] = NULL;
-	ast.data.cmd.argc = 0;
+	ast.data.cmd = calloc(1, sizeof(t_cmd));
+	ast.data.cmd->argv = calloc(1, sizeof(char *));
+	ast.data.cmd->argv[0] = NULL;
+	ast.data.cmd->argc = 0;
 	assign_str = strdup("FOO=bar");
-	ast.data.cmd.assignments = ft_lstnew(assign_str);
+	ast.data.cmd->assignments = ft_lstnew(assign_str);
 
 	status = executor_execute(&shell, &ast);
 	MU_ASSERT_INT(0, status);
 	MU_ASSERT_STR("FOO set", "bar", var_get_value(&shell, "FOO"));
 
 	free(assign_str);
-	free(ast.data.cmd.assignments);
-	free(ast.data.cmd.argv);
+	free(ast.data.cmd->assignments);
+	free(ast.data.cmd->argv);
+	free(ast.data.cmd);
 
 	stub_shell_cleanup(&shell);
 }
@@ -809,27 +834,30 @@ static void	test_execute_pipeline(void)
 	/* echo hello | cat > file */
 	left = calloc(1, sizeof(t_ast));
 	left->type = NODE_COMMAND;
-	left->data.cmd.argv = calloc(3, sizeof(char *));
-	left->data.cmd.argv[0] = strdup("/bin/echo");
-	left->data.cmd.argv[1] = strdup("pipe_test");
-	left->data.cmd.argc = 2;
+	left->data.cmd = calloc(1, sizeof(t_cmd));
+	left->data.cmd->argv = calloc(3, sizeof(char *));
+	left->data.cmd->argv[0] = strdup("/bin/echo");
+	left->data.cmd->argv[1] = strdup("pipe_test");
+	left->data.cmd->argc = 2;
 
 	right = calloc(1, sizeof(t_ast));
 	right->type = NODE_COMMAND;
-	right->data.cmd.argv = calloc(2, sizeof(char *));
-	right->data.cmd.argv[0] = strdup("/bin/cat");
-	right->data.cmd.argc = 1;
+	right->data.cmd = calloc(1, sizeof(t_cmd));
+	right->data.cmd->argv = calloc(2, sizeof(char *));
+	right->data.cmd->argv[0] = strdup("/bin/cat");
+	right->data.cmd->argc = 1;
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_REDIR_OUT;
 		redir->fd = -1;
 		redir->target = strdup("/tmp/42sh_test_pipeline");
-		right->data.cmd.redirs = ft_lstnew(redir);
+		right->data.cmd->redirs = ft_lstnew(redir);
 	}
 
 	pipe_node.type = NODE_PIPE;
-	pipe_node.data.binary.left = left;
-	pipe_node.data.binary.right = right;
+	pipe_node.data.binary = calloc(1, sizeof(t_binary));
+	pipe_node.data.binary->left = left;
+	pipe_node.data.binary->right = right;
 
 	status = executor_execute(&shell, &pipe_node);
 	MU_ASSERT_INT(0, status);
@@ -844,15 +872,17 @@ static void	test_execute_pipeline(void)
 
 	/* Cleanup */
 	{
-		t_redir *r = REDIR(right->data.cmd.redirs);
+		t_redir *r = REDIR(right->data.cmd->redirs);
 		free(r->target);
 		free(r);
-		free(right->data.cmd.redirs);
+		free(right->data.cmd->redirs);
 	}
 	free_cmd_ast(left);
-	free(right->data.cmd.argv[0]);
-	free(right->data.cmd.argv);
+	free(right->data.cmd->argv[0]);
+	free(right->data.cmd->argv);
+	free(right->data.cmd);
 	free(right);
+	free(pipe_node.data.binary);
 
 	stub_shell_cleanup(&shell);
 }
@@ -877,40 +907,45 @@ static void	test_execute_pipeline_three(void)
 	/* Simpler: printf "c\nb\na\n" | sort | head -n 1 */
 	cmd1 = calloc(1, sizeof(t_ast));
 	cmd1->type = NODE_COMMAND;
-	cmd1->data.cmd.argv = calloc(3, sizeof(char *));
-	cmd1->data.cmd.argv[0] = strdup("/usr/bin/printf");
-	cmd1->data.cmd.argv[1] = strdup("c\nb\na\n");
-	cmd1->data.cmd.argc = 2;
+	cmd1->data.cmd = calloc(1, sizeof(t_cmd));
+	cmd1->data.cmd->argv = calloc(3, sizeof(char *));
+	cmd1->data.cmd->argv[0] = strdup("/usr/bin/printf");
+	cmd1->data.cmd->argv[1] = strdup("c\nb\na\n");
+	cmd1->data.cmd->argc = 2;
 
 	cmd2 = calloc(1, sizeof(t_ast));
 	cmd2->type = NODE_COMMAND;
-	cmd2->data.cmd.argv = calloc(2, sizeof(char *));
-	cmd2->data.cmd.argv[0] = strdup("/usr/bin/sort");
-	cmd2->data.cmd.argc = 1;
+	cmd2->data.cmd = calloc(1, sizeof(t_cmd));
+	cmd2->data.cmd->argv = calloc(2, sizeof(char *));
+	cmd2->data.cmd->argv[0] = strdup("/usr/bin/sort");
+	cmd2->data.cmd->argc = 1;
 
 	cmd3 = calloc(1, sizeof(t_ast));
 	cmd3->type = NODE_COMMAND;
-	cmd3->data.cmd.argv = calloc(4, sizeof(char *));
-	cmd3->data.cmd.argv[0] = strdup("/usr/bin/head");
-	cmd3->data.cmd.argv[1] = strdup("-n");
-	cmd3->data.cmd.argv[2] = strdup("1");
-	cmd3->data.cmd.argc = 3;
+	cmd3->data.cmd = calloc(1, sizeof(t_cmd));
+	cmd3->data.cmd->argv = calloc(4, sizeof(char *));
+	cmd3->data.cmd->argv[0] = strdup("/usr/bin/head");
+	cmd3->data.cmd->argv[1] = strdup("-n");
+	cmd3->data.cmd->argv[2] = strdup("1");
+	cmd3->data.cmd->argc = 3;
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_REDIR_OUT;
 		redir->fd = -1;
 		redir->target = strdup("/tmp/42sh_test_pipe3");
-		cmd3->data.cmd.redirs = ft_lstnew(redir);
+		cmd3->data.cmd->redirs = ft_lstnew(redir);
 	}
 
 	/* (cmd1 | cmd2) | cmd3 */
 	pipe_inner.type = NODE_PIPE;
-	pipe_inner.data.binary.left = cmd1;
-	pipe_inner.data.binary.right = cmd2;
+	pipe_inner.data.binary = calloc(1, sizeof(t_binary));
+	pipe_inner.data.binary->left = cmd1;
+	pipe_inner.data.binary->right = cmd2;
 
 	pipe_outer.type = NODE_PIPE;
-	pipe_outer.data.binary.left = &pipe_inner;
-	pipe_outer.data.binary.right = cmd3;
+	pipe_outer.data.binary = calloc(1, sizeof(t_binary));
+	pipe_outer.data.binary->left = &pipe_inner;
+	pipe_outer.data.binary->right = cmd3;
 
 	status = executor_execute(&shell, &pipe_outer);
 	MU_ASSERT_INT(0, status);
@@ -925,18 +960,21 @@ static void	test_execute_pipeline_three(void)
 
 	/* Cleanup */
 	{
-		t_redir *r = REDIR(cmd3->data.cmd.redirs);
+		t_redir *r = REDIR(cmd3->data.cmd->redirs);
 		free(r->target);
 		free(r);
-		free(cmd3->data.cmd.redirs);
+		free(cmd3->data.cmd->redirs);
 	}
 	free_cmd_ast(cmd1);
 	free_cmd_ast(cmd2);
-	free(cmd3->data.cmd.argv[0]);
-	free(cmd3->data.cmd.argv[1]);
-	free(cmd3->data.cmd.argv[2]);
-	free(cmd3->data.cmd.argv);
+	free(cmd3->data.cmd->argv[0]);
+	free(cmd3->data.cmd->argv[1]);
+	free(cmd3->data.cmd->argv[2]);
+	free(cmd3->data.cmd->argv);
+	free(cmd3->data.cmd);
 	free(cmd3);
+	free(pipe_inner.data.binary);
+	free(pipe_outer.data.binary);
 
 	stub_shell_cleanup(&shell);
 }
@@ -952,13 +990,15 @@ static void	test_pipeline_exit_status(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	pipe_node.data.binary = calloc(1, sizeof(t_binary));
+
 	/* Pipeline exit status = last command's exit status */
 	/* true | false => 1 */
 	left = make_true_cmd();
 	right = make_false_cmd();
 	pipe_node.type = NODE_PIPE;
-	pipe_node.data.binary.left = left;
-	pipe_node.data.binary.right = right;
+	pipe_node.data.binary->left = left;
+	pipe_node.data.binary->right = right;
 	status = executor_execute(&shell, &pipe_node);
 	MU_ASSERT("true | false != 0", status != 0);
 	free_cmd_ast(left);
@@ -967,13 +1007,14 @@ static void	test_pipeline_exit_status(void)
 	/* false | true => 0 */
 	left = make_false_cmd();
 	right = make_true_cmd();
-	pipe_node.data.binary.left = left;
-	pipe_node.data.binary.right = right;
+	pipe_node.data.binary->left = left;
+	pipe_node.data.binary->right = right;
 	status = executor_execute(&shell, &pipe_node);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(left);
 	free_cmd_ast(right);
 
+	free(pipe_node.data.binary);
 	stub_shell_cleanup(&shell);
 }
 
@@ -991,22 +1032,25 @@ static void	test_execute_subshell(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	subshell.data.group = calloc(1, sizeof(t_group));
+
 	/* ( true ) => 0 */
 	child = make_true_cmd();
 	subshell.type = NODE_SUBSHELL;
-	subshell.data.group.child = child;
-	subshell.data.group.redirs = NULL;
+	subshell.data.group->child = child;
+	subshell.data.group->redirs = NULL;
 	status = executor_execute(&shell, &subshell);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(child);
 
 	/* ( false ) => 1 */
 	child = make_false_cmd();
-	subshell.data.group.child = child;
+	subshell.data.group->child = child;
 	status = executor_execute(&shell, &subshell);
 	MU_ASSERT("subshell false != 0", status != 0);
 	free_cmd_ast(child);
 
+	free(subshell.data.group);
 	stub_shell_cleanup(&shell);
 }
 
@@ -1026,19 +1070,21 @@ static void	test_execute_subshell_isolation(void)
 	/* Subshell with redirect: ( echo hello ) > file */
 	child = calloc(1, sizeof(t_ast));
 	child->type = NODE_COMMAND;
-	child->data.cmd.argv = calloc(3, sizeof(char *));
-	child->data.cmd.argv[0] = strdup("/bin/echo");
-	child->data.cmd.argv[1] = strdup("subshell_out");
-	child->data.cmd.argc = 2;
+	child->data.cmd = calloc(1, sizeof(t_cmd));
+	child->data.cmd->argv = calloc(3, sizeof(char *));
+	child->data.cmd->argv[0] = strdup("/bin/echo");
+	child->data.cmd->argv[1] = strdup("subshell_out");
+	child->data.cmd->argc = 2;
 
 	subshell.type = NODE_SUBSHELL;
-	subshell.data.group.child = child;
+	subshell.data.group = calloc(1, sizeof(t_group));
+	subshell.data.group->child = child;
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_REDIR_OUT;
 		redir->fd = -1;
 		redir->target = strdup("/tmp/42sh_test_subshell");
-		subshell.data.group.redirs = ft_lstnew(redir);
+		subshell.data.group->redirs = ft_lstnew(redir);
 	}
 
 	status = executor_execute(&shell, &subshell);
@@ -1053,12 +1099,13 @@ static void	test_execute_subshell_isolation(void)
 	unlink("/tmp/42sh_test_subshell");
 
 	{
-		t_redir *r = REDIR(subshell.data.group.redirs);
+		t_redir *r = REDIR(subshell.data.group->redirs);
 		free(r->target);
 		free(r);
-		free(subshell.data.group.redirs);
+		free(subshell.data.group->redirs);
 	}
 	free_cmd_ast(child);
+	free(subshell.data.group);
 	stub_shell_cleanup(&shell);
 }
 
@@ -1078,19 +1125,21 @@ static void	test_execute_block(void)
 	/* { echo hello; } > file */
 	child = calloc(1, sizeof(t_ast));
 	child->type = NODE_COMMAND;
-	child->data.cmd.argv = calloc(3, sizeof(char *));
-	child->data.cmd.argv[0] = strdup("/bin/echo");
-	child->data.cmd.argv[1] = strdup("block_out");
-	child->data.cmd.argc = 2;
+	child->data.cmd = calloc(1, sizeof(t_cmd));
+	child->data.cmd->argv = calloc(3, sizeof(char *));
+	child->data.cmd->argv[0] = strdup("/bin/echo");
+	child->data.cmd->argv[1] = strdup("block_out");
+	child->data.cmd->argc = 2;
 
 	block.type = NODE_BLOCK;
-	block.data.group.child = child;
+	block.data.group = calloc(1, sizeof(t_group));
+	block.data.group->child = child;
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_REDIR_OUT;
 		redir->fd = -1;
 		redir->target = strdup("/tmp/42sh_test_block");
-		block.data.group.redirs = ft_lstnew(redir);
+		block.data.group->redirs = ft_lstnew(redir);
 	}
 
 	status = executor_execute(&shell, &block);
@@ -1105,12 +1154,13 @@ static void	test_execute_block(void)
 	unlink("/tmp/42sh_test_block");
 
 	{
-		t_redir *r = REDIR(block.data.group.redirs);
+		t_redir *r = REDIR(block.data.group->redirs);
 		free(r->target);
 		free(r);
-		free(block.data.group.redirs);
+		free(block.data.group->redirs);
 	}
 	free_cmd_ast(child);
+	free(block.data.group);
 	stub_shell_cleanup(&shell);
 }
 
@@ -1133,14 +1183,16 @@ static void	test_execute_background(void)
 	unlink("/tmp/42sh_test_bg");
 	child = calloc(1, sizeof(t_ast));
 	child->type = NODE_COMMAND;
-	child->data.cmd.argv = calloc(4, sizeof(char *));
-	child->data.cmd.argv[0] = strdup("/usr/bin/touch");
-	child->data.cmd.argv[1] = strdup("/tmp/42sh_test_bg");
-	child->data.cmd.argc = 2;
+	child->data.cmd = calloc(1, sizeof(t_cmd));
+	child->data.cmd->argv = calloc(4, sizeof(char *));
+	child->data.cmd->argv[0] = strdup("/usr/bin/touch");
+	child->data.cmd->argv[1] = strdup("/tmp/42sh_test_bg");
+	child->data.cmd->argc = 2;
 
 	bg.type = NODE_BACKGROUND;
-	bg.data.group.child = child;
-	bg.data.group.redirs = NULL;
+	bg.data.group = calloc(1, sizeof(t_group));
+	bg.data.group->child = child;
+	bg.data.group->redirs = NULL;
 
 	status = executor_execute(&shell, &bg);
 	MU_ASSERT_INT(0, status);
@@ -1156,6 +1208,7 @@ static void	test_execute_background(void)
 	unlink("/tmp/42sh_test_bg");
 
 	free_cmd_ast(child);
+	free(bg.data.group);
 	stub_shell_cleanup(&shell);
 }
 
@@ -1209,17 +1262,20 @@ static void	test_complex_logical_chains(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	inner.data.binary = calloc(1, sizeof(t_binary));
+	outer.data.binary = calloc(1, sizeof(t_binary));
+
 	/* true && true && false => false
 	   Structure: (true && true) && false */
 	cmd1 = make_true_cmd();
 	cmd2 = make_true_cmd();
 	cmd3 = make_false_cmd();
 	inner.type = NODE_AND;
-	inner.data.binary.left = cmd1;
-	inner.data.binary.right = cmd2;
+	inner.data.binary->left = cmd1;
+	inner.data.binary->right = cmd2;
 	outer.type = NODE_AND;
-	outer.data.binary.left = &inner;
-	outer.data.binary.right = cmd3;
+	outer.data.binary->left = &inner;
+	outer.data.binary->right = cmd3;
 	status = executor_execute(&shell, &outer);
 	MU_ASSERT("true&&true&&false != 0", status != 0);
 	free_cmd_ast(cmd1);
@@ -1232,11 +1288,11 @@ static void	test_complex_logical_chains(void)
 	cmd2 = make_true_cmd();
 	cmd3 = make_false_cmd();
 	inner.type = NODE_OR;
-	inner.data.binary.left = cmd1;
-	inner.data.binary.right = cmd2;
+	inner.data.binary->left = cmd1;
+	inner.data.binary->right = cmd2;
 	outer.type = NODE_AND;
-	outer.data.binary.left = &inner;
-	outer.data.binary.right = cmd3;
+	outer.data.binary->left = &inner;
+	outer.data.binary->right = cmd3;
 	status = executor_execute(&shell, &outer);
 	MU_ASSERT("(false||true)&&false != 0", status != 0);
 	free_cmd_ast(cmd1);
@@ -1249,17 +1305,19 @@ static void	test_complex_logical_chains(void)
 	cmd2 = make_false_cmd();
 	cmd3 = make_true_cmd();
 	inner.type = NODE_OR;
-	inner.data.binary.left = cmd1;
-	inner.data.binary.right = cmd2;
+	inner.data.binary->left = cmd1;
+	inner.data.binary->right = cmd2;
 	outer.type = NODE_OR;
-	outer.data.binary.left = &inner;
-	outer.data.binary.right = cmd3;
+	outer.data.binary->left = &inner;
+	outer.data.binary->right = cmd3;
 	status = executor_execute(&shell, &outer);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(cmd1);
 	free_cmd_ast(cmd2);
 	free_cmd_ast(cmd3);
 
+	free(inner.data.binary);
+	free(outer.data.binary);
 	stub_shell_cleanup(&shell);
 }
 
@@ -1293,11 +1351,12 @@ static void	test_builtin_temp_assignments(void)
 	/* TESTVAR=temporary getvar => builtin sees "temporary" */
 	memset(&ast, 0, sizeof(ast));
 	ast.type = NODE_COMMAND;
-	ast.data.cmd.argv = calloc(2, sizeof(char *));
-	ast.data.cmd.argv[0] = strdup("getvar");
-	ast.data.cmd.argc = 1;
+	ast.data.cmd = calloc(1, sizeof(t_cmd));
+	ast.data.cmd->argv = calloc(2, sizeof(char *));
+	ast.data.cmd->argv[0] = strdup("getvar");
+	ast.data.cmd->argc = 1;
 	assign_str = strdup("TESTVAR=temporary");
-	ast.data.cmd.assignments = ft_lstnew(assign_str);
+	ast.data.cmd->assignments = ft_lstnew(assign_str);
 
 	status = executor_execute(&shell, &ast);
 	MU_ASSERT_INT(0, status);
@@ -1307,9 +1366,10 @@ static void	test_builtin_temp_assignments(void)
 		var_get_value(&shell, "TESTVAR"));
 
 	free(assign_str);
-	free(ast.data.cmd.assignments);
-	free(ast.data.cmd.argv[0]);
-	free(ast.data.cmd.argv);
+	free(ast.data.cmd->assignments);
+	free(ast.data.cmd->argv[0]);
+	free(ast.data.cmd->argv);
+	free(ast.data.cmd);
 	stub_set_builtin(NULL, NULL);
 	stub_shell_cleanup(&shell);
 }
@@ -1336,33 +1396,36 @@ static void	test_pipeline_with_heredoc(void)
 	   heredoc_content: "from_heredoc\n" */
 	left = calloc(1, sizeof(t_ast));
 	left->type = NODE_COMMAND;
-	left->data.cmd.argv = calloc(2, sizeof(char *));
-	left->data.cmd.argv[0] = strdup("/bin/cat");
-	left->data.cmd.argc = 1;
+	left->data.cmd = calloc(1, sizeof(t_cmd));
+	left->data.cmd->argv = calloc(2, sizeof(char *));
+	left->data.cmd->argv[0] = strdup("/bin/cat");
+	left->data.cmd->argc = 1;
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_HEREDOC;
 		redir->fd = -1;
 		redir->heredoc_content = strdup("from_heredoc\n");
-		left->data.cmd.redirs = ft_lstnew(redir);
+		left->data.cmd->redirs = ft_lstnew(redir);
 	}
 
 	right = calloc(1, sizeof(t_ast));
 	right->type = NODE_COMMAND;
-	right->data.cmd.argv = calloc(2, sizeof(char *));
-	right->data.cmd.argv[0] = strdup("/bin/cat");
-	right->data.cmd.argc = 1;
+	right->data.cmd = calloc(1, sizeof(t_cmd));
+	right->data.cmd->argv = calloc(2, sizeof(char *));
+	right->data.cmd->argv[0] = strdup("/bin/cat");
+	right->data.cmd->argc = 1;
 	{
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_REDIR_OUT;
 		redir->fd = -1;
 		redir->target = strdup("/tmp/42sh_test_pipe_heredoc");
-		right->data.cmd.redirs = ft_lstnew(redir);
+		right->data.cmd->redirs = ft_lstnew(redir);
 	}
 
 	pipe_node.type = NODE_PIPE;
-	pipe_node.data.binary.left = left;
-	pipe_node.data.binary.right = right;
+	pipe_node.data.binary = calloc(1, sizeof(t_binary));
+	pipe_node.data.binary->left = left;
+	pipe_node.data.binary->right = right;
 
 	status = executor_execute(&shell, &pipe_node);
 	MU_ASSERT_INT(0, status);
@@ -1377,25 +1440,28 @@ static void	test_pipeline_with_heredoc(void)
 
 	/* Cleanup left */
 	{
-		t_redir *r = REDIR(left->data.cmd.redirs);
+		t_redir *r = REDIR(left->data.cmd->redirs);
 		free(r->heredoc_content);
 		free(r);
-		free(left->data.cmd.redirs);
+		free(left->data.cmd->redirs);
 	}
-	free(left->data.cmd.argv[0]);
-	free(left->data.cmd.argv);
+	free(left->data.cmd->argv[0]);
+	free(left->data.cmd->argv);
+	free(left->data.cmd);
 	free(left);
 
 	/* Cleanup right */
 	{
-		t_redir *r = REDIR(right->data.cmd.redirs);
+		t_redir *r = REDIR(right->data.cmd->redirs);
 		free(r->target);
 		free(r);
-		free(right->data.cmd.redirs);
+		free(right->data.cmd->redirs);
 	}
-	free(right->data.cmd.argv[0]);
-	free(right->data.cmd.argv);
+	free(right->data.cmd->argv[0]);
+	free(right->data.cmd->argv);
+	free(right->data.cmd);
 	free(right);
+	free(pipe_node.data.binary);
 
 	stub_shell_cleanup(&shell);
 }
@@ -1417,23 +1483,28 @@ static void	test_sequence_mixed(void)
 	stub_shell_init(&shell);
 	var_set(&shell, "PATH", "/usr/bin:/bin");
 
+	and_node.data.binary = calloc(1, sizeof(t_binary));
+	seq.data.binary = calloc(1, sizeof(t_binary));
+
 	/* (true && false) ; true => 0
 	   Sequence returns right side's status */
 	cmd1 = make_true_cmd();
 	cmd2 = make_false_cmd();
 	cmd3 = make_true_cmd();
 	and_node.type = NODE_AND;
-	and_node.data.binary.left = cmd1;
-	and_node.data.binary.right = cmd2;
+	and_node.data.binary->left = cmd1;
+	and_node.data.binary->right = cmd2;
 	seq.type = NODE_SEQUENCE;
-	seq.data.binary.left = &and_node;
-	seq.data.binary.right = cmd3;
+	seq.data.binary->left = &and_node;
+	seq.data.binary->right = cmd3;
 	status = executor_execute(&shell, &seq);
 	MU_ASSERT_INT(0, status);
 	free_cmd_ast(cmd1);
 	free_cmd_ast(cmd2);
 	free_cmd_ast(cmd3);
 
+	free(and_node.data.binary);
+	free(seq.data.binary);
 	stub_shell_cleanup(&shell);
 }
 

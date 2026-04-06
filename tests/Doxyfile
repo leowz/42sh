@@ -7,7 +7,7 @@
 PROJECT_NAME			= "42sh Tests"
 PROJECT_BRIEF			= "Unit test suite for the 42sh shell"
 PROJECT_NUMBER			= "pulgamecanica"
-OUTPUT_DIRECTORY		= ../docs/test
+OUTPUT_DIRECTORY		= ../docs/_doxygen/test
 CREATE_SUBDIRS			= NO
 OUTPUT_LANGUAGE			= English
 
@@ -38,7 +38,10 @@ PREDEFINED				= TEST_DLIST_ENABLED \
 						  TEST_HISTORY_ENABLED \
 						  TEST_ARRAY_ENABLED \
 						  TEST_LEXER_ENABLED \
-						  TEST_BTREE_ENABLED
+						  TEST_BTREE_ENABLED \
+						  TEST_EXECUTOR_ENABLED \
+						  TEST_PARSER_ENABLED \
+						  TEST_LIST_ENABLED
 
 #---------------------------------------------------------------------------
 # Output: man pages + XML (XML consumed by Sphinx/Breathe)

@@ -1,0 +1,25 @@
+{
+  "input": "/bin/ls || /bin/yes",
+  "tok_file": "viz/tokenizations/tok_1775427248_711675.json",
+  "tree": {
+    "type": "NODE_OR",
+    "left": {
+      "type": "NODE_COMMAND",
+      "argv": ["/bin/ls"],
+      "argc": 1,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["/bin/yes"],
+      "argc": 1,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}
