@@ -57,14 +57,17 @@ jobs:
       - name: Generate HTML documentation
         run: make html
 
-      - name: Bundle viz into docs
-        run: cp -r viz docs/viz
+      - name: Stage site (docs + viz)
+        run: |
+          mkdir -p _site
+          cp -r docs/_build/html _site/docs
+          cp -r viz _site/viz
 
-      - name: Deploy docs/ to the `docs` branch
+      - name: Deploy to the `docs` branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: ./_site
           publish_branch: docs
           enable_jekyll: false
           force_orphan: true
