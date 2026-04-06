@@ -232,6 +232,7 @@ static void	test_redirections_output(void)
 	char	buf[256];
 	int		fd;
 	ssize_t	n;
+	int		ret;
 
 	/* Redirect stdout to a file */
 	memset(&redir, 0, sizeof(redir));
@@ -239,12 +240,11 @@ static void	test_redirections_output(void)
 	redir.fd = -1;
 	redir.target = strdup("/tmp/42sh_test_redir_out");
 	redirs = ft_lstnew(&redir);
-	{
-		int ret = setup_redirections(redirs, saved_fds);
-		write(1, "test output\n", 12);
-		restore_redirections(saved_fds);
-		MU_ASSERT_INT(0, ret);
-	}
+	fflush(stdout);
+	ret = setup_redirections(redirs, saved_fds);
+	write(1, "test output\n", 12);
+	restore_redirections(saved_fds);
+	MU_ASSERT_INT(0, ret);
 
 	/* Verify file contents */
 	fd = open("/tmp/42sh_test_redir_out", O_RDONLY);
@@ -266,6 +266,7 @@ static void	test_redirections_append(void)
 	char	buf[256];
 	int		fd;
 	ssize_t	n;
+	int		ret;
 
 	/* Create file with initial content */
 	fd = open("/tmp/42sh_test_redir_append", O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -278,12 +279,11 @@ static void	test_redirections_append(void)
 	redir.fd = -1;
 	redir.target = strdup("/tmp/42sh_test_redir_append");
 	redirs = ft_lstnew(&redir);
-	{
-		int ret = setup_redirections(redirs, saved_fds);
-		write(1, "second\n", 7);
-		restore_redirections(saved_fds);
-		MU_ASSERT_INT(0, ret);
-	}
+	fflush(stdout);
+	ret = setup_redirections(redirs, saved_fds);
+	write(1, "second\n", 7);
+	restore_redirections(saved_fds);
+	MU_ASSERT_INT(0, ret);
 
 	/* Verify append */
 	fd = open("/tmp/42sh_test_redir_append", O_RDONLY);
