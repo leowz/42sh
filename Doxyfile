@@ -7,7 +7,7 @@
 PROJECT_NAME           = "42sh"
 PROJECT_BRIEF          = "A POSIX-compliant shell"
 PROJECT_NUMBER         = "pulgamecanica"
-OUTPUT_DIRECTORY       = docs/core
+OUTPUT_DIRECTORY       = docs/_doxygen/core
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 
@@ -35,7 +35,7 @@ JAVADOC_AUTOBRIEF      = NO
 MARKDOWN_SUPPORT       = YES
 
 #---------------------------------------------------------------------------
-# Output: man pages only (html target converts these via man2html)
+# Output: man pages + XML (XML consumed by Sphinx/Breathe)
 #---------------------------------------------------------------------------
 GENERATE_HTML          = NO
 GENERATE_LATEX         = NO
@@ -44,6 +44,8 @@ MAN_OUTPUT             = man
 MAN_EXTENSION          = .9
 MAN_SUBDIR             =
 MAN_LINKS              = YES
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
 
 #---------------------------------------------------------------------------
 # Verbosity

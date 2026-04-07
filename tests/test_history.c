@@ -20,7 +20,6 @@
 #include <readline/history.h>
 
 #ifdef TEST_HISTORY_ENABLED
-#endif
 
 /**
  * Run all history module assertions.
@@ -71,3 +70,11 @@ void	test_history_suite(void)
 	clear_history();
 	unlink("/tmp/42sh_hist_roundtrip");
 }
+
+#else
+
+void	test_history_suite(void)
+{
+}
+
+#endif

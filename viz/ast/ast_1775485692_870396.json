@@ -1,0 +1,25 @@
+{
+  "input": "cp /home/pulgamecanica/42sh/Makefile /tmp/ &&  mkdir -p ./srcs/builtins",
+  "tok_file": "viz/tokenizations/tok_1775485692_870228.json",
+  "tree": {
+    "type": "NODE_AND",
+    "left": {
+      "type": "NODE_COMMAND",
+      "argv": ["cp", "/home/pulgamecanica/42sh/Makefile", "/tmp/"],
+      "argc": 3,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["mkdir", "-p", "./srcs/builtins"],
+      "argc": 3,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}

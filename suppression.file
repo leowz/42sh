@@ -1,0 +1,255 @@
+{
+   ignore_readline_no_main
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+}
+
+{
+   ignore_libtinfo_no_main
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+}
+
+{
+   ignore_libtinfo_tsearch
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:tsearch
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:readline
+}
+
+{
+   ignore_libtinfo_nc_doalloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:_nc_doalloc
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:readline
+}
+
+{
+   ignore_libtinfo_nc_read_termtype_malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:_nc_read_termtype
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:readline
+}
+
+{
+   ignore_libtinfo_nc_read_termtype_calloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:_nc_read_termtype
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:readline
+}
+{
+   ignore_all_readline
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+}
+
+{
+   ignore_all_libtinfo
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+}
+{
+   ignore_readline_malloc_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+   ...
+   fun:main
+}
+
+{
+   ignore_readline_realloc_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+   ...
+   fun:main
+}
+
+{
+   ignore_readline_calloc_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+   ...
+   fun:main
+}
+
+{
+   ignore_libtinfo_malloc_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:main
+}
+
+{
+   ignore_libtinfo_realloc_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:main
+}
+
+{
+   ignore_libtinfo_calloc_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:main
+}
+
+{
+   ignore_libtinfo_strdup
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:main
+}
+
+{
+   ignore_readline_rl_redisplay
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:xrealloc
+   ...
+   fun:rl_redisplay
+   ...
+   fun:main
+}
+{
+   ignore_readline_malloc_xmalloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:xmalloc
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+   ...
+   fun:main
+}
+
+{
+   ignore_readline_calloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:main
+}
+
+{
+   ignore_all_libreadline
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libreadline.so.8.2
+   fun:main
+}
+
+{
+   ignore_all_libtinfo
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   fun:main
+}
+{
+   ignore_readline_history_main
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:add_history
+   fun:main
+}
+
+{
+   ignore_readline_history_init
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:add_history
+   fun:read_history_range
+   fun:history_load
+   fun:history_init
+   fun:shell_init
+   fun:main
+}
+
+{
+   ignore_readline_realloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:xrealloc
+   ...
+   fun:readline
+   fun:read_line
+   fun:main
+}
+
+{
+   ignore_readline_rl_redisplay
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:xrealloc
+   ...
+   fun:rl_redisplay
+   fun:readline
+}
+
+{
+   ignore_libtinfo_strdup
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:rl_initialize
+   fun:readline
+}
+
+{
+   ignore_libtinfo_all
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+   ...
+   fun:_rl_init_terminal_io
+   fun:rl_initialize
+   fun:readline
+}

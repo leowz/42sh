@@ -72,7 +72,7 @@ int	is_operator_start(const char *line)
 	return (is_operator(*line));
 }
 
-/*
+/**
  * @param the string of the operator
  * @brief extract the file descriptor before the operator
  * @return an int
@@ -91,7 +91,7 @@ static int	extract_io_number(const char **line)
 	return (io_number);
 }
 
-/*
+/**
  * @param line Address of the string to tokenize
  * @param io_number file descriptor for redirection
  * @param literal representation of the operator
@@ -112,7 +112,7 @@ static t_list	*create_operator_token(
 	return (tok);
 }
 
-/*
+/**
  * @param the string of the operator
  * @brief read the operator and tokenize it
  * @details choose the good function to tokenize

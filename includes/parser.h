@@ -1,14 +1,8 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   parser.h                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/22 21:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/03/30 21:12:27 by jguillem         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/**
+ * @file parser.h
+ * @brief Parser definitions for the 42sh shell
+ * @author jguillem pulgamecanica
+ */
 
 #ifndef PARSER_H
 # define PARSER_H
@@ -17,12 +11,12 @@
 # include "lexer.h"
 # include "ast.h"
 
-/*
- * Parser internal state.
+/**
+ * @brief Parser internal state.
  *
- * tokens:  the t_list* of t_token* produced by the lexer.
- * current: the list node the parser is currently examining.
- * error:   human-readable error string (set on syntax error, free'd by parser).
+ * @param tokens:  the t_list* of t_token* produced by the lexer.
+ * @param current: the list node the parser is currently examining.
+ * @param error:   human-readable error string (set on syntax error, free'd by parser).
  */
 typedef struct s_parser
 {
@@ -32,19 +26,22 @@ typedef struct s_parser
 }	t_parser;
 
 /**
- * Parser interface
+ * @brief consume a t_list* of tokens and return the AST root.
  *
- * parser_parse: consume a t_list* of tokens and return the AST root.
- *   Returns NULL on syntax error (error printed to stderr).
- *   The token list is NOT freed here — caller frees it with lexer_free_tokens().
- *
- * parser_collect_heredocs: walk the AST after parsing and read heredoc content
- *   from stdin for each << redirection.
- *   shell is needed to read from the correct fd and to check SIGINT.
- *   Returns 0 on success, -1 if SIGINT aborted heredoc input.
+ * @details Returns NULL on syntax error (error printed to stderr).
+ * @details The token list is NOT freed here, caller frees it with lexer_free_tokens().
  */
 t_ast	*parser_parse(t_list *tokens, t_shell *shell);
+
+/**
+ * @brief walk the AST after parsing and read heredoc content
+ *
+ * @details from stdin for each << redirection.
+ * @details shell is needed to read from the correct fd and to check SIGINT.
+ * @details Returns 0 on success, -1 if SIGINT aborted heredoc input.
+ */
 int		parser_collect_heredocs(t_ast *ast, t_shell *shell);
+
 void	heredoc_expand_config(t_redir *redir);
 int		parser_accept(t_parser *p, t_token_type type);
 int		is_redir(t_token_type type);

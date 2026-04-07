@@ -2,7 +2,7 @@
 
 ---
 
-# 42sh
+# 42sh - [read the documentation here](https://leowz.github.io/42sh/)
 
 A POSIX-flavoured shell implemented in C as a group project at 42 School.
 The shell supports interactive line editing, command history, job control,
@@ -11,6 +11,8 @@ scratch on top of a custom `libft` standard library.
 
 The pipeline is: **line editor → lexer → parser → expander → executor**,
 with job control and signal handling wired in at the executor level.
+
+## LINKS: [Docs](https://leowz.github.io/42sh/docs/) & [Visualizer](https://leowz.github.io/42sh/viz/)
 
 ## Building
 

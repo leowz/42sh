@@ -6,11 +6,11 @@
 #    By: zweng <marvin@42.fr>                       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/11/09 18:11:43 by zweng             #+#    #+#              #
-#    Updated: 2026/03/18 19:50:54 by jguillem         ###   ########.fr        #
+#    Updated: 2026/04/07 16:02:42 by jguillem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-CC = c99
+CC = cc
 
 # ----- part to change -----
 
@@ -28,7 +28,8 @@ OBJ_PATH =  obj
 OBJ_NAME =  $(SRC_NAME_STD:.c=.o)
 
 CPPFLAGS = -I$(HEADER_PATH) 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = --std=c99 -Wall -Wextra -Werror \
+		  -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE
 
 # ----- part automatic -----
 SRCS := $(addprefix $(STD_PATH)/,$(SRC_NAME_STD))

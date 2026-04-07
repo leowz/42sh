@@ -1,0 +1,37 @@
+{
+  "input": "ls -la | grep \"lol\" ; make debug",
+  "tok_file": "viz/tokenizations/tok_1775485724_172137.json",
+  "tree": {
+    "type": "NODE_SEQUENCE",
+    "left": {
+      "type": "NODE_PIPE",
+      "left": {
+        "type": "NODE_COMMAND",
+        "argv": ["ls", "-la"],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["grep", "\"lol\""],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["make", "debug"],
+      "argc": 2,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}

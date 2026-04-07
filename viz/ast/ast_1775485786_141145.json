@@ -1,0 +1,49 @@
+{
+  "input": "cat /etc/passwd | egrep 'pulgamecanica' | awk '{print(\"$1\", \"pwd\")}' || echo \"didn't work\"",
+  "tok_file": "viz/tokenizations/tok_1775485786_140878.json",
+  "tree": {
+    "type": "NODE_OR",
+    "left": {
+      "type": "NODE_PIPE",
+      "left": {
+        "type": "NODE_PIPE",
+        "left": {
+          "type": "NODE_COMMAND",
+          "argv": ["cat", "/etc/passwd"],
+          "argc": 2,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        },
+        "right": {
+          "type": "NODE_COMMAND",
+          "argv": ["egrep", "'pulgamecanica'"],
+          "argc": 2,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        }
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["awk", "'{print(\"$1\", \"pwd\")}'"],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["echo", "\"didn't work\""],
+      "argc": 2,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}

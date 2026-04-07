@@ -72,7 +72,8 @@ void	ast_free(t_ast *node)
 	
 	if (node->type == NODE_COMMAND)
 		cmd_free(node->data.cmd);
-	else if (node->type == NODE_SUBSHELL || node->type == NODE_BLOCK)
+	else if (node->type == NODE_SUBSHELL || node->type == NODE_BLOCK
+		|| node->type == NODE_BACKGROUND)
 	{
 		ft_lstdel(&(node->data.group->redirs), (void (*)(void *))&redir_free);
 		ast_free(node->data.group->child);

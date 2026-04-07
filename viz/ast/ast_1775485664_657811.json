@@ -1,0 +1,13 @@
+{
+  "input": "cd /home/pulgamecanica/42sh/",
+  "tok_file": "viz/tokenizations/tok_1775485664_657578.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["cd", "/home/pulgamecanica/42sh/"],
+    "argc": 2,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

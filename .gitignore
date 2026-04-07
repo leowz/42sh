@@ -1,7 +1,9 @@
 .claude*
 CLAUDE*
 docs/test/*
-docs/core/*
+docs/core/xml
+docs/core/man
+docs/_build
 obj
 obj/*
 .DS_Store

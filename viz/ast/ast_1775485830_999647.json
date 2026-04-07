@@ -1,0 +1,43 @@
+{
+  "input": "(which ls) | echo \"dude\" && which top",
+  "tok_file": "viz/tokenizations/tok_1775485830_999348.json",
+  "tree": {
+    "type": "NODE_AND",
+    "left": {
+      "type": "NODE_PIPE",
+      "left": {
+        "type": "NODE_SUBSHELL",
+        "child": {
+          "type": "NODE_COMMAND",
+          "argv": ["which", "ls"],
+          "argc": 2,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        },
+        "redirs": [
+
+        ]
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["echo", "\"dude\""],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["which", "top"],
+      "argc": 2,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}

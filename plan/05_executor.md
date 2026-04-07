@@ -26,17 +26,20 @@ int executor_execute(t_shell *shell, t_ast *ast);
 
 ```
 executor_execute(shell, ast):
+    int status
+
     if ast is NULL: return 0
 
     switch ast->type:
-        NODE_COMMAND:    return execute_simple_command(shell, &ast->cmd)
-        NODE_PIPE:       return execute_pipeline(shell, ast)
-        NODE_AND:        return execute_and(shell, ast)
-        NODE_OR:         return execute_or(shell, ast)
-        NODE_SEQUENCE:   return execute_sequence(shell, ast)
-        NODE_SUBSHELL:   return execute_subshell(shell, ast)
-        NODE_BLOCK:      return execute_block(shell, ast)
-        NODE_BACKGROUND: return execute_background(shell, ast)
+        NODE_COMMAND:    status = execute_simple_command(shell, &ast->cmd)
+        NODE_PIPE:       status = execute_pipeline(shell, ast)
+        NODE_AND:        status = execute_and(shell, ast)
+        NODE_OR:         status = execute_or(shell, ast)
+        NODE_SEQUENCE:   status = execute_sequence(shell, ast)
+        NODE_SUBSHELL:   status = execute_subshell(shell, ast)
+        NODE_BLOCK:      status = execute_block(shell, ast)
+        NODE_BACKGROUND: status = execute_background(shell, ast)
+        default:         status = 1
 
     shell->last_exit_status = status
     return status
@@ -52,27 +55,55 @@ execute_simple_command(shell, cmd):
     expand_command(shell, cmd)
 
     # 2. Handle empty command with just assignments
+    #    Example: FOO=bar        → set FOO permanently in shell
+    #    Example: FOO=bar > file → also open/create file as side effect
     if cmd->argv is empty or cmd->argv[0] is NULL:
-        apply assignments to current shell (persistent)
-        apply redirections if any, then restore
+        for each assign in cmd->assignments:
+            split assign at first '=' → name, value
+            var_set(shell, name, value)
+        if cmd->redirs is not NULL:
+            save fds with dup()
+            setup_redirections(cmd->redirs)
+            restore_redirections(saved_fds)
         return 0
 
     # 3. Check if builtin
+    #    Assignments are TEMPORARY — scoped to this command only.
+    #    Example: FOO=bar echo $FOO → FOO exists only during echo
     builtin_fn = builtin_get(cmd->argv[0])
     if builtin_fn:
-        save and apply temporary assignments (for this command only)
+        # save old values and apply assignments
+        for each assign in cmd->assignments:
+            split assign at first '=' → name, value
+            old_values[name] = var_get_value(shell, name)  # NULL if unset
+            var_set(shell, name, value)
+
         save fds, setup redirections
         status = builtin_fn(shell, cmd->argc, cmd->argv)
         restore redirections
-        restore assignments
+
+        # restore old values (or unset if they didn't exist before)
+        for each name in old_values:
+            if old_values[name] was NULL:
+                var_unset(shell, name)
+            else:
+                var_set(shell, name, old_values[name])
         return status
 
     # 4. External command - fork
+    #    Assignments are applied to the CHILD's environment only.
+    #    Example: FOO=bar /usr/bin/env → FOO only in child's envp
     pid = fork()
     if pid == 0:  # child
         setup signals to default
         setup process group (for job control)
-        apply assignments to environment
+
+        # apply assignments to environment for execve
+        for each assign in cmd->assignments:
+            split assign at first '=' → name, value
+            var_set(shell, name, value)
+            var_export(shell, name)
+
         setup redirections (no need to save/restore, we're in child)
         path = find_command(shell, cmd->argv[0])
         if not found:
@@ -82,7 +113,7 @@ execute_simple_command(shell, cmd):
         print error
         exit(126)
 
-    # parent
+    # parent (shell's variables are unchanged — fork copied them)
     wait for child (or add to job for foreground tracking)
     return exit status from child
 ```

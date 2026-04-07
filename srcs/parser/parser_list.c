@@ -45,16 +45,12 @@ t_ast	*parse_list(t_parser *p)
 		return (NULL);
 	while ((op = detect_separator(p, &operator)))
 	{
+		if (operator == NODE_BACKGROUND)
+			left = ast_new_group(NODE_BACKGROUND, left, NULL);
 		current = parser_peek(p);
-		if (!current
+		if (!current || current->type == TOK_EOF
 			|| (current->type == TOK_WORD && strcmp(current->value, "}") == 0))
 			return (left);
-		if (operator == NODE_BACKGROUND)
-		{
-		   left = ast_new_binary(operator, left, NULL);
-		   if (current->type == TOK_EOF)
-			   return (left);
-		}
 		right = parse_list(p);
 		left = ast_new_binary(NODE_SEQUENCE, left, right);
 	}
