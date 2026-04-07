@@ -1,5 +1,8 @@
 /**
- * @brief defines the central `t_shell` state struct.
+ * @file builtins.h
+ * @brief Header for builtin function registry and declarations.
+ * @details Defines the t_builtin_fn type and declares builtin functions.
+ *          Also includes the builtin lookup function.
  * @author zweng, pulgamecanica
  */
 

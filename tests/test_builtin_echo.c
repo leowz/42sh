@@ -21,7 +21,7 @@ static int	capture_echo(t_shell *shell, int argc, char **argv,
 	ssize_t	n = 0;
 	ssize_t	total = 0;
 
-	memset(buf, 0, strlen(buf));
+	memset(buf, 0, buf_size);
 	if (pipe(pipefd) == -1)
 		return (-1);
 	saved_stdout = dup(STDOUT_FILENO);

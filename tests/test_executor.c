@@ -22,7 +22,7 @@
 /* Stub helpers declared in test_stubs.c */
 extern void	stub_shell_init(t_shell *shell);
 extern void	stub_shell_cleanup(t_shell *shell);
-extern void	stub_set_builtin(const char *name, t_builtin_fn fn);
+// extern void	stub_set_builtin(const char *name, t_builtin_fn fn);
 
 /* ================================================================
  * 1. exec_utils: get_exit_status, split_assignment
@@ -708,23 +708,6 @@ static void	test_execute_external_command(void)
 	stub_shell_cleanup(&shell);
 }
 
-static int	mock_builtin_echo(t_shell *shell, int argc, char **argv)
-{
-	int	i;
-
-	(void)shell;
-	i = 1;
-	while (i < argc)
-	{
-		if (i > 1)
-			write(1, " ", 1);
-		write(1, argv[i], strlen(argv[i]));
-		i++;
-	}
-	write(1, "\n", 1);
-	return (0);
-}
-
 static void	test_execute_builtin_command(void)
 {
 	t_shell	shell;
@@ -735,7 +718,6 @@ static void	test_execute_builtin_command(void)
 	ssize_t	n;
 
 	stub_shell_init(&shell);
-	stub_set_builtin("echo", mock_builtin_echo);
 
 	/* builtin echo with output redirect */
 	memset(&ast, 0, sizeof(ast));
@@ -777,7 +759,6 @@ static void	test_execute_builtin_command(void)
 	free(ast.data.cmd->argv);
 	free(ast.data.cmd);
 
-	stub_set_builtin(NULL, NULL);
 	stub_shell_cleanup(&shell);
 }
 
