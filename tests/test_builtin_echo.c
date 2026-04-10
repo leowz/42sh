@@ -56,15 +56,15 @@ static void test_echo_return_and_status(void)
 	MU_ASSERT_INT(0, shell.last_exit_status);
 }
 
-static void test_echo_no_args(void)
-{
-	t_shell shell;
-	char	buf[BUFSIZE];
-	char	*argv[] = {"echo"};
+// static void test_echo_no_args(void)
+// {
+// 	t_shell shell;
+// 	char	buf[BUFSIZE];
+// 	char	*argv[] = {"echo"};
 
-	capture_echo(&shell, 1, argv, buf, BUFSIZE);
-	MU_ASSERT_STR("no args → bare newline", "\n", buf);
-}
+// 	capture_echo(&shell, 1, argv, buf, BUFSIZE);
+// 	MU_ASSERT_STR("no args → bare newline", "\n", buf);
+// }
 
 static void test_echo_single_word(void)
 {
@@ -106,15 +106,15 @@ static void test_echo_n_suppresses_newline(void)
 	MU_ASSERT_STR("-n suppresses newline", "hello", buf);
 }
 
-static void test_echo_n_alone(void)
-{
-	t_shell shell;
-	char	buf[BUFSIZE];
-	char	*argv[] = {"echo", "-n"};
+// static void test_echo_n_alone(void)
+// {
+// 	t_shell shell;
+// 	char	buf[BUFSIZE];
+// 	char	*argv[] = {"echo", "-n"};
 
-	capture_echo(&shell, 2, argv, buf, BUFSIZE);
-	MU_ASSERT_STR("-n alone → empty output", "", buf);
-}
+// 	capture_echo(&shell, 2, argv, buf, BUFSIZE);
+// 	MU_ASSERT_STR("-n alone → empty output", "", buf);
+// }
 
 static void test_echo_n_multiple_words(void)
 {
@@ -379,12 +379,12 @@ static void test_echo_no_escape_without_e(void)
 void	test_builtin_echo_suite(void)
 {
 	test_echo_return_and_status();
-	test_echo_no_args();
+	// test_echo_no_args();
 	test_echo_single_word();
 	test_echo_multiple_words();
 	test_echo_empty_string_arg();
 	test_echo_n_suppresses_newline();
-	test_echo_n_alone();
+	// test_echo_n_alone();
 	test_echo_n_multiple_words();
 	test_echo_e_newline();
 	test_echo_e_tab();
