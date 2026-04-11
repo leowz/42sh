@@ -117,7 +117,7 @@ fclean: clean dclean
 re: fclean all
 
 valgrind:
-	valgrind --gen-suppressions=yes --suppressions=suppression.file --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=valgrind-out.txt ./42sh
+	valgrind --gen-suppressions=yes --suppressions=suppression.file --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=valgrind-out.txt ./42sh
 
 # ---- Documentation ----
 # Two Doxyfiles produce XML consumed by Sphinx/Breathe:
