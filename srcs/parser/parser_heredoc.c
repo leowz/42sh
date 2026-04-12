@@ -35,14 +35,27 @@ static char	*result_concat(char *begin, size_t *len, size_t read, char *src)
 }
 
 /**
- * @param delimiter : const char pointer of the string representing EOF
+ * @param origin : raw string
+ * @brief strip the leading tabulations of origin
+ * @return an allocated cleaned string
+ */
+static char *strip_tab(char *origin)
+{
+	while (*origin && *origin == '\t')
+		origin++;
+	return (strdup(origin));
+}
+
+/**
+ * @param redir : a pointer on struct s_redir 
  * @param prompt : the prompt symbol of the heredoc
  * @brief read the user input and store each line
  * @return a char pointer on the content of the heredoc
  */
-static char	*read_heredoc(const char *delimiter, const char *prompt)
+static char	*read_heredoc(t_redir *redir, const char *prompt)
 {
 	char		*line;
+	char		*convert_line;
 	char		*result;
 	size_t		result_len;
 
@@ -56,17 +69,26 @@ static char	*read_heredoc(const char *delimiter, const char *prompt)
 		{
 			fprintf(stderr,
 				"\nwarning: here-document delimited by end-of-file (wanted`%s')\n",
-				delimiter);
+				redir->heredoc_delim);
 			break;
 		}
-		if (strcmp(line, delimiter) == 0)
-		{
-			free(line);
-			break;
-		}
-		result = result_concat(result, &result_len, strlen(line), line);
-		result = result_concat(result, &result_len, 1, "\n");
+		if (redir->type == TOK_HEREDOC_STRIP)
+			convert_line = strip_tab(line);
+		else
+			convert_line = strdup(line);
 		free(line);
+		if (strcmp(convert_line, redir->heredoc_delim) == 0)
+		{
+			free(convert_line);
+			break;
+		}
+		result = result_concat(
+				result,
+				&result_len,
+				strlen(convert_line),
+				convert_line);
+		result = result_concat(result, &result_len, 1, "\n");
+		free(convert_line);
 		if (!result)
 			break ;
 	}
@@ -118,7 +140,7 @@ static int	fork_heredoc(t_redir *redir)
 	{
 		signal(SIGINT, SIG_DFL);
 		close(pipefd[0]);
-		res = read_heredoc(redir->heredoc_delim, "> ");
+		res = read_heredoc(redir, "> ");
 		if (!res)
 		{
 			close(pipefd[1]);
@@ -156,9 +178,12 @@ static int	collect_heredocs_from_list(t_list *lst)
 	while (lst)
 	{
 		redir = lst->content;
-		if (redir && redir->type == TOK_HEREDOC)
+		if (redir &&
+			(redir->type == TOK_HEREDOC || redir->type == TOK_HEREDOC_STRIP))
+		{
 			if (fork_heredoc(redir) == -1)
 				return (-1);
+		}
 		lst = lst->next;
 	}
 	return (0);
@@ -195,7 +220,7 @@ void	heredoc_expand_config(t_redir *redir)
 	char	quote;
 	char	*end;
 
-	if (redir->type == TOK_HEREDOC)
+	if (redir->type == TOK_HEREDOC || redir->type == TOK_HEREDOC_STRIP)
 	{
 		if (redir->target[0] == '\'' || redir->target[0] == '"')
 		{

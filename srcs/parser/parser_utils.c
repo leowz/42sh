@@ -45,6 +45,7 @@ int	is_redir(t_token_type type)
 		|| type == TOK_REDIR_APPEND
 		|| type == TOK_REDIR_DUP_IN
 		|| type == TOK_REDIR_DUP_OUT
+		|| type == TOK_HEREDOC_STRIP
 		|| type == TOK_HEREDOC);
 }
 

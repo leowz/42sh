@@ -31,11 +31,12 @@ typedef enum e_node_type
  * @details Stored in t_cmd.redirs and t_group.redirs as t_list*
  *          (each node->content is a t_redir*).  No *next field.
  *
- * @param fd               source fd (-1 = default for the operator type).
- * @param target           raw filename or fd number string (unexpanded).
- * @param heredoc_delim    the delimiter word for << (raw, may be quoted).
- * @param heredoc_content  collected heredoc content (filled after parse, before exec).
- * @param heredoc_quoted   1 if delimiter was quoted (no expansion inside heredoc).
+ * @param fd				source fd (-1 = default for the operator type).
+ * @param target			raw filename or fd number string (unexpanded).
+ * @param heredoc_delim		the delimiter word for << (raw, may be quoted).
+ * @param heredoc_stripped	1 if leadling tab are stripped
+ * @param heredoc_content	collected heredoc content (filled after parse, before exec).
+ * @param heredoc_quoted	1 if delimiter was quoted (no expansion inside heredoc).
  */
 typedef struct s_redir
 {

@@ -13,7 +13,7 @@ static int	redir_get_fd(t_redir *redir)
 	if (redir->fd >= 0)
 		return (redir->fd);
 	if (redir->type == TOK_REDIR_IN || redir->type == TOK_HEREDOC
-		|| redir->type == TOK_REDIR_DUP_IN)
+		|| redir->type == TOK_HEREDOC_STRIP || redir->type == TOK_REDIR_DUP_IN)
 		return (0);
 	return (1);
 }
@@ -75,7 +75,7 @@ static int	apply_one_redir(t_redir *redir)
 	src_fd = redir_get_fd(redir);
 	if (redir->type == TOK_REDIR_DUP_IN || redir->type == TOK_REDIR_DUP_OUT)
 		return (apply_dup_redir(redir, src_fd));
-	if (redir->type == TOK_HEREDOC)
+	if (redir->type == TOK_HEREDOC || redir->type == TOK_HEREDOC_STRIP)
 	{
 		target_fd = setup_heredoc(redir);
 		if (target_fd == -1)

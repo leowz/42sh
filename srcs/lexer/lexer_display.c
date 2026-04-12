@@ -29,6 +29,7 @@ static const char	*tok_type_str(t_token_type type)
 		"TOK_REDIR_OUT",
 		"TOK_REDIR_APPEND",
 		"TOK_HEREDOC",
+		"TOK_HEREDOC_STRIP",
 		"TOK_REDIR_DUP_IN",
 		"TOK_REDIR_DUP_OUT",
 		"TOK_LPAREN",

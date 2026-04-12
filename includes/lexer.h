@@ -29,6 +29,7 @@ typedef enum e_token_type
 	TOK_REDIR_OUT, /**< A redirect output token ex: ">" */
 	TOK_REDIR_APPEND, /**< A redirect append token ex: ">>" */
 	TOK_HEREDOC, /**< A heredoc token ex: "<<" */
+	TOK_HEREDOC_STRIP, /** A heredoc without leading tab ex : "<<-" */
 	TOK_REDIR_DUP_IN, /**< A duplicate redirect input token ex: "<&" */
 	TOK_REDIR_DUP_OUT, /**< A duplicate redirect output token ex: ">&" */
 	TOK_LPAREN, /**< A left parenthesis token ex: "(" */

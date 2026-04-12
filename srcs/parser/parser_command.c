@@ -104,7 +104,8 @@ static char	**command_size(t_parser *p, t_cmd *command)
 	if (command->argc == 0 && !command->assignments)
 	{
 		p->current = start;
-		if (parser_peek(p)->type != TOK_HEREDOC)
+		if (parser_peek(p)->type != TOK_HEREDOC
+			&& parser_peek(p)->type != TOK_HEREDOC_STRIP)
 			parser_error_unexpected(p, token);
 		return (NULL);
 	}
@@ -221,6 +222,7 @@ t_ast	*parse_simple_command(t_parser *p)
 	}
 	if (!(command->argv = command_size(p, command))
 		&& parser_peek(p)->type != TOK_HEREDOC
+		&& parser_peek(p)->type != TOK_HEREDOC_STRIP
 		&& !command->assignments)
 	{
 		free(command);

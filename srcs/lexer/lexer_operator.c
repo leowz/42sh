@@ -24,6 +24,7 @@ static const	t_operator operators[] = {
 	{"|",	TOK_PIPE},
 	{"&&",	TOK_AND},
 	{"&",	TOK_AMPERSAND},
+	{"<<-", TOK_HEREDOC_STRIP},
 	{"<<",	TOK_HEREDOC},
 	{"<&",	TOK_REDIR_DUP_IN},
 	{"<",	TOK_REDIR_IN},

@@ -43,6 +43,8 @@ static const char	*redir_type_str(t_token_type type)
 		return (">>");
 	if (type == TOK_HEREDOC)
 		return ("<<");
+	if (type == TOK_HEREDOC_STRIP)
+		return ("<<-");
 	if (type == TOK_REDIR_DUP_IN)
 		return ("<&");
 	if (type == TOK_REDIR_DUP_OUT)

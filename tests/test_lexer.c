@@ -344,6 +344,7 @@ static void	test_read_operator_double_char(void)
 	MU_ASSERT_INT(TOK_AND, operator_type("&&"));
 	MU_ASSERT_INT(TOK_REDIR_APPEND, operator_type(">>"));
 	MU_ASSERT_INT(TOK_HEREDOC, operator_type("<<"));
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, operator_type("<<-"));
 	MU_ASSERT_INT(TOK_REDIR_DUP_IN, operator_type("<&"));
 	MU_ASSERT_INT(TOK_REDIR_DUP_OUT, operator_type(">&"));
 }
@@ -442,6 +443,20 @@ static void	test_tokenize_heredoc(void)
 	tokens = lexer_tokenize("cat << EOF");
 	MU_ASSERT_INT(TOK_WORD, nth_token(tokens, 0)->type);
 	MU_ASSERT_INT(TOK_HEREDOC, nth_token(tokens, 1)->type);
+	MU_ASSERT_INT(TOK_WORD, nth_token(tokens, 2)->type);
+	lexer_free_tokens(tokens);
+}
+
+/**
+ * @brief "cat <<- EOF" produces WORD HEREDOC_STRIP WORD EOF (4 tokens).
+ */
+static void	test_tokenize_heredoc_strip(void)
+{
+	t_list	*tokens;
+
+	tokens = lexer_tokenize("cat <<- EOF");
+	MU_ASSERT_INT(TOK_WORD, nth_token(tokens, 0)->type);
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, nth_token(tokens, 1)->type);
 	MU_ASSERT_INT(TOK_WORD, nth_token(tokens, 2)->type);
 	lexer_free_tokens(tokens);
 }
@@ -601,6 +616,7 @@ void	test_lexer_suite(void)
 	test_tokenize_pipe();
 	test_tokenize_redirect_out();
 	test_tokenize_heredoc();
+	test_tokenize_heredoc_strip();
 	test_tokenize_empty();
 	test_tokenize_whitespace_trimmed();
 	test_tokenize_and_or();
