@@ -61,7 +61,7 @@ static t_ast	*parse_group(t_parser *p, t_ast *child, t_node_type node)
 		if (!redir)
 			return (NULL);
 		redir->heredoc_delim = NULL;
-		redir->heredoc_content = NULL;
+		redir->heredoc_fd = -1;
 		redir->heredoc_quoted = 0;
 		redir->type = token->type;
 		redir->fd = token->io_number;

@@ -44,7 +44,7 @@ typedef struct s_redir
 	int				fd;
 	char			*target;
 	char			*heredoc_delim;
-	char			*heredoc_content;
+	int				heredoc_fd;
 	int				heredoc_quoted;
 }	t_redir;
 

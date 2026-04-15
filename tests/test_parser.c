@@ -19,6 +19,8 @@
 # include <string.h>
 # include <unistd.h>
 
+#define BUFSIZE 256
+
 static void	test_simple_command(void)
 {
 	t_ast	*ast;
@@ -335,175 +337,166 @@ static void	test_redirs_in_a_row(void)
 	ast_free(ast);
 }
 
-static void test_heredoc_basic(void)
+static t_ast	*write_to_pipe(char *content, char *cmd)
 {
-	int		pipefd[2];
-	t_ast	*ast;
 	t_shell	shell;
+	int		pipefd[2];
+
+	t_ast	*ast;
 
 	pipe(pipefd);
-	write(pipefd[1], "hello\nEOF\n", 10);
+	write(pipefd[1], content, strlen(content));
+	write(pipefd[1], "EOF\n", 4);
 	close(pipefd[1]);
 
 	int saved_stdin = dup(STDIN_FILENO);
 	dup2(pipefd[0], STDIN_FILENO);
 	close(pipefd[0]);
 
-	ast = parser_parse(lexer_tokenize("cat << EOF"), &shell);
+	ast = parser_parse(lexer_tokenize(cmd), &shell);
 
 	dup2(saved_stdin, STDIN_FILENO);
 	close(saved_stdin);
+	return (ast);
+}
+
+static void test_heredoc_basic(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe("hello\n", "cat << EOF");
+	redir = REDIR(ast->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
 	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
-	MU_ASSERT_INT(TOK_HEREDOC, ((t_redir *)(ast->data.cmd->redirs->content))->type);
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.cmd->redirs->content))->heredoc_content);
-
-	ast_free(ast);
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_stripped_basic(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "hello\nEOF\n", 10);
-	close(pipefd[1]);
-
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-
-	ast = parser_parse(lexer_tokenize("cat <<- EOF"), &shell);
-
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("hello\n", "cat <<- EOF");
+	redir = REDIR(ast->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
 	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
-	MU_ASSERT_INT(TOK_HEREDOC_STRIP, ((t_redir *)(ast->data.cmd->redirs->content))->type);
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.cmd->redirs->content))->heredoc_content);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
 
-	ast_free(ast);
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_multiline(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "line1\nline2\nline3\nEOF\n", 22);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat << EOF"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("line1\nline2\nline3\n", "cat << EOF");
+	redir = REDIR(ast->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
-	MU_ASSERT_STR("multiline content", "line1\nline2\nline3\n",
-			((t_redir *)(ast->data.cmd->redirs->content))->heredoc_content);
-	ast_free(ast);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT_STR("heredoc content", "line1\nline2\nline3\n", buf);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_stripped_multiline(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "\tline1\nline2\n\t\tline3\n\t\t\tEOF\n", 28);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat <<-EOF"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("\tline1\nline2\n\t\tline3\n\t\t\t", "cat <<-EOF");
+	redir = REDIR(ast->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
-	MU_ASSERT_STR("multiline content", "line1\nline2\nline3\n",
-			((t_redir *)(ast->data.cmd->redirs->content))->heredoc_content);
-	ast_free(ast);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT_STR("heredoc content", "line1\nline2\nline3\n", buf);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_quoted_no_expand(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
 	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "$USER\nEOF\n", 10);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat << 'EOF'"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("$USER\nEOF\n", "cat << 'EOF'");
+	redir = REDIR(ast->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
-	redir = (t_redir *)(ast->data.cmd->redirs->content);
 	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
-	MU_ASSERT_STR("raw content", "$USER\n", redir->heredoc_content);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_STR("heredoc content", "$USER\n", buf);
 	MU_ASSERT("no expand", redir->heredoc_quoted == 1);
-	ast_free(ast);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_stripped_quoted_no_expand(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
 	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "\t$USER\n\tEOF\n", 12);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat <<- 'EOF'"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("\t$USER\n\t", "cat <<- 'EOF'");
+	redir = REDIR(ast->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
-	redir = (t_redir *)(ast->data.cmd->redirs->content);
 	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
-	MU_ASSERT_STR("raw content", "$USER\n", redir->heredoc_content);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_STR("heredoc content", "$USER\n", buf);
 	MU_ASSERT("no expand", redir->heredoc_quoted == 1);
-	ast_free(ast);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_pipe(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "hello\nEOF\n", 10);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat << EOF | grep hello"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("hello\nEOF\n", "cat <<EOF | grep hello");
+	printf("DEBUG!!!\n");
+	redir = REDIR(ast->data.binary->left->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_PIPE, ast->type);
@@ -511,26 +504,23 @@ static void test_heredoc_pipe(void)
 			ast->data.binary->left->data.cmd->argv[0]);
 	MU_ASSERT_STR("right cmd", "grep",
 			ast->data.binary->right->data.cmd->argv[0]);
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.binary->left->data.cmd->redirs->content))->heredoc_content);
-	ast_free(ast);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_stripped_pipe(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "\thello\n\t\tEOF\n", 13);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat <<- EOF | grep hello"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("\thello\n\t\t", "cat <<- \"EOF\" | grep hello");
+	redir = REDIR(ast->data.binary->left->data.cmd->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_PIPE, ast->type);
@@ -538,27 +528,20 @@ static void test_heredoc_stripped_pipe(void)
 			ast->data.binary->left->data.cmd->argv[0]);
 	MU_ASSERT_STR("right cmd", "grep",
 			ast->data.binary->right->data.cmd->argv[0]);
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.binary->left->data.cmd->redirs->content))->heredoc_content);
-	ast_free(ast);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_with_redir(void)
 {
-	int		pipefd[2];
 	t_ast	*ast;
-	t_shell	shell;
 	t_list	*redirs;
 
-	pipe(pipefd);
-	write(pipefd[1], "hello\nEOF\n", 10);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat << EOF > out"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("hello\n", "cat << EOF > out");
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -567,25 +550,15 @@ static void test_heredoc_with_redir(void)
 	MU_ASSERT_INT(TOK_HEREDOC, ((t_redir *)(redirs->content))->type);
 	MU_ASSERT_INT(TOK_REDIR_OUT, ((t_redir *)(redirs->next->content))->type);
 	MU_ASSERT_STR("out file", "out", ((t_redir *)(redirs->next->content))->target);
-	ast_free(ast);
+	close(((t_redir *)redirs->content)->heredoc_fd);
 }
 
 static void test_heredoc_stripped_with_redir(void)
 {
-	int		pipefd[2];
 	t_ast	*ast;
-	t_shell	shell;
 	t_list	*redirs;
 
-	pipe(pipefd);
-	write(pipefd[1], "\t\thello\n\tEOF\n", 13);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat <<- EOF > out"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("\t\thello\n\t", "cat <<- EOF > out");
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -594,100 +567,146 @@ static void test_heredoc_stripped_with_redir(void)
 	MU_ASSERT_INT(TOK_HEREDOC_STRIP, ((t_redir *)(redirs->content))->type);
 	MU_ASSERT_INT(TOK_REDIR_OUT, ((t_redir *)(redirs->next->content))->type);
 	MU_ASSERT_STR("out file", "out", ((t_redir *)(redirs->next->content))->target);
-	ast_free(ast);
+	close(((t_redir *)redirs->content)->heredoc_fd);
 }
 
 static void test_heredoc_unterminated(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "hello\n", 6); 
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat << EOF"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("hello\n", "cat << EOF");
+	redir = REDIR(ast->data.cmd->redirs);
 
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.cmd->redirs->content))->heredoc_content);
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_COMMAND, ast->type);
+	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
 
-	ast_free(ast);
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_stripped_unterminated(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "\t\thello\n", 8); 
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("cat <<- EOF"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("\t\thello\n", "cat <<- EOF");
+	redir = REDIR(ast->data.cmd->redirs);
 
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.cmd->redirs->content))->heredoc_content);
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_COMMAND, ast->type);
+	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
 
-	ast_free(ast);
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_group(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "hello\nEOF\n", 10);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("(cat) << EOF"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("hello\n", "(cat) << EOF");
+	redir = REDIR(ast->data.group->redirs);
+
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_SUBSHELL, ast->type);
-	MU_ASSERT_STR("cmd", "cat",
-			ast->data.group->child->data.cmd->argv[0]);
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.group->redirs->content))->heredoc_content);
-	ast_free(ast);
+	MU_ASSERT_STR("cmd", "cat", ast->data.group->child->data.cmd->argv[0]);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
+
+	close(redir->heredoc_fd);
 }
 
 static void test_heredoc_stripped_group(void)
 {
-	int		pipefd[2];
+	ssize_t	n;
+	char	buf[BUFSIZE];
 	t_ast	*ast;
-	t_shell	shell;
+	t_redir	*redir;
 
-	pipe(pipefd);
-	write(pipefd[1], "\t\t\thello\n\tEOF\n", 14);
-	close(pipefd[1]);
-	int saved_stdin = dup(STDIN_FILENO);
-	dup2(pipefd[0], STDIN_FILENO);
-	close(pipefd[0]);
-	ast = parser_parse(lexer_tokenize("(cat) <<- EOF"), &shell);
-	dup2(saved_stdin, STDIN_FILENO);
-	close(saved_stdin);
+	ast = write_to_pipe("\t\t\thello\n\t", "(cat) <<- EOF");
+	redir = REDIR(ast->data.group->redirs);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
 	MU_ASSERT_INT(NODE_SUBSHELL, ast->type);
-	MU_ASSERT_STR("cmd", "cat",
-			ast->data.group->child->data.cmd->argv[0]);
-	MU_ASSERT_STR("heredoc content", "hello\n",
-			((t_redir *)(ast->data.group->redirs->content))->heredoc_content);
+	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	buf[n] = '\0';
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT_STR("heredoc content", "hello\n", buf);
+
+	close(redir->heredoc_fd);
+}
+
+static void	test_heredoc_empty(void)
+{
+	ssize_t	n;
+	char	buf[BUFSIZE];
+	t_ast	*ast;
+	t_redir	*redir;
+
+	ast = write_to_pipe("", "cat << EOF");
+	redir = REDIR(ast->data.cmd->redirs);
+
+
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	MU_ASSERT_INT(0, (int)n);
+
+	close(redir->heredoc_fd);
+}
+
+static void	test_heredoc_stripped_empty(void)
+{
+	ssize_t	n;
+	char	buf[BUFSIZE];
+	t_ast	*ast;
+	t_redir	*redir;
+
+	ast = write_to_pipe("", "cat <<- EOF");
+	redir = REDIR(ast->data.cmd->redirs);
+
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+	n = read(redir->heredoc_fd, buf, BUFSIZE);
+	MU_ASSERT_INT(0, (int)n);
+
+	close(redir->heredoc_fd);
+}
+
+static void	test_no_heredoc(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	t_shell	shell;
+
+	ast	= parser_parse(lexer_tokenize("no heredoc > out"), &shell);
+	redir = REDIR(ast->data.cmd->redirs);
+
+
+	MU_ASSERT_INT(-1, redir->heredoc_fd);
+
+	close(redir->heredoc_fd);
 	ast_free(ast);
 }
 
@@ -893,8 +912,11 @@ void	test_parser_suite(void)
 	test_heredoc_stripped_with_redir();
 	test_heredoc_unterminated();
 	test_heredoc_stripped_unterminated();
-	test_heredoc_stripped_group();
 	test_heredoc_group();
+	test_heredoc_stripped_group();
+	test_heredoc_empty();
+	test_heredoc_stripped_empty();
+	test_no_heredoc();
 	test_assignment();
 	test_multiple_assignments();
 	test_assignment_only();

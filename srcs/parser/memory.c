@@ -18,8 +18,11 @@ void	redir_free(t_redir *redir)
 		free(redir->target);
 	if (redir->heredoc_delim)
 		free(redir->heredoc_delim);
-	if (redir->heredoc_content)
-		free(redir->heredoc_content);	
+	if (redir->heredoc_fd >= 0)
+	{
+		close(redir->heredoc_fd);
+		redir->heredoc_fd = -1;
+	}
 	free(redir);
 }
 

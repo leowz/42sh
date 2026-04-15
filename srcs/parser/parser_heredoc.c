@@ -102,24 +102,6 @@ static char	*read_heredoc(t_redir *redir, const char *prompt)
 
 /**
  * @param redir pointer on a struct s_redir
- * @param pipefd the 2 ends of the pipe
- * @brief read from the pipe out
- */
-static void	read_heredoc_from_pipe(t_redir *redir, int pipefd[2])
-{
-	char	buffer[1024];
-	ssize_t	n;
-	char	*result = NULL;
-	size_t	len = 0;
-
-	while ((n = read(pipefd[0], buffer, sizeof(buffer))) > 0)
-		result = result_concat(result, &len, n, buffer);
-	close(pipefd[0]);
-	redir->heredoc_content = result;
-}
-
-/**
- * @param redir pointer on a struct s_redir
  * @brief create a fork for the heredoc collecting
  * @brief in order to catch SIGINT only at the heredoc level
  * @return 0 | -1
@@ -133,6 +115,7 @@ static int	fork_heredoc(t_redir *redir)
 
 	if (pipe(pipefd) == -1)
 		return (-1);
+	fcntl(pipefd[0], F_SETFD, FD_CLOEXEC);
 	pid = fork();
 	if (pid == -1)
 		return (-1);
@@ -144,7 +127,7 @@ static int	fork_heredoc(t_redir *redir)
 		if (!res)
 		{
 			close(pipefd[1]);
-			exit(130);
+			return (0);
 		}
 		write(pipefd[1], res, strlen(res));
 		free(res);
@@ -155,13 +138,13 @@ static int	fork_heredoc(t_redir *redir)
 	{
 		close(pipefd[1]);
 		waitpid(pid, &status, 0);
-		if (WIFSIGNALED(status) || WEXITSTATUS(status == 130))
+		if (WIFSIGNALED(status) || WEXITSTATUS(status) == 130)
 		{
 			close(pipefd[0]);
 			g_sigint_heredoc = 1;
 			return (-1);
 		}
-		read_heredoc_from_pipe(redir, pipefd);
+		redir->heredoc_fd = pipefd[0];
 		return (0);
 	}
 }

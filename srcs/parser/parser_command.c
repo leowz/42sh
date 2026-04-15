@@ -142,7 +142,7 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 			if (!redir)
 				return (NULL);
 			redir->heredoc_delim = NULL;
-			redir->heredoc_content = NULL;
+			redir->heredoc_fd = -1;
 			redir->heredoc_quoted = 0;
 			redir->type = token->type;
 			redir->fd = token->io_number; 
