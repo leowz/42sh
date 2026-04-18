@@ -30,6 +30,7 @@ static void	shell_cleanup(t_shell *shell)
 		free(shell->history_file);
 		shell->history_file = NULL;
 	}
+	job_control_cleanup(shell);
 }
 
 static char	*read_line(t_shell *shell)
@@ -144,6 +145,11 @@ int	main(int argc, char *argv[], char *envp[])
 	while (shell.running)
 	{
 		signals_check(&shell);
+		if (shell.interactive)
+		{
+			job_update_statuses(&shell);
+			job_notify(&shell);
+		}
 		raw_line = read_line(&shell);
 		if (!raw_line)
 		{
