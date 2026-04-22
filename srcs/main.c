@@ -15,6 +15,7 @@ static int	shell_init(t_shell *shell, char **envp)
 	{
 		history_init(shell);
 		signals_setup_interactive();
+		job_control_init(shell);
 	}
 	(void)envp;
 	// init a 42shrc file here if it exists

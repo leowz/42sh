@@ -53,7 +53,7 @@ static char	*append_redirs(char *out, t_list *redirs)
 	return (out);
 }
 
-static char	*cmd_to_string(t_cmd *cmd)
+char	*cmd_to_string(t_cmd *cmd)
 {
 	char	*out;
 	t_list	*node;

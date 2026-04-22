@@ -20,21 +20,7 @@ const char	*job_status_str(t_job_status s)
 	return ("Terminated");
 }
 
-static t_process	*process_find(t_job *job, pid_t pid)
-{
-	t_list	*node;
-
-	node = job->processes;
-	while (node)
-	{
-		if (LST_PROC(node)->pid == pid)
-			return (LST_PROC(node));
-		node = node->next;
-	}
-	return (NULL);
-}
-
-static void	recompute_job_status(t_job *job)
+void	job_recompute_status(t_job *job)
 {
 	t_list		*node;
 	t_process	*p;
@@ -64,29 +50,45 @@ static void	recompute_job_status(t_job *job)
 		job->status = JOB_RUNNING;
 }
 
+int	job_apply_status(t_job *job, pid_t pid, int status)
+{
+	t_list		*node;
+	t_process	*p;
+
+	node = job->processes;
+	while (node)
+	{
+		p = LST_PROC(node);
+		if (p->pid != pid)
+		{
+			node = node->next;
+			continue ;
+		}
+		p->status = status;
+		if (WIFSTOPPED(status))
+			p->stopped = 1;
+		else
+		{
+			p->completed = 1;
+			p->stopped = 0;
+			if (WIFSIGNALED(status))
+				job->status = JOB_TERMINATED;
+		}
+		job->notified = 0;
+		return (1);
+	}
+	return (0);
+}
+
 static void	apply_wait_result(t_shell *shell, pid_t pid, int status)
 {
-	t_job		*job;
-	t_process	*p;
+	t_job	*job;
 
 	job = job_find_by_pid(shell, pid);
 	if (!job)
 		return ;
-	p = process_find(job, pid);
-	if (!p)
-		return ;
-	p->status = status;
-	if (WIFSTOPPED(status))
-		p->stopped = 1;
-	else
-	{
-		p->completed = 1;
-		p->stopped = 0;
-		if (WIFSIGNALED(status))
-			job->status = JOB_TERMINATED;
-	}
-	job->notified = 0;
-	recompute_job_status(job);
+	if (job_apply_status(job, pid, status))
+		job_recompute_status(job);
 }
 
 void	job_update_statuses(t_shell *shell)

@@ -78,40 +78,6 @@ void	job_add_process(t_job *job, pid_t pid, const char *cmd)
 	ft_lstappend(&job->processes, node);
 }
 
-t_job	*job_find_by_id(t_shell *shell, int id)
-{
-	t_list	*node;
-
-	node = shell->jobs;
-	while (node)
-	{
-		if (LST_JOB(node)->id == id)
-			return (LST_JOB(node));
-		node = node->next;
-	}
-	return (NULL);
-}
-
-t_job	*job_find_by_pid(t_shell *shell, pid_t pid)
-{
-	t_list	*jn;
-	t_list	*pn;
-
-	jn = shell->jobs;
-	while (jn)
-	{
-		pn = LST_JOB(jn)->processes;
-		while (pn)
-		{
-			if (LST_PROC(pn)->pid == pid)
-				return (LST_JOB(jn));
-			pn = pn->next;
-		}
-		jn = jn->next;
-	}
-	return (NULL);
-}
-
 static void	proc_free(void *proc_ptr)
 {
 	t_process	*p;
@@ -133,4 +99,31 @@ void	job_free(void *job_ptr)
 	ft_lstdel(&job->processes, proc_free);
 	free(job->cmd_line);
 	free(job);
+}
+
+void	job_remove(t_shell *shell, t_job *job)
+{
+	t_list	*prev;
+	t_list	*node;
+
+	if (!shell || !job)
+		return ;
+	prev = NULL;
+	node = shell->jobs;
+	while (node)
+	{
+		if (LST_JOB(node) == job)
+		{
+			if (prev)
+				prev->next = node->next;
+			else
+				shell->jobs = node->next;
+			if (shell->current_job == job)
+				shell->current_job = NULL;
+			ft_lstdelone(&node, job_free);
+			return ;
+		}
+		prev = node;
+		node = node->next;
+	}
 }

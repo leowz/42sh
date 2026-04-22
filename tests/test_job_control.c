@@ -246,6 +246,139 @@ static void	test_ast_to_string_logical_chain(void)
 }
 
 /* ================================================================
+ * 4. job_find_by_spec — bash-style %spec resolution
+ * ================================================================ */
+
+static void	setup_three_jobs(t_shell *shell, t_job **j1, t_job **j2, t_job **j3)
+{
+	*j1 = job_create(shell, "sleep 10");
+	*j2 = job_create(shell, "grep pattern");
+	*j3 = job_create(shell, "sleep 5");
+}
+
+static void	test_find_by_spec_current(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	MU_ASSERT("NULL -> current", job_find_by_spec(&shell, NULL) == j3);
+	MU_ASSERT("empty -> current", job_find_by_spec(&shell, "") == j3);
+	MU_ASSERT("% -> current", job_find_by_spec(&shell, "%") == j3);
+	MU_ASSERT("%+ -> current", job_find_by_spec(&shell, "%+") == j3);
+	MU_ASSERT("%% -> current", job_find_by_spec(&shell, "%%") == j3);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+static void	test_find_by_spec_previous(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	MU_ASSERT("%- -> previous (j2)", job_find_by_spec(&shell, "%-") == j2);
+	shell.current_job = j1;
+	MU_ASSERT("%- when current is first -> NULL",
+		job_find_by_spec(&shell, "%-") == NULL);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+static void	test_find_by_spec_by_id(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	MU_ASSERT("%1", job_find_by_spec(&shell, "%1") == j1);
+	MU_ASSERT("%2", job_find_by_spec(&shell, "%2") == j2);
+	MU_ASSERT("%3", job_find_by_spec(&shell, "%3") == j3);
+	MU_ASSERT("%99 missing", job_find_by_spec(&shell, "%99") == NULL);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+static void	test_find_by_spec_by_prefix(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	MU_ASSERT("%sleep -> first sleep", job_find_by_spec(&shell, "%sleep") == j1);
+	MU_ASSERT("%grep -> j2", job_find_by_spec(&shell, "%grep") == j2);
+	MU_ASSERT("%no_such -> NULL", job_find_by_spec(&shell, "%no_such") == NULL);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+static void	test_find_by_spec_malformed(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	MU_ASSERT("no leading % -> NULL", job_find_by_spec(&shell, "sleep") == NULL);
+	MU_ASSERT("1 (no %) -> NULL", job_find_by_spec(&shell, "1") == NULL);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+/* ================================================================
+ * 5. job_remove — unlink without triggering notifications
+ * ================================================================ */
+
+static void	test_job_remove_middle(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	job_remove(&shell, j2);
+	MU_ASSERT("j1 still found", job_find_by_id(&shell, 1) == j1);
+	MU_ASSERT("j2 gone", job_find_by_id(&shell, 2) == NULL);
+	MU_ASSERT("j3 still found", job_find_by_id(&shell, 3) == j3);
+	MU_ASSERT("current_job unchanged", shell.current_job == j3);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+static void	test_job_remove_clears_current(void)
+{
+	t_shell	shell;
+	t_job	*j1;
+	t_job	*j2;
+	t_job	*j3;
+
+	stub_shell_init(&shell);
+	setup_three_jobs(&shell, &j1, &j2, &j3);
+	job_remove(&shell, j3);
+	MU_ASSERT("current_job cleared when removed target",
+		shell.current_job == NULL);
+	MU_ASSERT("j3 gone", job_find_by_id(&shell, 3) == NULL);
+	job_control_cleanup(&shell);
+	stub_shell_cleanup(&shell);
+}
+
+/* ================================================================
  * Master suite
  * ================================================================ */
 
@@ -259,6 +392,13 @@ void	test_job_control_suite(void)
 	test_ast_to_string_simple_cmd();
 	test_ast_to_string_pipeline();
 	test_ast_to_string_logical_chain();
+	test_find_by_spec_current();
+	test_find_by_spec_previous();
+	test_find_by_spec_by_id();
+	test_find_by_spec_by_prefix();
+	test_find_by_spec_malformed();
+	test_job_remove_middle();
+	test_job_remove_clears_current();
 }
 
 #else

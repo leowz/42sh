@@ -145,14 +145,18 @@ static int	exec_builtin(t_shell *shell, t_cmd *cmd, t_builtin_fn fn)
 }
 
 /**
- * @brief Child process: apply assignments, set up redirections, exec.
- * @param shell The shell instance.
- * @param cmd The command structure.
+ * @brief Child process: place in own pgrp, apply assignments, exec.
+ * @details `setpgid(0, 0)` race-free paired with parent-side `setpgid(pid,pid)`;
+ *          `tcsetpgrp` hands the terminal off before the child could block on
+ *          stdin (parent's SIG_IGN for SIGTTOU is still inherited here).
  */
 static void	exec_child(t_shell *shell, t_cmd *cmd)
 {
 	char	*path;
 
+	setpgid(0, 0);
+	if (shell->interactive)
+		tcsetpgrp(shell->terminal_fd, getpid());
 	signals_setup_child();
 	apply_assignments(shell, cmd->assignments, 1);
 	if (setup_redirections(cmd->redirs, NULL) == -1)
@@ -174,11 +178,35 @@ static void	exec_child(t_shell *shell, t_cmd *cmd)
 	exit(126);
 }
 
+static int	launch_simple_job(t_shell *shell, t_cmd *cmd, pid_t pid)
+{
+	t_job	*job;
+	char	*cmd_line;
+	int		status;
+
+	setpgid(pid, pid);
+	cmd_line = cmd_to_string(cmd);
+	job = job_create(shell, cmd_line);
+	free(cmd_line);
+	if (!job)
+	{
+		waitpid(pid, &status, 0);
+		return (get_exit_status(status));
+	}
+	job->pgid = pid;
+	job_add_process(job, pid, job->cmd_line);
+	status = job_launch_foreground(shell, job);
+	if (job->status == JOB_STOPPED)
+		job->notified = 0;
+	else
+		job_remove(shell, job);
+	return (status);
+}
+
 int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 {
 	t_builtin_fn	fn;
 	pid_t			pid;
-	int				wstatus;
 
 	expand_command(shell, cmd);
 	if (!cmd->argv || !cmd->argv[0])
@@ -195,6 +223,5 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 	}
 	if (pid == 0)
 		exec_child(shell, cmd);
-	waitpid(pid, &wstatus, 0);
-	return (get_exit_status(wstatus));
+	return (launch_simple_job(shell, cmd, pid));
 }

@@ -9,18 +9,53 @@
 #include "signals.h"
 #include <string.h>
 
+static void	subshell_child(t_shell *shell, t_ast *ast)
+{
+	int	status;
+
+	setpgid(0, 0);
+	if (shell->interactive)
+		tcsetpgrp(shell->terminal_fd, getpid());
+	signals_setup_child();
+	if (setup_redirections(ast->data.group->redirs, NULL) == -1)
+		_exit(1);
+	status = executor_execute(shell, ast->data.group->child);
+	_exit(status);
+}
+
+static int	launch_subshell_job(t_shell *shell, t_ast *ast, pid_t pid)
+{
+	t_job	*job;
+	char	*cmd_line;
+	int		status;
+
+	setpgid(pid, pid);
+	cmd_line = ast_to_string(ast);
+	job = job_create(shell, cmd_line);
+	free(cmd_line);
+	if (!job)
+	{
+		waitpid(pid, &status, 0);
+		return (get_exit_status(status));
+	}
+	job->pgid = pid;
+	job_add_process(job, pid, job->cmd_line);
+	status = job_launch_foreground(shell, job);
+	if (job->status == JOB_STOPPED)
+		job->notified = 0;
+	else
+		job_remove(shell, job);
+	return (status);
+}
+
 /**
  * @brief Execute a command in a subshell.
- * @details ( cmd ) - runs in a forked child (subshell).
- * @param shell The shell instance.
- * @param ast The abstract syntax tree node.
- * @return The exit status of the command.
+ * @details ( cmd ) - runs in a forked child (subshell) with its own pgrp,
+ *          routed through the job-control machinery so Ctrl-Z works.
  */
 int	execute_subshell(t_shell *shell, t_ast *ast)
 {
 	pid_t	pid;
-	int		wstatus;
-	int		status;
 
 	pid = fork();
 	if (pid == -1)
@@ -30,15 +65,8 @@ int	execute_subshell(t_shell *shell, t_ast *ast)
 		return (1);
 	}
 	if (pid == 0)
-	{
-		signals_setup_child();
-		if (setup_redirections(ast->data.group->redirs, NULL) == -1)
-			_exit(1);
-		status = executor_execute(shell, ast->data.group->child);
-		_exit(status);
-	}
-	waitpid(pid, &wstatus, 0);
-	return (get_exit_status(wstatus));
+		subshell_child(shell, ast);
+	return (launch_subshell_job(shell, ast, pid));
 }
 
 /**

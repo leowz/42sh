@@ -22,6 +22,8 @@ static const t_builtin_entry	g_builtins[] = {
 	{"history", builtin_history},
 	{"echo", builtin_echo},
 	{"jobs", builtin_jobs},
+	{"fg", builtin_fg},
+	{"bg", builtin_bg},
 	{NULL, NULL}
 };
 
