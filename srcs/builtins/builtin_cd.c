@@ -39,7 +39,6 @@ static char	*join_paths(char *old_path, char *relative)
 
 	if (!old_path)
 		return (strdup(relative));
-
 	old_path_len = strlen(old_path);
 	if (old_path[old_path_len - 1] == '/')
 		tmp = strdup(old_path);
@@ -48,7 +47,6 @@ static char	*join_paths(char *old_path, char *relative)
 		tmp = malloc(sizeof(char) * old_path_len + 2);
 		sprintf(tmp, "%s/", old_path);
 	}
-
 	new_path = malloc(sizeof(char) * (strlen(tmp) + strlen(relative) + 1));
 	sprintf(new_path, "%s%s", tmp, relative);
 	free(tmp);
@@ -59,12 +57,30 @@ static int	change_directory(char *target, int physical)
 {
 	char	*path = NULL;
 	char	*directory;
-	char	*oldpwd;
+	char	*oldpwd = NULL;
 	char	*cwd;
 
-	directory = target;
-	if (!directory)
+	if (!target)
+	{
 		directory = getenv("HOME");
+		if (!directory)
+		{
+			fprintf(stderr, "42sh: cd: HOME not set\n");
+			return (1);
+		}
+	}
+	else if (!strcmp(target, "-"))
+	{
+		oldpwd = getenv("OLDPWD");
+		if (!oldpwd)
+		{
+			fprintf(stderr, "42sh: cd: OLDPWD not set\n");
+			return (1);
+		}
+		directory = oldpwd;
+	}
+	else
+		directory = target;
 	oldpwd = strdup(getenv("PWD") ? getenv("PWD") : "");
 	if (physical)
 		path = realpath(directory, NULL);
@@ -134,8 +150,6 @@ int	builtin_cd(struct s_shell *shell, int argc, char **argv)
 		argc--;
 		++argv;
 	}
-	if (argc == 1)
-		return (change_directory(NULL, physical));
 	if (argc > 2)
 	{
 		fprintf(stderr, "-42sh: cd: too many arguments\n");
