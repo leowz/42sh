@@ -152,7 +152,6 @@ static int	exec_builtin(t_shell *shell, t_cmd *cmd, t_builtin_fn fn)
 static void	exec_child(t_shell *shell, t_cmd *cmd)
 {
 	char	*path;
-	extern char	**environ;
 
 	signals_setup_child();
 	apply_assignments(shell, cmd->assignments, 1);
@@ -166,7 +165,7 @@ static void	exec_child(t_shell *shell, t_cmd *cmd)
 		ft_putendl_fd(": command not found", 2);
 		_exit(127);
 	}
-	execve(path, cmd->argv, environ);
+	execve(path, cmd->argv, var_get_environ(shell));
 	ft_putstr_fd("42sh: ", 2);
 	ft_putstr_fd(cmd->argv[0], 2);
 	ft_putstr_fd(": ", 2);
