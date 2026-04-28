@@ -53,6 +53,51 @@ static char	*join_paths(char *old_path, char *relative)
 	return (new_path);
 }
 
+static char	*concatenate(char *base, char *add)
+{
+	char	*concat;
+	size_t	b = base ? strlen(base) : 0;
+	size_t	a = add ? strlen(add) : 0;
+
+	concat = malloc(sizeof(char) * (b + a + 2));
+	concat = strcpy(concat, base);
+	free(base);
+	if (b > 1)
+		concat = strcat(concat, "/");
+	concat = strcat(concat, add);
+	return (concat);
+}
+
+static void	resolve_path(char **path)
+{
+	char	*resolve = *path;
+	char	*token;
+	t_list	**tokens = malloc(sizeof(t_list *));
+	t_list	*current;
+
+	*tokens = NULL;
+	token = strtok(resolve, "/");
+	while (token)
+	{
+		if (!strcmp(token, ".."))
+			ft_lstdellast(tokens, &free);
+		else if (strcmp(token, "."))
+			ft_lstappend(tokens, ft_lstnew(strdup(token)));
+		token = strtok(NULL, "/");
+	}
+	free(*path);
+	resolve = strdup("/");
+	current = *tokens;
+	while (current)
+	{
+		resolve = concatenate(resolve, (char *)current->content);
+		current = current->next;
+	}
+	ft_lstdel(tokens, &free);
+	free(tokens);
+	*path = resolve;
+}
+
 static int	change_directory(char *target, int physical)
 {
 	char	*path = NULL;
@@ -91,6 +136,7 @@ static int	change_directory(char *target, int physical)
 		else
 			path = join_paths(oldpwd, directory);
 	}
+	resolve_path(&path);
 	if (chdir(path) < 0)
 	{
 		fprintf(stderr, "-42sh: cd: %s: No such file or directory\n", path);
@@ -146,14 +192,19 @@ int	builtin_cd(struct s_shell *shell, int argc, char **argv)
 	if (*argv && **argv == '-' && strlen(*argv) > 1)
 	{
 		if ((physical = detect_option(*argv)) == -1)
-			return (2);
+		{
+			shell->last_exit_status = 2;
+			return (shell->last_exit_status);
+		}
 		argc--;
 		++argv;
 	}
 	if (argc > 2)
 	{
 		fprintf(stderr, "-42sh: cd: too many arguments\n");
-		return (2);
+		shell->last_exit_status = 2;
+		return (shell->last_exit_status);
 	}
-	return (change_directory(*argv, physical));
+	shell->last_exit_status = change_directory(*argv, physical);
+	return (shell->last_exit_status);
 }

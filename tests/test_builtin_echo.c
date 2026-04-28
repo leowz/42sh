@@ -1,6 +1,6 @@
 /**
  * @file test_builtins_echo.c
- * @brief Unit tests for the 42sh builtins
+ * @brief Unit tests for the 42sh echo builtin
  */
 
 #ifdef TEST_BUILTIN_ECHO_ENABLED
