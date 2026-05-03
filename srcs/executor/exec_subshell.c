@@ -1,6 +1,6 @@
 /**
- * @file command_search.c
- * @brief Command search functionality for 42sh.
+ * @file exec_subshell.c
+ * @brief Subshell, block, and background execution for 42sh.
  * @author wengzhang, pulgamecanica
  */
 

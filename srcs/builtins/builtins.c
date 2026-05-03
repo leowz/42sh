@@ -24,6 +24,8 @@ static const t_builtin_entry	g_builtins[] = {
 	{"jobs", builtin_jobs},
 	{"fg", builtin_fg},
 	{"bg", builtin_bg},
+	{"exit", builtin_exit},
+	{"type", builtin_type},
 	{NULL, NULL}
 };
 

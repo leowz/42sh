@@ -7,6 +7,7 @@
 #include "42sh.h"
 #include "executor.h"
 #include "job_control.h"
+#include "signals.h"
 #include <string.h>
 
 /**
@@ -84,7 +85,7 @@ static void	pipe_child(t_shell *shell, t_ast *cmd_ast,
 		exec_pipeline_external(shell, cmd_ast->data.cmd);
 	}
 	status = executor_execute(shell, cmd_ast);
-	exit(status);
+	_exit(status);
 }
 
 void	exec_pipeline_external(t_shell *shell, t_cmd *cmd)
@@ -104,7 +105,8 @@ void	exec_pipeline_external(t_shell *shell, t_cmd *cmd)
 	ft_putstr_fd(cmd->argv[0], 2);
 	ft_putstr_fd(": ", 2);
 	ft_putendl_fd(strerror(errno), 2);
-	exit(126);
+	free(path);
+	_exit(126);
 }
 
 static int	open_pipes(int pipes[][2], int n)

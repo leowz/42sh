@@ -6,6 +6,7 @@
 
 #include "42sh.h"
 #include "executor.h"
+#include "signals.h"
 #include <string.h>
 
 /**
@@ -175,7 +176,7 @@ static void	exec_child(t_shell *shell, t_cmd *cmd)
 	ft_putstr_fd(": ", 2);
 	ft_putendl_fd(strerror(errno), 2);
 	free(path);
-	exit(126);
+	_exit(126);
 }
 
 static int	launch_simple_job(t_shell *shell, t_cmd *cmd, pid_t pid)

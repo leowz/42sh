@@ -1,6 +1,6 @@
 /**
- * @file command_search.c
- * @brief Command search functionality for 42sh.
+ * @file redirections.c
+ * @brief Redirection setup and restore for 42sh.
  * @author wengzhang, pulgamecanica
  */
 
@@ -75,20 +75,31 @@ static int	apply_one_redir(t_redir *redir)
 	src_fd = redir_get_fd(redir);
 	if (redir->type == TOK_REDIR_DUP_IN || redir->type == TOK_REDIR_DUP_OUT)
 		return (apply_dup_redir(redir, src_fd));
-	if (redir->type == TOK_HEREDOC || redir->type == TOK_HEREDOC_STRIP)
+	if ((redir->type == TOK_HEREDOC
+		|| redir->type == TOK_HEREDOC_STRIP)
+		&& redir->heredoc_fd != -1)
 	{
-		target_fd = setup_heredoc(redir);
-		if (target_fd == -1)
+		if (dup2(redir->heredoc_fd, src_fd) < 0)
+		{
+			close(redir->heredoc_fd);
+			redir->heredoc_fd = -1;
 			return (-1);
-		dup2(target_fd, src_fd);
-		close(target_fd);
+		}
+		close(redir->heredoc_fd);
+		redir->heredoc_fd = -1;
 		return (0);
 	}
 	target_fd = redir_open_file(redir);
 	if (target_fd == -1)
 		return (-1);
-	dup2(target_fd, src_fd);
-	close(target_fd);
+	if (dup2(target_fd, src_fd) < 0)
+	{
+		if (target_fd >= 0)
+			close(target_fd);
+		return (-1);
+	}
+	if (target_fd >= 0)
+		close(target_fd);
 	return (0);
 }
 

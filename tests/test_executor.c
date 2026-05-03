@@ -178,50 +178,55 @@ static void	test_find_command(void)
 /* ================================================================
  * 3. Heredoc
  * ================================================================ */
-
-static void	test_heredoc(void)
-{
-	t_redir	redir;
-	int		fd;
-	char	buf[256];
-	ssize_t	n;
-
-	/* Normal heredoc */
-	memset(&redir, 0, sizeof(redir));
-	redir.type = TOK_HEREDOC;
-	redir.fd = -1;
-	redir.heredoc_content = strdup("hello world\nline 2\n");
-	fd = setup_heredoc(&redir);
-	MU_ASSERT("heredoc fd >= 0", fd >= 0);
-	n = read(fd, buf, sizeof(buf) - 1);
-	buf[n] = '\0';
-	MU_ASSERT_STR("heredoc content", "hello world\nline 2\n", buf);
-	close(fd);
-	free(redir.heredoc_content);
-
-	/* Empty heredoc */
-	memset(&redir, 0, sizeof(redir));
-	redir.type = TOK_HEREDOC;
-	redir.fd = -1;
-	redir.heredoc_content = strdup("");
-	fd = setup_heredoc(&redir);
-	MU_ASSERT("empty heredoc fd >= 0", fd >= 0);
-	n = read(fd, buf, sizeof(buf) - 1);
-	MU_ASSERT_INT(0, (int)n);
-	close(fd);
-	free(redir.heredoc_content);
-
-	/* NULL content heredoc */
-	memset(&redir, 0, sizeof(redir));
-	redir.type = TOK_HEREDOC;
-	redir.fd = -1;
-	redir.heredoc_content = NULL;
-	fd = setup_heredoc(&redir);
-	MU_ASSERT("null heredoc fd >= 0", fd >= 0);
-	n = read(fd, buf, sizeof(buf) - 1);
-	MU_ASSERT_INT(0, (int)n);
-	close(fd);
-}
+/*
+ * No longer valable since the reading comes directly from the pipe
+ * with bypassing the heredoc_content buffer.
+ *
+ * The corresponding tests are present in the test_parser.c file
+ */
+//static void	test_heredoc(void)
+//{
+//	t_redir	redir;
+//	int		fd;
+//	char	buf[256];
+//	ssize_t	n;
+//
+//	/* Normal heredoc */
+//	memset(&redir, 0, sizeof(redir));
+//	redir.type = TOK_HEREDOC;
+//	redir.fd = -1;
+//	redir.heredoc_content = strdup("hello world\nline 2\n");
+//	fd = setup_heredoc(&redir);
+//	MU_ASSERT("heredoc fd >= 0", fd >= 0);
+//	n = read(fd, buf, sizeof(buf) - 1);
+//	buf[n] = '\0';
+//	MU_ASSERT_STR("heredoc content", "hello world\nline 2\n", buf);
+//	close(fd);
+//	free(redir.heredoc_content);
+//
+//	/* Empty heredoc */
+//	memset(&redir, 0, sizeof(redir));
+//	redir.type = TOK_HEREDOC;
+//	redir.fd = -1;
+//	redir.heredoc_content = strdup("");
+//	fd = setup_heredoc(&redir);
+//	MU_ASSERT("empty heredoc fd >= 0", fd >= 0);
+//	n = read(fd, buf, sizeof(buf) - 1);
+//	MU_ASSERT_INT(0, (int)n);
+//	close(fd);
+//	free(redir.heredoc_content);
+//
+//	/* NULL content heredoc */
+//	memset(&redir, 0, sizeof(redir));
+//	redir.type = TOK_HEREDOC;
+//	redir.fd = -1;
+//	redir.heredoc_content = NULL;
+//	fd = setup_heredoc(&redir);
+//	MU_ASSERT("null heredoc fd >= 0", fd >= 0);
+//	n = read(fd, buf, sizeof(buf) - 1);
+//	MU_ASSERT_INT(0, (int)n);
+//	close(fd);
+//}
 
 /* ================================================================
  * 4. Redirections
@@ -330,6 +335,23 @@ static void	test_redirections_input(void)
 	free(redirs);
 }
 
+static int	write_to_pipe(char *content)
+{
+	int		pipefd[2];
+
+
+	pipe(pipefd);
+	write(pipefd[1], content, strlen(content));
+	close(pipefd[1]);
+
+	int saved_stdin = dup(STDIN_FILENO);
+	dup2(pipefd[0], STDIN_FILENO);
+
+	dup2(saved_stdin, STDIN_FILENO);
+	close(saved_stdin);
+	return (pipefd[0]);
+}
+
 static void	test_redirections_heredoc_in_list(void)
 {
 	t_redir	redir;
@@ -342,14 +364,14 @@ static void	test_redirections_heredoc_in_list(void)
 	memset(&redir, 0, sizeof(redir));
 	redir.type = TOK_HEREDOC;
 	redir.fd = -1;
-	redir.heredoc_content = strdup("heredoc line\n");
+	redir.heredoc_fd = write_to_pipe("heredoc line\n");
 	redirs = ft_lstnew(&redir);
 	MU_ASSERT_INT(0, setup_redirections(redirs, saved_fds));
 	n = read(0, buf, sizeof(buf) - 1);
 	buf[n] = '\0';
 	MU_ASSERT_STR("heredoc via redirs", "heredoc line\n", buf);
 	restore_redirections(saved_fds);
-	free(redir.heredoc_content);
+	close(redir.heredoc_fd);
 	free(redirs);
 }
 
@@ -1394,7 +1416,7 @@ static void	test_pipeline_with_heredoc(void)
 		t_redir	*redir = calloc(1, sizeof(t_redir));
 		redir->type = TOK_HEREDOC;
 		redir->fd = -1;
-		redir->heredoc_content = strdup("from_heredoc\n");
+		redir->heredoc_fd = write_to_pipe("from_heredoc\n");
 		left->data.cmd->redirs = ft_lstnew(redir);
 	}
 
@@ -1431,7 +1453,7 @@ static void	test_pipeline_with_heredoc(void)
 	/* Cleanup left */
 	{
 		t_redir *r = REDIR(left->data.cmd->redirs);
-		free(r->heredoc_content);
+		close(r->heredoc_fd);
 		free(r);
 		free(left->data.cmd->redirs);
 	}
@@ -1513,7 +1535,7 @@ void	test_executor_suite(void)
 	/* test_find_command(); */
 
 	/* 3. Heredoc */
-	test_heredoc();
+	//test_heredoc();
 
 	/* 4. Redirections */
 	test_redirections_output();
