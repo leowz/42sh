@@ -919,7 +919,9 @@ static void	test_execute_pipeline_three(void)
 	cmd1->data.cmd = calloc(1, sizeof(t_cmd));
 	cmd1->data.cmd->argv = calloc(3, sizeof(char *));
 	cmd1->data.cmd->argv[0] = strdup("/usr/bin/printf");
-	cmd1->data.cmd->argv[1] = strdup("c\nb\na\n");
+	/* Quote the multi-line argument so the (now-real) expander treats
+	 * it as one field instead of field-splitting on the literal \n. */
+	cmd1->data.cmd->argv[1] = strdup("\"c\nb\na\n\"");
 	cmd1->data.cmd->argc = 2;
 
 	cmd2 = calloc(1, sizeof(t_ast));
