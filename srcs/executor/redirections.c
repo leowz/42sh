@@ -1,6 +1,6 @@
 /**
- * @file command_search.c
- * @brief Command search functionality for 42sh.
+ * @file redirections.c
+ * @brief Redirection setup and restore for 42sh.
  * @author wengzhang, pulgamecanica
  */
 

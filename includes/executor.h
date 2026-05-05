@@ -52,13 +52,6 @@ int		setup_redirections(t_list *redirs, int saved_fds[3]);
 void	restore_redirections(int saved_fds[3]);
 
 /**
- * @brief Heredoc setup
- * @param redir Pointer to the redirection node
- * @return Exit status code
- */
-int		setup_heredoc(t_redir *redir);
-
-/**
  * @brief Command search (PATH)
  * @param shell Pointer to the central shell state
  * @param name Name of the command to search for

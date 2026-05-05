@@ -27,9 +27,10 @@ static void	sigint_handler_interactive(int sig)
  * @brief Set up signal handlers for interactive mode (at the prompt).
  *
  * @details SIGINT  - custom handler: newline + redisplay prompt (like bash)
- * @details SIGQUIT - ignored (Ctrl-\ does nothing at prompt) (for now... I think)
- * @details SIGTSTP - ignored for now (Ctrl-Z does nothing at prompt, will handle
- *           fg/bg job control later)
+ * @details SIGQUIT - ignored (Ctrl-\ does nothing at prompt)
+ * @details SIGTSTP - ignored (Ctrl-Z at prompt is a no-op; children handle it)
+ * @details SIGTTIN - ignored (shell never blocks reading from a bg tty)
+ * @details SIGTTOU - ignored (tcsetpgrp/tcsetattr from shell must not self-stop)
  */
 void	signals_setup_interactive(void)
 {
@@ -43,4 +44,6 @@ void	signals_setup_interactive(void)
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGTSTP, &sa, NULL);
+	sigaction(SIGTTIN, &sa, NULL);
+	sigaction(SIGTTOU, &sa, NULL);
 }

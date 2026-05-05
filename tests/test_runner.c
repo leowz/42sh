@@ -34,6 +34,10 @@ void	test_btree_suite(void);
 void	test_parser_suite(void);
 void	test_builtin_echo_suite(void);
 void	test_builtin_cd_suite(void);
+void	test_job_control_suite(void);
+void	test_builtin_exit_suite(void);
+void	test_builtin_type_suite(void);
+void	test_heredoc_bugs_suite(void);
 
 int	main(void)
 {
@@ -48,6 +52,10 @@ int	main(void)
 	MU_RUN(test_parser_suite);
 	MU_RUN(test_builtin_echo_suite);
 	MU_RUN(test_builtin_cd_suite);
+	MU_RUN(test_job_control_suite);
+	MU_RUN(test_builtin_exit_suite);
+	MU_RUN(test_builtin_type_suite);
+	MU_RUN(test_heredoc_bugs_suite);
 
 	MU_SUMMARY();
 }

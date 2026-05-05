@@ -108,7 +108,11 @@ static int	fork_heredoc(t_redir *redir)
 	fcntl(pipefd[0], F_SETFD, FD_CLOEXEC);
 	pid = fork();
 	if (pid == -1)
+	{
+		close(pipefd[0]);
+		close(pipefd[1]);
 		return (-1);
+	}
 	if (pid == 0) //CHILD PROCESS
 	{
 		signal(SIGINT, SIG_DFL);

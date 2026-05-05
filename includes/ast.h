@@ -104,6 +104,8 @@ typedef struct s_ast
 /**
  * @brief AST construction helpers
  */
+char		*ast_to_string(t_ast *ast);
+char		*cmd_to_string(t_cmd *cmd);
 t_ast		*ast_new_command(t_cmd *cmd);
 t_ast		*ast_new_binary(t_node_type type, t_ast *left, t_ast *right);
 t_ast		*ast_new_group(t_node_type type, t_ast *child, t_list *redirs);

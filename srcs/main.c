@@ -15,6 +15,7 @@ static int	shell_init(t_shell *shell, char **envp)
 	{
 		history_init(shell);
 		signals_setup_interactive();
+		job_control_init(shell);
 	}
 	(void)envp;
 	// init a 42shrc file here if it exists
@@ -30,6 +31,7 @@ static void	shell_cleanup(t_shell *shell)
 		free(shell->history_file);
 		shell->history_file = NULL;
 	}
+	job_control_cleanup(shell);
 }
 
 static char	*read_line(t_shell *shell)
@@ -144,6 +146,11 @@ int	main(int argc, char *argv[], char *envp[])
 	while (shell.running)
 	{
 		signals_check(&shell);
+		if (shell.interactive)
+		{
+			job_update_statuses(&shell);
+			job_notify(&shell);
+		}
 		raw_line = read_line(&shell);
 		if (!raw_line)
 		{
