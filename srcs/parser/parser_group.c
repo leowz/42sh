@@ -36,7 +36,7 @@ t_ast	*ast_new_group(t_node_type type, t_ast *child, t_list *redirs)
 /**
  * @param p struct s_parser pointer
  * @param child struct s_ast pointer
- * @paran node enum e_node_type
+ * @param node enum e_node_type
  * @brief factorization of the end of parse_subshell and parse_block
  * @return pointer on struct s_ast
  */

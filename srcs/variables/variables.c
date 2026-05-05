@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   variables.c                                      :+:      :+:    :+:   */
+/*   variables.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: wengzhang <marvin@42.fr>                   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/06 00:00:00 by wengzhang         #+#    #+#             */
-/*   Updated: 2026/04/06 00:00:00 by wengzhang        ###   ########.fr       */
+/*   Updated: 2026/04/29 21:40:49 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,9 @@ int	var_export(t_shell *shell, const char *name)
 char	**var_get_environ(t_shell *shell)
 {
 	(void)shell;
-	return (NULL);
+	extern char	**environ; //only for tests, to delete
+	return (environ);
+	//return (NULL);
 }
 
 void	var_init_from_environ(t_shell *shell, char **envp)

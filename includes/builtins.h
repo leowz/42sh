@@ -29,6 +29,7 @@ typedef int	(*t_builtin_fn)(struct s_shell *shell, int argc, char **argv);
  * @return Pointer to the builtin function, or NULL if not found
  */
 t_builtin_fn	builtin_get(const char *name);
+
 int				builtin_is_builtin(const char*name);
 int				builtin_echo(struct s_shell *shell, int argc, char **argv);
 int				builtin_cd(struct s_shell *shell, int argc, char **argv);
