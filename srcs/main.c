@@ -11,16 +11,51 @@ static int	shell_init(t_shell *shell, char **envp)
 	shell->terminal_fd = STDIN_FILENO;
 	shell->shell_pgid = getpid();
 	shell->env_dirty = 1;
+	var_init_from_environ(shell, envp);
 	if (shell->interactive)
 	{
 		history_init(shell);
 		signals_setup_interactive();
 		job_control_init(shell);
 	}
-	(void)envp;
 	// init a 42shrc file here if it exists
-	// init variables from envp here
 	return (0);
+}
+
+static void	free_variables(t_shell *shell)
+{
+	t_list	*node;
+	t_list	*next;
+	t_var	*var;
+
+	node = shell->variables;
+	while (node)
+	{
+		next = node->next;
+		var = LST_VAR(node);
+		if (var)
+		{
+			free(var->name);
+			free(var->value);
+			free(var);
+		}
+		free(node);
+		node = next;
+	}
+	shell->variables = NULL;
+}
+
+static void	free_env_cache(t_shell *shell)
+{
+	int	i;
+
+	if (!shell->env)
+		return ;
+	i = 0;
+	while (shell->env[i])
+		free(shell->env[i++]);
+	free(shell->env);
+	shell->env = NULL;
 }
 
 static void	shell_cleanup(t_shell *shell)
@@ -32,6 +67,8 @@ static void	shell_cleanup(t_shell *shell)
 		shell->history_file = NULL;
 	}
 	job_control_cleanup(shell);
+	free_variables(shell);
+	free_env_cache(shell);
 }
 
 static char	*read_line(t_shell *shell)

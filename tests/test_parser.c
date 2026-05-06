@@ -876,6 +876,401 @@ static void test_assignment_before_subshell(void)
 	ast_free(ast);
 }
 
+/*
+ * Helpers used by the assignment tests below.  They keep the assertions
+ * NULL-safe: every deref is preceded by a guard so a failing test reports
+ * the missing field instead of segfaulting and aborting the whole suite.
+ */
+static int	assert_command_node(t_ast *ast)
+{
+	MU_ASSERT("ast not NULL", ast != NULL);
+	if (!ast)
+		return (0);
+	MU_ASSERT_INT(NODE_COMMAND, ast->type);
+	if (ast->type != NODE_COMMAND)
+		return (0);
+	MU_ASSERT("cmd not NULL", ast->data.cmd != NULL);
+	if (!ast->data.cmd)
+		return (0);
+	return (1);
+}
+
+static int	assert_argv_at(t_ast *ast, int i, const char *expected, const char *func_name)
+{
+	char	label[64];
+
+	if (!ast->data.cmd->argv)
+	{
+		MU_ASSERT("argv not NULL", 0);
+		return (0);
+	}
+	for (int k = 0; k <= i; k++)
+	{
+		if (!ast->data.cmd->argv[k])
+		{
+			snprintf(label, sizeof(label), "\033[1;36m[%s]\033[0m argv[%d] not NULL", func_name, k);
+			MU_ASSERT(label, 0);
+			return (0);
+		}
+	}
+	snprintf(label, sizeof(label), "\033[1;36m[%s]\033[0m argv[%d]", func_name, i);
+	MU_ASSERT_STR(label, expected, ast->data.cmd->argv[i]);
+	return (1);
+}
+
+static int	assert_assignment_at(t_list *a, int i, const char *expected, const char *func_name)
+{
+	char	label[64];
+
+	for (int k = 0; k < i; k++)
+	{
+		if (!a)
+		{
+			snprintf(label, sizeof(label), "\033[1;36m[%s]\033[0m assignments[%d] not NULL", func_name, k);
+			MU_ASSERT(label, 0);
+			return (0);
+		}
+		a = a->next;
+	}
+	if (!a)
+	{
+		snprintf(label, sizeof(label), "\033[1;36m[%s]\033[0m assignments[%d] not NULL", func_name, i);
+		MU_ASSERT(label, 0);
+		return (0);
+	}
+	snprintf(label, sizeof(label), "\033[1;36m[%s]\033[0m assignments[%d]", func_name, i);
+	MU_ASSERT_STR(label, expected, (char *)a->content);
+	return (1);
+}
+
+static void test_assignment_underscore_name(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("_VAR=value cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_underscore_name");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "_VAR=value", "test_assignment_underscore_name");
+	ast_free(ast);
+}
+
+static void test_assignment_underscore_inside_name(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("MY_VAR=val cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_underscore_inside_name");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "MY_VAR=val", "test_assignment_underscore_inside_name");
+	ast_free(ast);
+}
+
+static void test_assignment_alnum_value(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR1=val123 cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_alnum_value");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR1=val123", "test_assignment_alnum_value");
+	ast_free(ast);
+}
+
+static void test_assignment_value_with_extra_equals(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR=a=b=c cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_value_with_extra_equals");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR=a=b=c", "test_assignment_value_with_extra_equals");
+	ast_free(ast);
+}
+
+static void test_assignment_double_quoted(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR=\"value\" cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_double_quoted");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR=\"value\"", "test_assignment_double_quoted");
+	ast_free(ast);
+}
+
+static void test_assignment_single_quoted(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR='value' cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_single_quoted");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR='value'", "test_assignment_single_quoted");
+	ast_free(ast);
+}
+
+static void test_assignment_double_quoted_with_space(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("VAR=\"hello world\" cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_double_quoted_with_space");
+	assert_assignment_at(ast->data.cmd->assignments, 0,
+			"VAR=\"hello world\"", "test_assignment_double_quoted_with_space");
+	ast_free(ast);
+}
+
+static void test_assignment_double_quoted_empty(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR=\"\" cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd",  "test_assignment_double_quoted_empty");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR=\"\"", "test_assignment_double_quoted_empty");
+	ast_free(ast);
+}
+
+static void test_assignment_double_quoted_with_hash_and_equals(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("HELLO=\"#WORLD=\" cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_double_quoted_with_hash_and_equals");
+	assert_assignment_at(ast->data.cmd->assignments, 0,
+			"HELLO=\"#WORLD=\"", "test_assignment_double_quoted_with_hash_and_equals");
+	ast_free(ast);
+}
+
+static void test_assignment_dollar_value(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR=$HOME cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_dollar_value");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR=$HOME", "test_assignment_dollar_value");
+	ast_free(ast);
+}
+
+static void test_assignment_double_quoted_dollar(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("VAR=\"$HOME/bin\" cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_double_quoted_dollar");
+	assert_assignment_at(ast->data.cmd->assignments, 0,
+			"VAR=\"$HOME/bin\"", "test_assignment_double_quoted_dollar");
+	ast_free(ast);
+}
+
+static void test_assignment_mixed_quoted_and_bare(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("A=1 B=\"2 3\" C='x' cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_mixed_quoted_and_bare");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "A=1", "test_assignment_mixed_quoted_and_bare");
+	assert_assignment_at(ast->data.cmd->assignments, 1, "B=\"2 3\"", "test_assignment_mixed_quoted_and_bare");
+	assert_assignment_at(ast->data.cmd->assignments, 2, "C='x'", "test_assignment_mixed_quoted_and_bare");
+	ast_free(ast);
+}
+
+static void test_assignment_many_bare_then_args(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("K1=v1 K2=v2 K3=v3 cmd arg1 arg2"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_many_bare_then_args");
+	assert_argv_at(ast, 1, "arg1", "test_assignment_many_bare_then_args");
+	assert_argv_at(ast, 2, "arg2", "test_assignment_many_bare_then_args");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "K1=v1", "test_assignment_many_bare_then_args");
+	assert_assignment_at(ast->data.cmd->assignments, 1, "K2=v2", "test_assignment_many_bare_then_args");
+	assert_assignment_at(ast->data.cmd->assignments, 2, "K3=v3", "test_assignment_many_bare_then_args");
+
+	t_list *a = ast->data.cmd->assignments;
+	int n = 0;
+	while (a)
+	{
+		n++;
+		a = a->next;
+	}
+	MU_ASSERT_INT(3, n);
+	ast_free(ast);
+}
+
+static void test_assignment_after_argv_is_arg(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("A=1 cmd B=2 C=3"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd", "test_assignment_after_argv_is_arg");
+	assert_argv_at(ast, 1, "B=2", "test_assignment_after_argv_is_arg");
+	assert_argv_at(ast, 2, "C=3", "test_assignment_after_argv_is_arg");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "A=1",  "test_assignment_after_argv_is_arg");
+
+	if (ast->data.cmd->assignments)
+		MU_ASSERT("only one assignment",
+				ast->data.cmd->assignments->next == NULL);
+	ast_free(ast);
+}
+
+static void test_assignment_only_empty_value(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("VAR="), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	MU_ASSERT("no argv or empty", ast->data.cmd->argv == NULL
+			|| ast->data.cmd->argv[0] == NULL);
+	assert_assignment_at(ast->data.cmd->assignments, 0, "VAR=", "test_assignment_only_empty_value");
+	ast_free(ast);
+}
+
+static void test_assignment_only_multiple(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("A=1 B=2 C=3"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	MU_ASSERT("no argv or empty", ast->data.cmd->argv == NULL
+			|| ast->data.cmd->argv[0] == NULL);
+	assert_assignment_at(ast->data.cmd->assignments, 0, "A=1", "test_assignment_only_multiple");
+	assert_assignment_at(ast->data.cmd->assignments, 1, "B=2", "test_assignment_only_multiple");
+	assert_assignment_at(ast->data.cmd->assignments, 2, "C=3", "test_assignment_only_multiple");
+	ast_free(ast);
+}
+
+static void test_assignment_leading_equals_falls_to_argv(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("=value cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	MU_ASSERT("no assignments", ast->data.cmd->assignments == NULL);
+	assert_argv_at(ast, 0, "=value", "test_assignment_leading_equals_falls_to_argv");
+	assert_argv_at(ast, 1, "cmd", "test_assignment_leading_equals_falls_to_argv");
+	ast_free(ast);
+}
+
+static void test_assignment_dash_in_name_falls_to_argv(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(lexer_tokenize("MY-VAR=val cmd"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	MU_ASSERT("no assignments", ast->data.cmd->assignments == NULL);
+	assert_argv_at(ast, 0, "MY-VAR=val", "test_assignment_dash_in_name_falls_to_argv");
+	assert_argv_at(ast, 1, "cmd", "test_assignment_dash_in_name_falls_to_argv");
+	ast_free(ast);
+}
+
+static void test_assignment_pipeline_quoted_both_sides(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("A=\"1 2\" cmd1 | B='x y' cmd2 arg"), &shell);
+
+	MU_ASSERT("ast not NULL", ast != NULL);
+	if (!ast)
+		return;
+	MU_ASSERT_INT(NODE_PIPE, ast->type);
+	if (ast->type != NODE_PIPE)
+		return ((void)ast_free(ast));
+	if (!ast->data.binary || !ast->data.binary->left
+		|| !ast->data.binary->right)
+	{
+		MU_ASSERT("pipe children not NULL", 0);
+		ast_free(ast);
+		return ;
+	}
+
+	t_ast *left = ast->data.binary->left;
+	t_ast *right = ast->data.binary->right;
+
+	if (assert_command_node(left))
+	{
+		assert_argv_at(left, 0, "cmd1", "test_assignment_pipeline_quoted_both_sides");
+		assert_assignment_at(left->data.cmd->assignments, 0, "A=\"1 2\"", "test_assignment_pipeline_quoted_both_sides");
+	}
+	if (assert_command_node(right))
+	{
+		assert_argv_at(right, 0, "cmd2", "test_assignment_pipeline_quoted_both_sides");
+		assert_argv_at(right, 1, "arg", "test_assignment_pipeline_quoted_both_sides");
+		assert_assignment_at(right->data.cmd->assignments, 0, "B='x y'", "test_assignment_pipeline_quoted_both_sides");
+	}
+	ast_free(ast);
+}
+
+static void test_assignment_with_two_redirs(void)
+{
+	t_shell	shell;
+	t_ast	*ast = parser_parse(
+			lexer_tokenize("A=1 B=\"2 3\" cmd < in > out"), &shell);
+
+	if (!assert_command_node(ast))
+		return ((void)ast_free(ast));
+	assert_argv_at(ast, 0, "cmd",  "test_assignment_with_two_redirs");
+	assert_assignment_at(ast->data.cmd->assignments, 0, "A=1", "test_assignment_with_two_redirs");
+	assert_assignment_at(ast->data.cmd->assignments, 1, "B=\"2 3\"", "test_assignment_with_two_redirs");
+
+	t_list *r = ast->data.cmd->redirs;
+	if (!r)
+	{
+		MU_ASSERT("redirs not NULL", 0);
+		ast_free(ast);
+		return ;
+	}
+	t_redir *r0 = (t_redir *)r->content;
+	if (r0)
+	{
+		MU_ASSERT_INT(TOK_REDIR_IN, r0->type);
+		MU_ASSERT_STR("in target", "in", r0->target);
+	}
+	if (!r->next)
+	{
+		MU_ASSERT("redirs[1] not NULL", 0);
+		ast_free(ast);
+		return ;
+	}
+	t_redir *r1 = (t_redir *)r->next->content;
+	if (r1)
+	{
+		MU_ASSERT_INT(TOK_REDIR_OUT, r1->type);
+		MU_ASSERT_STR("out target", "out", r1->target);
+	}
+	ast_free(ast);
+}
+
 void	test_parser_suite(void)
 {
 	test_simple_command();
@@ -928,4 +1323,24 @@ void	test_parser_suite(void)
 	test_empty_value_assignment();
 	test_plus_equals_not_assignment();
 	test_assignment_before_subshell();
+	test_assignment_underscore_name();
+	test_assignment_underscore_inside_name();
+	test_assignment_alnum_value();
+	test_assignment_value_with_extra_equals();
+	test_assignment_double_quoted();
+	test_assignment_single_quoted();
+	test_assignment_double_quoted_with_space();
+	test_assignment_double_quoted_empty();
+	test_assignment_double_quoted_with_hash_and_equals();
+	test_assignment_dollar_value();
+	test_assignment_double_quoted_dollar();
+	test_assignment_mixed_quoted_and_bare();
+	test_assignment_many_bare_then_args();
+	test_assignment_after_argv_is_arg();
+	test_assignment_only_empty_value();
+	test_assignment_only_multiple();
+	test_assignment_leading_equals_falls_to_argv();
+	test_assignment_dash_in_name_falls_to_argv();
+	test_assignment_pipeline_quoted_both_sides();
+	test_assignment_with_two_redirs();
 }

@@ -104,6 +104,15 @@ static void	ast_display_node(t_ast *node, int depth)
 			printf("\033[1;32m%s\033[0m", node->data.cmd->argv[i]);
 			i++;
 		}
+		printf("]\tassignments=[");
+		i = 0;
+		for (t_list *it = node->data.cmd->assignments; it != NULL; i++)
+		{
+			if (i > 0)
+				printf(", ");
+			printf("\033[1;32m%s\033[0m", (char*)TOK(it));
+			it = it->next;
+		}
 		printf("]\n");
 		display_redirs(node->data.cmd->redirs, depth + 1);
 	}
