@@ -205,20 +205,12 @@ static int	change_directory(char *target, int argc, int physical)
 	char	*oldpwd = NULL;
 	char	*cwd;
 
-	if (!target)
+	if (!target || argc == 0)
 	{
-		if (argc == 0)
+		directory = getenv("HOME");
+		if (!directory)
 		{
-			directory = getenv("HOME");
-			if (!directory)
-			{
-				fprintf(stderr, "42sh: cd: HOME not set\n");
-				return (1);
-			}
-		}
-		else
-		{
-			fprintf(stderr, "42sh : cd: null directory\n");
+			fprintf(stderr, "42sh: cd: HOME not set\n");
 			return (1);
 		}
 	}

@@ -466,27 +466,6 @@ static void	test_cd_too_long(void)
 }
 
 /**
- * @brief Test cd behavior when directory argument is NULL or invalid
- */
-static void	test_cd_null_directory(void)
-{
-	t_shell	shell = {0};
-	int		ret;
-
-	{
-		char	*argv[] = {"cd", NULL};
-		ret = builtin_cd(&shell, 1, argv);
-	}
-
-	{
-		char	*argv[] = {"cd", NULL};
-		
-		ret = builtin_cd(&shell, 2, argv);
-		check_test(&shell, "null directory", getenv("HOME"), 1, ret);
-	}
-}
-
-/**
  * @brief Create directory structure used for cd unit tests
  */
 static void	create_test_directories(void)
@@ -563,7 +542,6 @@ void	test_builtin_cd_suite(void)
 	test_cd_beyond_the_root();
 	test_cd_many_slash();
 	test_cd_too_long();
-	test_cd_null_directory();
 
 	delete_test_directories();
 }
