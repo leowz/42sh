@@ -9,7 +9,7 @@ You must implement **6 features** from this list to pass. Choose based on:
 
 ## Important: Mandatory vs Modular Quote Handling
 
-**Basic quote handling is MANDATORY** — the lexer must preserve quotes in token values, and the expander must respect quote context (single quotes = literal, double quotes = expand `$` but no splitting/globbing). This is part of the core expansion logic.
+**Basic quote handling is MANDATORY** - the lexer must preserve quotes in token values, and the expander must respect quote context (single quotes = literal, double quotes = expand `$` but no splitting/globbing). This is part of the core expansion logic.
 
 The **Inhibitors modular feature** goes beyond this basic handling to cover:
 - Backslash escaping (`\` before special characters)
@@ -183,8 +183,8 @@ echo ${PATH##*:}         # last component of PATH
 ### 5. Control Groups: `()` and `{}`
 
 **What it does:**
-- `( commands )` — Run in subshell (separate environment, changes don't affect parent)
-- `{ commands; }` — Run in current shell (grouping only)
+- `( commands )` - Run in subshell (separate environment, changes don't affect parent)
+- `{ commands; }` - Run in current shell (grouping only)
 - Both can have redirections applied to the whole group
 
 **Implementation:**
@@ -265,8 +265,8 @@ x=5; echo $((x * 2))     # 10
 ### 8. Process Substitution `<()` and `>()`
 
 **What it does:**
-- `<(command)` — Command output available as a file path (via /dev/fd/N)
-- `>(command)` — Write to a file path that pipes into command
+- `<(command)` - Command output available as a file path (via /dev/fd/N)
+- `>(command)` - Write to a file path that pipes into command
 
 **Implementation:**
 - Create pipe
@@ -292,7 +292,7 @@ tee >(gzip > file.gz) < input
 - fc builtin (list, re-execute, edit)
 - Ctrl-R reverse search (optional bonus)
 
-**History expansion happens BEFORE tokenization** — it's a pre-processing step on the raw input line.
+**History expansion happens BEFORE tokenization** - it's a pre-processing step on the raw input line.
 
 ```
 History expansion:
@@ -347,8 +347,8 @@ History expansion:
 - Prevent infinite recursion (don't re-expand the same alias)
 
 **Builtins:**
-- `alias` — no args: print all. `alias name=value`: set.
-- `unalias name` — remove. `unalias -a` — remove all.
+- `alias` - no args: print all. `alias name=value`: set.
+- `unalias name` - remove. `unalias -a` - remove all.
 
 **Examples:**
 ```bash
@@ -417,4 +417,4 @@ test "$a" = "$b"
                     Arithmetic
 ```
 
-**Recommendation:** Implement inhibitors first — they affect the behavior of most other features.
+**Recommendation:** Implement inhibitors first - they affect the behavior of most other features.

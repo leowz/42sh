@@ -8,17 +8,6 @@
 #include "builtins.h"
 #include "executor.h"
 
-/**
- * @brief Display the type of each argument.
- * @details For each name:
- *          - If it's a builtin: "name is a shell builtin"
- *          - If found in PATH: "name is /path/to/name"
- *          - Otherwise: "42sh: type: name: not found" (exit 1)
- * @param shell The shell instance.
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return 0 if all found, 1 if any not found.
- */
 int	builtin_type(struct s_shell *shell, int argc, char **argv)
 {
 	int		i;
@@ -41,9 +30,8 @@ int	builtin_type(struct s_shell *shell, int argc, char **argv)
 			}
 			else
 			{
-				ft_putstr_fd("42sh: type: ", 2);
 				ft_putstr_fd(argv[i], 2);
-				ft_putendl_fd(": not found", 2);
+				ft_putendl_fd(" not found", 2);
 				status = 1;
 			}
 		}

@@ -54,8 +54,6 @@ char	**expand_word_to_fields(t_shell *shell, const char *word)
 	return (fields);
 }
 
-/* ===== expand_command helpers ========================================== */
-
 /**
  * @brief Free a NULL-terminated argv array (each string + the array).
  */

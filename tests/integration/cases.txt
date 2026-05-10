@@ -1,0 +1,42 @@
+# Integration test cases: one shell command per line.
+# Empty lines and lines starting with `#` are skipped.
+# Each line is run as:  ./42sh -c "<line>"   vs   bash --posix -c "<line>"
+# stdout, stderr, and exit status must match. Each line is also re-run
+# under valgrind against ./42sh only (skipped with VALGRIND=0).
+
+# --- echo / basic words --------------------------------------------------
+echo hello
+echo hello world
+echo
+echo a b   c
+
+# --- exit status ---------------------------------------------------------
+true
+false
+exit 0
+exit 7
+exit 42
+
+# --- sequential lists ----------------------------------------------------
+echo a; echo b
+true; false; true
+false; echo after
+
+# --- and / or chains -----------------------------------------------------
+true && echo yes
+false && echo nope
+false || echo no
+true || echo nope
+true && echo a && echo b
+false || echo a || echo b
+
+# --- pipelines -----------------------------------------------------------
+echo hi | cat
+echo one | cat | cat
+printf '%s\n' a b c | cat
+echo abc | tr a-z A-Z
+
+# --- subshells / groups --------------------------------------------------
+(echo inside)
+(true && echo ok)
+(false); echo $?

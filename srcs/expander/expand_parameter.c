@@ -9,7 +9,7 @@
  * names matching the identifier grammar [A-Za-z_][A-Za-z0-9_]*.
  *
  * Anything that doesn't match a recognised form (e.g. `$+`, a lone
- * trailing `$`) is emitted literally — this matches POSIX behaviour
+ * trailing `$`) is emitted literally - this matches POSIX behaviour
  * and the way bash treats unrecognised dollar sequences.
  */
 
@@ -85,7 +85,7 @@ static int	push_special(t_shell *shell, char c, int dq, t_xbuf *out)
  * @details Only the basic form ${NAME} and the special parameters
  *          ${?}, ${$}, ${0} are implemented here.  The richer modular
  *          formats (${VAR:-word}, ${#VAR}, ...) listed in
- *          plan/04_expander.md are not handled yet — they are deferred
+ *          plan/04_expander.md are not handled yet - they are deferred
  *          to a follow-up branch.  An unterminated brace is emitted
  *          literally so the user can see what they typed.
  */

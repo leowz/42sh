@@ -4,11 +4,11 @@
  * @author pulgamecanica
  *
  * Spec forms (all operate on `shell->jobs`):
- *   NULL / ""      — `shell->current_job`
- *   "%" / "%+" / "%%" — `shell->current_job`
- *   "%-"           — the job immediately preceding `current_job` in the list
- *   "%N"           — job whose `id` equals N
- *   "%prefix"      — first job whose `cmd_line` starts with `prefix`
+ *   NULL / ""      - `shell->current_job`
+ *   "%" / "%+" / "%%" - `shell->current_job`
+ *   "%-"           - the job immediately preceding `current_job` in the list
+ *   "%N"           - job whose `id` equals N
+ *   "%prefix"      - first job whose `cmd_line` starts with `prefix`
  */
 
 #include "42sh.h"

@@ -14,7 +14,7 @@
 
 /*
 ** ft_dlstnew: allocate a new doubly-linked node.
-** content is stored as a pointer (not copied — caller owns the allocation).
+** content is stored as a pointer (not copied - caller owns the allocation).
 ** Returns NULL on malloc failure.
 */
 t_dlist	*ft_dlstnew(void *content)
@@ -72,7 +72,7 @@ t_dlist	*ft_dlstadd_back(t_dlist **head, t_dlist *node)
 /*
 ** ft_dlstdelone: unlink node from its neighbours and free it.
 ** del(content) is called to free the content before freeing the node itself.
-** The neighbours are re-linked — caller must update any head/tail pointers.
+** The neighbours are re-linked - caller must update any head/tail pointers.
 */
 void	ft_dlstdelone(t_dlist *node, void (*del)(void *))
 {

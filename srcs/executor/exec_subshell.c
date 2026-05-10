@@ -20,6 +20,7 @@ static void	subshell_child(t_shell *shell, t_ast *ast)
 	if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 		_exit(1);
 	status = executor_execute(shell, ast->data.group->child);
+	fflush(NULL);
 	_exit(status);
 }
 
@@ -49,9 +50,8 @@ static int	launch_subshell_job(t_shell *shell, t_ast *ast, pid_t pid)
 }
 
 /**
- * @brief Execute a command in a subshell.
  * @details ( cmd ) - runs in a forked child (subshell) with its own pgrp,
- *          routed through the job-control machinery so Ctrl-Z works.
+ *                   routed through the job-control machinery so Ctrl-Z works.
  */
 int	execute_subshell(t_shell *shell, t_ast *ast)
 {
@@ -70,11 +70,7 @@ int	execute_subshell(t_shell *shell, t_ast *ast)
 }
 
 /**
- * @brief Execute a command block.
  * @details { cmd; } - runs in the current shell, but with its own redirections.
- * @param shell The shell instance.
- * @param ast The abstract syntax tree node.
- * @return The exit status of the command.
  */
 int	execute_block(t_shell *shell, t_ast *ast)
 {
@@ -111,6 +107,7 @@ static void	bg_child(t_shell *shell, t_ast *ast)
 	if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 		_exit(1);
 	status = executor_execute(shell, ast->data.group->child);
+	fflush(NULL);
 	_exit(status);
 }
 

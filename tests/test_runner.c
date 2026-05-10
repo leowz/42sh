@@ -20,11 +20,11 @@
 
 #include "minunit.h"
 
-/* Shared pass/fail counters — extern in minunit.h, defined once here. */
+/* Shared pass/fail counters - extern in minunit.h, defined once here. */
 int	g_mu_passed = 0;
 int	g_mu_failed = 0;
 
-/* Forward declarations — one per test file. */
+/* Forward declarations - one per test file. */
 void	test_dlist_suite(void);
 void	test_list_suite(void);
 void	test_history_suite(void);

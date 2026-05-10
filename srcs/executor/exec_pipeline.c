@@ -48,6 +48,9 @@ static void	close_pipes(int pipes[][2], int count)
  * @details info = { stage_index, stage_count, group_pgid }.  When
  *          `group_pgid == 0` this stage becomes the pgrp leader; the parent
  *          mirrors `setpgid` race-free.
+ *          Expansion of NODE_COMMAND stages is done in the parent before
+ *          forking (see expand_pipeline_stages) so the child inherits the
+ *          already-expanded argv and debug output stays in one process.
  */
 static void	pipe_child(t_shell *shell, t_ast *cmd_ast,
 		int pipes[][2], int info[3])
@@ -71,7 +74,6 @@ static void	pipe_child(t_shell *shell, t_ast *cmd_ast,
 	close_pipes(pipes, n - 1);
 	if (cmd_ast->type == NODE_COMMAND)
 	{
-		expand_command(shell, cmd_ast->data.cmd);
 		if (setup_redirections(cmd_ast->data.cmd->redirs, NULL) == -1)
 			_exit(1);
 		if (!cmd_ast->data.cmd->argv || !cmd_ast->data.cmd->argv[0])
@@ -80,11 +82,13 @@ static void	pipe_child(t_shell *shell, t_ast *cmd_ast,
 		{
 			status = builtin_get(cmd_ast->data.cmd->argv[0])(shell,
 					cmd_ast->data.cmd->argc, cmd_ast->data.cmd->argv);
+			fflush(NULL);
 			_exit(status);
 		}
 		exec_pipeline_external(shell, cmd_ast->data.cmd);
 	}
 	status = executor_execute(shell, cmd_ast);
+	fflush(NULL);
 	_exit(status);
 }
 
@@ -169,6 +173,42 @@ static int	spawn_pipeline(t_shell *shell, t_ast **cmds, int n,
 	return (0);
 }
 
+/**
+ * @brief Expand every NODE_COMMAND stage in the parent before forking.
+ * @details Runs the same expand_command pass that execute_simple_command
+ *          uses, so each child inherits a fully-expanded argv. Compound
+ *          stages (subshells etc.) are expanded later inside their own
+ *          executor_execute call.
+ */
+static void	expand_pipeline_stages(t_shell *shell, t_ast **cmds, int n)
+{
+	int	i;
+
+	i = 0;
+	while (i < n)
+	{
+		if (cmds[i]->type == NODE_COMMAND)
+		{
+#ifdef FT_EXTRA_VERBOSE
+			char	*pre = cmd_to_string(cmds[i]->data.cmd);
+			fprintf(stderr,
+				"  \033[2mDebug → Pipeline[%d/%d] pre-expand: %s\033[0m\n",
+				i + 1, n, pre ? pre : "");
+			free(pre);
+#endif
+			expand_command(shell, cmds[i]->data.cmd);
+#ifdef FT_EXTRA_VERBOSE
+			char	*post = cmd_to_string(cmds[i]->data.cmd);
+			fprintf(stderr,
+				"  \033[2mDebug → Pipeline[%d/%d] post-expand: %s\033[0m\n",
+				i + 1, n, post ? post : "");
+			free(post);
+#endif
+		}
+		i++;
+	}
+}
+
 int	execute_pipeline(t_shell *shell, t_ast *ast)
 {
 	t_ast	*cmds[MAX_PIPELINE];
@@ -179,6 +219,7 @@ int	execute_pipeline(t_shell *shell, t_ast *ast)
 	int		status;
 
 	n = collect_pipeline(ast, cmds, MAX_PIPELINE);
+	expand_pipeline_stages(shell, cmds, n);
 	if (open_pipes(pipes, n) == -1)
 		return (1);
 	cmd_line = ast_to_string(ast);
@@ -197,6 +238,10 @@ int	execute_pipeline(t_shell *shell, t_ast *ast)
 	}
 	close_pipes(pipes, n - 1);
 	status = job_launch_foreground(shell, job);
+#ifdef FT_EXTRA_VERBOSE
+	fprintf(stderr, "  \033[2mDebug → Exit (pipeline %d stages): %d\033[0m\n",
+		n, status);
+#endif
 	if (job->status == JOB_STOPPED)
 		job->notified = 0;
 	else

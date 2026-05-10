@@ -1,8 +1,6 @@
 #include "42sh.h"
 
 /**
- * @brief Process any pending signal that was caught during the last prompt.
- *
  * @details Called in the main loop before each prompt iteration.
  * @details Sets $? to the appropriate value (130 for SIGINT = 128 + 2).
  */

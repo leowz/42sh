@@ -6,11 +6,6 @@
 
 #include "parser.h"
 
-/**
- * @param p struct s_parser
- * @brief detect the pipe and create a t_ast node with two commands
- * @return a pointer on a struct s_ast
- */
 t_ast	*parse_pipeline(t_parser *p)
 {
 	t_ast	*left;

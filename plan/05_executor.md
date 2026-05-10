@@ -68,7 +68,7 @@ execute_simple_command(shell, cmd):
         return 0
 
     # 3. Check if builtin
-    #    Assignments are TEMPORARY — scoped to this command only.
+    #    Assignments are TEMPORARY - scoped to this command only.
     #    Example: FOO=bar echo $FOO → FOO exists only during echo
     builtin_fn = builtin_get(cmd->argv[0])
     if builtin_fn:
@@ -113,7 +113,7 @@ execute_simple_command(shell, cmd):
         print error
         exit(126)
 
-    # parent (shell's variables are unchanged — fork copied them)
+    # parent (shell's variables are unchanged - fork copied them)
     wait for child (or add to job for foreground tracking)
     return exit status from child
 ```
@@ -180,7 +180,7 @@ execute_pipeline(shell, ast):
 
         # Parent side: also call setpgid (race avoidance)
         if pgid == 0: pgid = pids[i]         # first child's PID = PGID
-        setpgid(pids[i], pgid)               # may fail if child already exec'd — that's ok
+        setpgid(pids[i], pgid)               # may fail if child already exec'd - that's ok
 
     # Parent: close all pipe fds
     for i in 0..n-2:

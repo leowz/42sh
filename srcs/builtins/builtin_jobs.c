@@ -1,6 +1,6 @@
 /**
  * @file builtin_jobs.c
- * @brief `jobs` builtin — list active background jobs.
+ * @brief `jobs` builtin - list active background jobs.
  * @author pulgamecanica
  */
 

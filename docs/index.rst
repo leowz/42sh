@@ -4,7 +4,7 @@
 A POSIX-compliant shell built at 42.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Core
 
    core/42sh
@@ -15,12 +15,11 @@ A POSIX-compliant shell built at 42.
    core/history
    core/job_control
    core/lexer
-   core/parser
    core/signals
    core/variables
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Tests
 
    tests/minunit

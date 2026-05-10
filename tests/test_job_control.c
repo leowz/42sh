@@ -8,7 +8,7 @@
  *   - job_update_statuses + job_notify with a real short-lived child
  *   - ast_to_string for common AST shapes (protects `jobs` display output)
  *
- * No tcsetpgrp / foreground behavior is tested here — that belongs to a
+ * No tcsetpgrp / foreground behavior is tested here - that belongs to a
  * later increment.
  */
 
@@ -174,7 +174,7 @@ static void	test_update_and_notify_completes_job(void)
 }
 
 /* ================================================================
- * 3. ast_to_string — protects `jobs` display output
+ * 3. ast_to_string - protects `jobs` display output
  * ================================================================ */
 
 static t_cmd	*mk_cmd(const char *const argv[])
@@ -246,7 +246,7 @@ static void	test_ast_to_string_logical_chain(void)
 }
 
 /* ================================================================
- * 4. job_find_by_spec — bash-style %spec resolution
+ * 4. job_find_by_spec - bash-style %spec resolution
  * ================================================================ */
 
 static void	setup_three_jobs(t_shell *shell, t_job **j1, t_job **j2, t_job **j3)
@@ -340,7 +340,7 @@ static void	test_find_by_spec_malformed(void)
 }
 
 /* ================================================================
- * 5. job_remove — unlink without triggering notifications
+ * 5. job_remove - unlink without triggering notifications
  * ================================================================ */
 
 static void	test_job_remove_middle(void)

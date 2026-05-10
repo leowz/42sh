@@ -1,6 +1,6 @@
 {
   "input": "cat /etc/passwd | egrep 'pulgamecanica' | awk '{print(\"$1\", \"pwd\")}' || echo \"didn't work\"",
-  "tok_file": "viz/tokenizations/tok_1775485786_140878.json",
+  "tok_file": "viz/tokenizations/tok_1778447191_757393.json",
   "tree": {
     "type": "NODE_OR",
     "left": {

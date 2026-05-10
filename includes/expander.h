@@ -19,10 +19,10 @@
  */
 
 #ifndef EXPANDER_H
-# define EXPANDER_H
+#define EXPANDER_H
 
-# include <stddef.h>
-# include "ast.h"
+#include "ast.h"
+#include <stddef.h>
 
 struct s_shell;
 
@@ -34,20 +34,17 @@ struct s_shell;
  *          from IFS characters that were literal-quoted in the source
  *          word (not splittable).
  *
- *          For every byte stored in @c data there is a parallel byte in
- *          @c mask: 1 means "IFS-splittable", 0 means "literal — never
- *          a field boundary".  Both buffers are NUL-terminated so the
- *          payload can be inspected with the regular string functions.
+ * @details For every byte stored in @c data there is a parallel byte in
+ *          @c mask: 1 means "IFS-splittable", 0 means "literal - never a field boundary".
+ * @note Both buffers are NUL-terminated so the
+ * payload can be inspected with the regular string functions.
  */
-typedef struct s_xbuf
-{
-	char	*data;	/**< NUL-terminated expanded text. */
-	char	*mask;	/**< Parallel mask: 1 = splittable, 0 = literal. */
-	size_t	len;	/**< Number of bytes currently stored (excluding NUL). */
-	size_t	cap;	/**< Allocated capacity of @c data and @c mask. */
-}	t_xbuf;
-
-/* ===== Public API ====================================================== */
+typedef struct s_xbuf {
+  char *data; /**< NUL-terminated expanded text. */
+  char *mask; /**< Parallel mask: 1 = splittable, 0 = literal. */
+  size_t len; /**< Number of bytes currently stored (excluding NUL). */
+  size_t cap; /**< Allocated capacity of @c data and @c mask. */
+} t_xbuf;
 
 /**
  * @brief Expand a word to a single string (no field splitting, no globbing).
@@ -57,7 +54,7 @@ typedef struct s_xbuf
  * @return Newly-allocated string. Caller frees. NULL on allocation failure
  *         or when @p word is NULL.
  */
-char	*expand_word(struct s_shell *shell, const char *word);
+char *expand_word(struct s_shell *shell, const char *word);
 
 /**
  * @brief Expand a word to multiple fields (argv words).
@@ -69,7 +66,7 @@ char	*expand_word(struct s_shell *shell, const char *word);
  *         array (just a NULL terminator) when the word expanded to nothing
  *         splittable. NULL on allocation failure or when @p word is NULL.
  */
-char	**expand_word_to_fields(struct s_shell *shell, const char *word);
+char **expand_word_to_fields(struct s_shell *shell, const char *word);
 
 /**
  * @brief Expand a whole simple command in place: argv, assignments, redirs.
@@ -81,15 +78,13 @@ char	**expand_word_to_fields(struct s_shell *shell, const char *word);
  * @param cmd The command node to expand.
  * @return 0 on success, -1 on allocation failure.
  */
-int		expand_command(struct s_shell *shell, t_cmd *cmd);
-
-/* ===== Lower-level helpers (exposed for testing) ====================== */
+int expand_command(struct s_shell *shell, t_cmd *cmd);
 
 /** @brief Initialise an empty expansion buffer. Returns 0 / -1. */
-int		xbuf_init(t_xbuf *buf);
+int xbuf_init(t_xbuf *buf);
 
 /** @brief Release a buffer's storage. Safe to call on a NULL/empty buf. */
-void	xbuf_free(t_xbuf *buf);
+void xbuf_free(t_xbuf *buf);
 
 /**
  * @brief Append one byte plus its split-mask flag.
@@ -98,7 +93,7 @@ void	xbuf_free(t_xbuf *buf);
  * @param split 1 if @p c is subject to IFS splitting, 0 if literal.
  * @return 0 on success, -1 on allocation failure.
  */
-int		xbuf_putc(t_xbuf *buf, char c, char split);
+int xbuf_putc(t_xbuf *buf, char c, char split);
 
 /**
  * @brief Append a NUL-terminated string with a uniform split flag.
@@ -107,7 +102,7 @@ int		xbuf_putc(t_xbuf *buf, char c, char split);
  * @param split 1 if every byte of @p s is splittable, 0 if literal.
  * @return 0 on success, -1 on allocation failure.
  */
-int		xbuf_puts(t_xbuf *buf, const char *s, char split);
+int xbuf_puts(t_xbuf *buf, const char *s, char split);
 
 /**
  * @brief Run the char-by-char expansion loop on @p word into @p out.
@@ -116,7 +111,7 @@ int		xbuf_puts(t_xbuf *buf, const char *s, char split);
  *          backslash escapes per POSIX.
  * @return 0 on success, -1 on allocation failure.
  */
-int		expand_word_into(struct s_shell *shell, const char *word, t_xbuf *out);
+int expand_word_into(struct s_shell *shell, const char *word, t_xbuf *out);
 
 /**
  * @brief Read a $... sequence beginning at @c input[*pos].
@@ -130,8 +125,8 @@ int		expand_word_into(struct s_shell *shell, const char *word, t_xbuf *out);
  * @param out Buffer to append the expanded value to.
  * @return 0 on success, -1 on allocation failure.
  */
-int		expand_dollar(struct s_shell *shell, const char *input,
-			size_t *pos, int dq, t_xbuf *out);
+int expand_dollar(struct s_shell *shell, const char *input, size_t *pos, int dq,
+                  t_xbuf *out);
 
 /**
  * @brief Read a tilde sequence beginning at @c input[*pos].
@@ -140,8 +135,8 @@ int		expand_dollar(struct s_shell *shell, const char *input,
  *          original text is emitted literally.
  * @return 0 on success, -1 on allocation failure.
  */
-int		expand_tilde_at(struct s_shell *shell, const char *input,
-			size_t *pos, t_xbuf *out);
+int expand_tilde_at(struct s_shell *shell, const char *input, size_t *pos,
+                    t_xbuf *out);
 
 /**
  * @brief Field-split an already-expanded buffer on $IFS.
@@ -151,6 +146,6 @@ int		expand_tilde_at(struct s_shell *shell, const char *input,
  * @return Newly-allocated NULL-terminated array of strings, or NULL on
  *         allocation failure.
  */
-char	**field_split(struct s_shell *shell, const t_xbuf *expanded);
+char **field_split(struct s_shell *shell, const t_xbuf *expanded);
 
 #endif

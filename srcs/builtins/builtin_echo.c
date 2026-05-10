@@ -123,9 +123,9 @@ static int	display_token(char *token, int last, int escape)
 	char	*scout;
 	char	*word;
 
-	if (!escape)
+	if (!escape && token)
 		printf("%s", token);
-	else
+	else if (token)
 	{
 		scout = token;
 		while (*scout)
@@ -198,13 +198,6 @@ static int	display_token(char *token, int last, int escape)
 	return (1);
 }
 
-/*
- * @param shell : a pointer on the s_shell struct
- * @param argc : the number of tokens of the command
- * @param argv : the tokens of the command
- * @brief This is the POSIX echo command
- * @return 0
- */
 int	builtin_echo(struct s_shell *shell, int argc, char **argv)
 {
 	int	i = 1;

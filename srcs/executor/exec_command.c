@@ -204,17 +204,68 @@ static int	launch_simple_job(t_shell *shell, t_cmd *cmd, pid_t pid)
 	return (status);
 }
 
+#ifdef FT_EXTRA_VERBOSE
+static void	debug_cmd(const char *label, t_cmd *cmd)
+{
+	char	*rendered;
+
+	rendered = cmd_to_string(cmd);
+	fprintf(stderr, "  \033[2mDebug → %s: %s\033[0m\n",
+		label, rendered ? rendered : "(empty)");
+	free(rendered);
+}
+
+static void	debug_dispatch(const char *kind, const char *name)
+{
+	fprintf(stderr, "  \033[2mDebug → Exec %s: %s\033[0m\n", kind, name);
+}
+
+static int	debug_status(const char *kind, const char *name, int status)
+{
+	fprintf(stderr, "  \033[2mDebug → Exit (%s %s): %d\033[0m\n",
+		kind, name, status);
+	return (status);
+}
+#endif
+
 int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 {
 	t_builtin_fn	fn;
 	pid_t			pid;
+	int				status;
 
+#ifdef FT_EXTRA_VERBOSE
+	debug_cmd("Pre-expand", cmd);
+#endif
 	expand_command(shell, cmd);
+#ifdef FT_EXTRA_VERBOSE
+	debug_cmd("Post-expand", cmd);
+#endif
 	if (!cmd->argv || !cmd->argv[0])
-		return (exec_assignment_only(shell, cmd));
+	{
+		status = exec_assignment_only(shell, cmd);
+#ifdef FT_EXTRA_VERBOSE
+		return (debug_status("assignment", "(none)", status));
+#else
+		return (status);
+#endif
+	}
 	fn = builtin_get(cmd->argv[0]);
 	if (fn)
-		return (exec_builtin(shell, cmd, fn));
+	{
+#ifdef FT_EXTRA_VERBOSE
+		debug_dispatch("builtin", cmd->argv[0]);
+#endif
+		status = exec_builtin(shell, cmd, fn);
+#ifdef FT_EXTRA_VERBOSE
+		return (debug_status("builtin", cmd->argv[0], status));
+#else
+		return (status);
+#endif
+	}
+#ifdef FT_EXTRA_VERBOSE
+	debug_dispatch("external", cmd->argv[0]);
+#endif
 	pid = fork();
 	if (pid == -1)
 	{
@@ -224,5 +275,10 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 	}
 	if (pid == 0)
 		exec_child(shell, cmd);
-	return (launch_simple_job(shell, cmd, pid));
+	status = launch_simple_job(shell, cmd, pid);
+#ifdef FT_EXTRA_VERBOSE
+	return (debug_status("external", cmd->argv[0], status));
+#else
+	return (status);
+#endif
 }

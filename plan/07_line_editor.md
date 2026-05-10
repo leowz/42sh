@@ -8,7 +8,7 @@ implementation:
 
 - Raw terminal mode management
 - Character insertion/deletion and cursor movement
-- History navigation (Up/Down arrows) — integrated with our `t_history`
+- History navigation (Up/Down arrows) - integrated with our `t_history`
 - Ctrl-A/E (home/end), Ctrl-K/U/W (kill operations), Ctrl-L (clear screen)
 - Vi and Emacs editing modes (modular feature)
 
@@ -142,5 +142,5 @@ The subject explicitly allows `readline` (`-lreadline`).  Using readline:
 - Keeps the terminal always in a consistent state (readline resets on cleanup).
 
 The raw-mode / termcap knowledge documented in background resources is still
-worth understanding — it's exactly what readline implements under the hood — but
+worth understanding - it's exactly what readline implements under the hood - but
 there is no reason to reimplement it from scratch.

@@ -154,7 +154,7 @@ static void	test_type_not_found(void)
 	MU_ASSERT_INT(1, ret);
 	MU_ASSERT_INT(1, shell.last_exit_status);
 	MU_ASSERT_STR("not found error",
-		"42sh: type: nonexistent_cmd_xyz: not found\n", buf);
+		"nonexistent_cmd_xyz not found\n", buf);
 }
 
 /* --- type with multiple builtins --- */
@@ -224,7 +224,7 @@ static void	test_type_mixed_returns_failure(void)
 	MU_ASSERT_STR("stdout has builtin info",
 		"echo is a shell builtin\n", stdout_buf);
 	MU_ASSERT_STR("stderr has not found",
-		"42sh: type: nonexistent_cmd_xyz: not found\n", stderr_buf);
+		"nonexistent_cmd_xyz not found\n", stderr_buf);
 }
 
 /* --- type with no arguments --- */

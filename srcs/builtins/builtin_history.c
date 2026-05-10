@@ -33,17 +33,6 @@ static void	print_entries(HIST_ENTRY **list, int start, int end)
 	}
 }
 
-/**
- * @brief display the command history list
- * 
- * @details This function displays the command history list in a format similar to bash and ksh.
- * 
- * @param shell The shell context (not used in this function).
- * @param argc The number of arguments passed to the history command.
- * @param argv The arguments passed to the history command. If a numeric argument is provided, it specifies how many of the most recent entries to display.
- * 
- * @return int Always returns 0.
- */
 int	builtin_history(struct s_shell *shell, int argc, char **argv)
 {
 	HIST_ENTRY	**list;

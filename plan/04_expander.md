@@ -49,10 +49,10 @@ Expansions happen in this order for each word:
 ```
 1. Tilde expansion         (only at word start or after : in assignments)
 2. Parameter expansion     ($VAR, ${VAR}, $?, $$, etc.)
-3. Command substitution    $(cmd) — modular feature
-4. Arithmetic expansion    $((expr)) — modular feature
+3. Command substitution    $(cmd) - modular feature
+4. Arithmetic expansion    $((expr)) - modular feature
 5. Field splitting         (on unquoted expansion results, using $IFS)
-6. Pathname expansion      (globbing: *, ?, [] — modular feature)
+6. Pathname expansion      (globbing: *, ?, [] - modular feature)
 7. Quote removal           (remove unescaped quotes)
 ```
 
@@ -318,11 +318,11 @@ glob_expand(fields):
     return result
 ```
 
-**Note:** Glob characters that were quoted (inside `''` or `""` or preceded by `\`) must NOT trigger globbing. The expander needs to track which characters were quoted — a common approach is to use internal marker characters for "literal" versions of `*`, `?`, `[`.
+**Note:** Glob characters that were quoted (inside `''` or `""` or preceded by `\`) must NOT trigger globbing. The expander needs to track which characters were quoted - a common approach is to use internal marker characters for "literal" versions of `*`, `?`, `[`.
 
 ## Quote Removal
 
-Final step — remove all unescaped quote characters from each field:
+Final step - remove all unescaped quote characters from each field:
 
 ```
 remove_quotes(string):
@@ -389,9 +389,9 @@ src/expander/
 ├── expand_word.c         # Core char-by-char expansion (expand_word_internal)
 ├── expand_tilde.c        # Tilde expansion
 ├── expand_parameter.c    # $VAR, ${VAR}, $?, $$
-├── expand_command.c      # Command substitution $() — modular
-├── expand_arithmetic.c   # Arithmetic $() — modular
-├── expand_glob.c         # Pathname expansion — modular
+├── expand_command.c      # Command substitution $() - modular
+├── expand_arithmetic.c   # Arithmetic $() - modular
+├── expand_glob.c         # Pathname expansion - modular
 ├── field_split.c         # IFS-based field splitting
 ├── quote_removal.c       # Final quote stripping
 └── expand_utils.c        # Helpers (string buffer, markers, etc.)

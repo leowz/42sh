@@ -1,0 +1,31 @@
+{
+  "input": "/usr/bin/sleep 5 & echo 'good'",
+  "tok_file": "viz/tokenizations/tok_1778447217_736608.json",
+  "tree": {
+    "type": "NODE_SEQUENCE",
+    "left": {
+      "type": "NODE_BACKGROUND",
+      "child": {
+        "type": "NODE_COMMAND",
+        "argv": ["/usr/bin/sleep", "5"],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      },
+      "redirs": [
+
+      ]
+    },
+    "right": {
+      "type": "NODE_COMMAND",
+      "argv": ["echo", "'good'"],
+      "argc": 2,
+      "assignments": [],
+      "redirs": [
+
+      ]
+    }
+  }
+}

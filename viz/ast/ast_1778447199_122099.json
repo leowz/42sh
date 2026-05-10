@@ -1,6 +1,6 @@
 {
   "input": "ls -la | grep \"lol\" ; make debug",
-  "tok_file": "viz/tokenizations/tok_1775485724_172137.json",
+  "tok_file": "viz/tokenizations/tok_1778447199_121923.json",
   "tree": {
     "type": "NODE_SEQUENCE",
     "left": {

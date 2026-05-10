@@ -21,7 +21,7 @@
  * and the corresponding `-D` flag is deleted from the Makefile.  The test
  * then compiles and runs unconditionally forever.
  *
- * ## Quick-start — test file
+ * ## Quick-start - test file
  *
  * ```c
  * void test_something(void) {
@@ -31,7 +31,7 @@
  * }
  * ```
  *
- * ## Quick-start — test_runner.c
+ * ## Quick-start - test_runner.c
  *
  * ```c
  * int main(void) {
@@ -68,7 +68,7 @@ extern int	g_mu_failed;
  *
  * Evaluates *expr*. Prints a green **PASS** line on success, or a red
  * **FAIL** line including the source location on failure.
- * Do not call directly — use the *MU_ASSERT* macro.
+ * Do not call directly - use the *MU_ASSERT* macro.
  *
  * @param msg   Human-readable description shown in the output line.
  * @param expr  Non-zero = pass, zero = fail.
@@ -85,7 +85,7 @@ static inline void	mu_assert(const char *file, int line,
 {
 	if (!expr)
 	{
-		printf("  \033[1;31mFAIL\033[0m %s:%d — %s\n", file, line, msg);
+		printf("  \033[1;31mFAIL\033[0m %s:%d - %s\n", file, line, msg);
 		g_mu_failed++;
 	}
 	else
@@ -103,7 +103,7 @@ static inline void	mu_assert(const char *file, int line,
  *
  * Compares *expected* and *actual* as `int` values.  On failure the
  * output includes both the expected and the actual values.
- * Do not call directly — use the *MU_ASSERT_INT* macro.
+ * Do not call directly - use the *MU_ASSERT_INT* macro.
  *
  * @param expected The value the expression should produce.
  * @param actual   The expression under test.
@@ -120,7 +120,7 @@ static inline void	mu_assert_int(const char *file, int line,
 {
 	if (expected != actual)
 	{
-		printf("  \033[1;31mFAIL\033[0m %s:%d — expected %d, got %d\n",
+		printf("  \033[1;31mFAIL\033[0m %s:%d - expected %d, got %d\n",
 			file, line, expected, actual);
 		g_mu_failed++;
 	}
@@ -139,7 +139,7 @@ static inline void	mu_assert_int(const char *file, int line,
  *
  * Compares *expected* and *actual* with strcmp(3).  A NULL *actual* is
  * treated as a failure and printed as `"(null)"` in the output line.
- * Do not call directly — use the *MU_ASSERT_STR* macro.
+ * Do not call directly - use the *MU_ASSERT_STR* macro.
  *
  * @param msg      Human-readable label shown in the output line.
  * @param expected The expected C string (must not be NULL).
@@ -158,7 +158,7 @@ static inline void	mu_assert_str(const char *file, int line,
 {
 	if (!actual || strcmp(expected, actual) != 0)
 	{
-		printf("  \033[1;31mFAIL\033[0m %s:%d — %s: want \"%s\" got \"%s\"\n",
+		printf("  \033[1;31mFAIL\033[0m %s:%d - %s: want \"%s\" got \"%s\"\n",
 			file, line, msg, expected, actual ? actual : "(null)");
 		g_mu_failed++;
 	}
@@ -177,7 +177,7 @@ static inline void	mu_assert_str(const char *file, int line,
  *
  * Prints a cyan header line with the name of *fn* then calls `fn()`.
  * Typically used in `main()` of test_runner.c.
- * Do not call directly — use the *MU_RUN* macro.
+ * Do not call directly - use the *MU_RUN* macro.
  *
  * @param name  Stringified name of the test suite function.
  * @param fn    Function pointer to the test suite.

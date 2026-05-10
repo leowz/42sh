@@ -88,11 +88,11 @@ Single-character operators:
     "&"   → TOK_AMPERSAND
     ">"   → TOK_REDIR_OUT
     "<"   → TOK_REDIR_IN
-    "("   → TOK_LPAREN    (operator — breaks words, even inside a word)
-    ")"   → TOK_RPAREN    (operator — breaks words)
+    "("   → TOK_LPAREN    (operator - breaks words, even inside a word)
+    ")"   → TOK_RPAREN    (operator - breaks words)
     "\n"  → TOK_NEWLINE
 
-NOT operators (reserved words — handled by parser):
+NOT operators (reserved words - handled by parser):
     "{"   → tokenized as TOK_WORD with value "{"
     "}"   → tokenized as TOK_WORD with value "}"
     These are only special when they appear as a standalone word

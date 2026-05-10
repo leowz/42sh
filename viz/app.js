@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   42sh Visualizer — Tokenization + AST explorer
+   42sh Visualizer - Tokenization + AST explorer
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ─── Token type → colour mapping ──────────────────────────────── */
@@ -676,7 +676,7 @@ function highlightByType(type) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   AST VISUALIZATION — D3 interactive tree
+   AST VISUALIZATION - D3 interactive tree
    ═══════════════════════════════════════════════════════════════════ */
 
 /**

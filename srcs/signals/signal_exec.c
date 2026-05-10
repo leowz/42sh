@@ -8,14 +8,12 @@
 #include <stddef.h>
 
 /**
- * @brief Set up signal handlers for executing context (parent waiting for fg child).
- *
- * @details SIGINT  — ignored (let signal reach the child process)
- * @details SIGQUIT — ignored (let signal reach the child process)
- * @details SIGTSTP — ignored (let signal reach the child process)
+ * @details SIGINT  - ignored (let signal reach the child process)
+ * @details SIGQUIT - ignored (let signal reach the child process)
+ * @details SIGTSTP - ignored (let signal reach the child process)
  *
  * @note The parent simply waits; the child handles or dies from the signal.
-*/
+ */
 void	signals_setup_executing(void)
 {
 	struct sigaction	sa;

@@ -1,6 +1,6 @@
 /**
  * @file builtin_fg.c
- * @brief `fg [%spec]` — resume a stopped job in the foreground.
+ * @brief `fg [%spec]` - resume a stopped job in the foreground.
  * @author pulgamecanica
  */
 

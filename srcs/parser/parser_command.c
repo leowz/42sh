@@ -5,11 +5,6 @@
  */
 #include "parser.h"
 
-/**
- * @param cmd struct s_cmd
- * @brief allocate memory and define type for a NODE_COMMAND
- * @return pointer on struct s_ast
- */
 t_ast	*ast_new_command(t_cmd *cmd)
 {
 	t_ast	*ast;
@@ -22,11 +17,6 @@ t_ast	*ast_new_command(t_cmd *cmd)
 	return (ast);
 }
 
-/**
- * @param p t_parser struct
- * @brief handle (subshell) and (block) then parser command
- * @return t_ast struct
- */
 t_ast	*parse_command(t_parser *p)
 {
 	t_token	*token;
@@ -162,27 +152,27 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 
 /**
  * @param str char *
- * @brief check for valid assignment
- * @return 0 | 1
+ * @brief Check whether @p str is a POSIX assignment word.
+ * @details The portion BEFORE the first '=' must be a valid identifier
+ *          (alpha or '_' first, then alnum or '_'). The portion AFTER
+ *          the '=' is the value and may contain any characters,
+ *          including quotes - quote handling is the expander's job.
+ * @return 1 if @p str is a NAME=VALUE assignment, 0 otherwise.
  */
 static int	is_assignment(char *str)
 {
-	int	equal;
-
-	equal = 0;
-	if (!str)
+	if (!str || !*str)
 		return (0);
-	if (*str == '=' || (!isalpha(*str) && *str != '_'))
+	if (!isalpha((unsigned char)*str) && *str != '_')
 		return (0);
-	while (*str)
+	str++;
+	while (*str && *str != '=')
 	{
-		if (*str == '=')
-			equal = 1;
-		else if (!isalnum(*str) && *str != '_')
+		if (!isalnum((unsigned char)*str) && *str != '_')
 			return (0);
 		str++;
 	}
-	return (equal);
+	return (*str == '=');
 }
 
 /**
@@ -202,11 +192,6 @@ static void	parse_assignment(t_parser *p, t_cmd *command)
 	}
 }
 
-/**
- * @param p struct s_parser
- * @brief handle commands and detect subshells
- * @return a pointer on a struct s_ast
- */
 t_ast	*parse_simple_command(t_parser *p)
 {
 	t_cmd	*command;

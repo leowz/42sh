@@ -74,12 +74,8 @@ static char	*search_path(const char *path_var, const char *name)
 }
 
 /**
- * @brief Find an executable command.
  * @details - If name contains '/', treat it as a path directly.
  * @details - Otherwise search each directory in $PATH.
- * @param shell The shell instance.
- * @param name The command name.
- * @return Heap-allocated path on success, NULL on failure.
  */
 char	*find_command(t_shell *shell, const char *name)
 {

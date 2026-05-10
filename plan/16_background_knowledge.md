@@ -2,7 +2,7 @@
 
 ## Must-Read
 
-### 1. "Advanced Programming in the UNIX Environment" (APUE) — Stevens & Rago
+### 1. "Advanced Programming in the UNIX Environment" (APUE) - Stevens & Rago
 
 THE reference for everything this project needs: `fork`, `exec`, `pipe`, `dup2`, `signal`/`sigaction`, process groups, sessions, terminal control, `tcsetpgrp`.
 
@@ -15,20 +15,20 @@ Most relevant chapters:
 
 Use as a reference when implementing each module. No need to read cover-to-cover.
 
-### 2. "The Linux Programming Interface" (TLPI) — Michael Kerrisk
+### 2. "The Linux Programming Interface" (TLPI) - Michael Kerrisk
 
-Same topics as APUE but more modern and Linux-specific (our target platform). Longer but clearer explanations. Same chapters are relevant. Pick whichever of APUE or TLPI you prefer — you don't need both.
+Same topics as APUE but more modern and Linux-specific (our target platform). Longer but clearer explanations. Same chapters are relevant. Pick whichever of APUE or TLPI you prefer - you don't need both.
 
 ## Very Helpful
 
 ### 3. Bash Reference Manual (GNU)
 
-Free online. This is the behavior reference — when unsure how something should work, test it in bash and read this manual.
+Free online. This is the behavior reference - when unsure how something should work, test it in bash and read this manual.
 
 - https://www.gnu.org/software/bash/manual/bash.html
 - Sections on quoting, expansion, redirections, job control are directly applicable
 
-### 4. "Writing a Unix Shell" tutorial series — Nelson Elhage
+### 4. "Writing a Unix Shell" tutorial series - Nelson Elhage
 
 Short blog series that walks through building a shell step by step. Covers the exact concepts needed: fork/exec, pipes, signals, job control. Good for getting the big picture before diving into APUE/TLPI details.
 
@@ -46,7 +46,7 @@ The actual standard. Dry reading, but it's the definitive answer when bash behav
 | **Executor/Pipes** | GLIBC "Implementing a Shell" for fork/exec/wait patterns. APUE ch8-9 for process groups and pipeline PGID. |
 | **Expander/Variables** | Bash manual §3.5 (Shell Expansions) and POSIX §2.6 (Word Expansions). Quote-aware char-by-char walking is the core skill. |
 | **Termcap/Line Editor** | `man termios` for raw mode. `man termcap` for cursor control. GNU Readline source for architecture ideas. |
-| **Job Control** | GLIBC "Implementing a Shell" — covers process groups, fg/bg, tcsetpgrp with real C code. |
+| **Job Control** | GLIBC "Implementing a Shell" - covers process groups, fg/bg, tcsetpgrp with real C code. |
 | **Signals** | APUE ch10 or TLPI ch20-22. Three contexts (interactive/executing/child) need different setups. Read before coding. |
 
 ## Per Team Member
@@ -62,7 +62,7 @@ The actual standard. Dry reading, but it's the definitive answer when bash behav
 
 ## P1 Deep Dive: Lexer, Parser, and AST
 
-P1 builds the front-end of the shell — turning raw text into a tree structure that the executor can walk. This requires understanding three closely related concepts.
+P1 builds the front-end of the shell - turning raw text into a tree structure that the executor can walk. This requires understanding three closely related concepts.
 
 ### What to Learn
 
@@ -84,29 +84,29 @@ P1 builds the front-end of the shell — turning raw text into a tree structure 
 
 ### Recommended Resources (in order)
 
-**1. "Crafting Interpreters" by Robert Nystrom — Chapters 4-6 (free online)**
+**1. "Crafting Interpreters" by Robert Nystrom - Chapters 4-6 (free online)**
 - https://craftinginterpreters.com
 - Ch 4 "Scanning" = lexer. Teaches state-machine tokenization with clear code.
 - Ch 5 "Representing Code" = AST. Shows how to define tree nodes with a union/visitor pattern.
 - Ch 6 "Parsing Expressions" = recursive descent parser with operator precedence.
 - Written in Java but concepts translate directly to C. The best intro to this topic.
 
-**2. "Compilers: Principles, Techniques, and Tools" (Dragon Book) — Ch 2-3**
+**2. "Compilers: Principles, Techniques, and Tools" (Dragon Book) - Ch 2-3**
 - Ch 2 "A Simple Syntax-Directed Translator" walks through lexing → parsing → tree building
 - Ch 3 "Lexical Analysis" covers state machines and token recognition in depth
-- Heavy academic book — use as reference, not cover-to-cover reading
+- Heavy academic book - use as reference, not cover-to-cover reading
 
 **3. POSIX Shell Grammar**
 - https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_10
 - Section 2.10 defines the actual shell grammar in BNF notation
 - Our `03_parser.md` is a simplified version of this. Refer to the original when unclear.
 
-**4. Bash source code — `parse.y`**
+**4. Bash source code - `parse.y`**
 - Bash uses a yacc/bison grammar file. Reading it helps understand what tokens exist and how grammar rules combine.
 - You won't copy it (we use recursive descent, not yacc), but it shows how a real shell handles edge cases.
 - https://git.savannah.gnu.org/cgit/bash.git/tree/parse.y
 
-**5. "Let's Build a Simple Interpreter" — Ruslan Spivak (blog series)**
+**5. "Let's Build a Simple Interpreter" - Ruslan Spivak (blog series)**
 - https://ruslanspivak.com/lsbasi-part1/
 - Step-by-step blog building a recursive descent parser from scratch
 - Very hands-on, good for someone who learns by doing
@@ -164,22 +164,22 @@ switch (ast->type) {
 ```
 
 **Common P1 mistakes to avoid:**
-- Don't strip quotes in the lexer — preserve them for the expander
-- Don't detect assignments in the lexer — only the parser knows if a word is in prefix position
-- Don't use a separate token type for `{`/`}` — they're reserved words (WORD tokens)
+- Don't strip quotes in the lexer - preserve them for the expander
+- Don't detect assignments in the lexer - only the parser knows if a word is in prefix position
+- Don't use a separate token type for `{`/`}` - they're reserved words (WORD tokens)
 - Don't forget that `&` is a list separator like `;`, not just a trailing flag
 
 ---
 
 ## P2 Deep Dive: Executor, Pipelines, and Signals
 
-P2 is the engine of the shell — taking the AST that P1 built and actually running commands. This means understanding how UNIX creates processes, wires them together, and manages their lifecycle.
+P2 is the engine of the shell - taking the AST that P1 built and actually running commands. This means understanding how UNIX creates processes, wires them together, and manages their lifecycle.
 
 ### What to Learn
 
 **Process creation (fork/exec/wait):**
 - `fork()` duplicates the current process; child gets PID 0 return, parent gets child's PID
-- `execve()` replaces the child's memory with a new program — it never returns on success
+- `execve()` replaces the child's memory with a new program - it never returns on success
 - `waitpid()` blocks until a child changes state (exits, stops, continues)
 - The fork+exec pattern: fork first, set up the child's environment, then exec
 
@@ -187,7 +187,7 @@ P2 is the engine of the shell — taking the AST that P1 built and actually runn
 - `pipe()` creates two connected fds: write to one end, read from the other
 - `dup2(old, new)` makes fd `new` point to the same file/pipe as fd `old`
 - Each pipeline stage: redirect stdin from previous pipe, stdout to next pipe
-- Close ALL pipe fds in every process after dup2 — leaked fds cause hangs
+- Close ALL pipe fds in every process after dup2 - leaked fds cause hangs
 
 **Process groups (PGID):**
 - All processes in a pipeline share one process group
@@ -204,7 +204,7 @@ P2 is the engine of the shell — taking the AST that P1 built and actually runn
 
 **1. GLIBC "Implementing a Shell" (free online, ~30 min)**
 - https://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html
-- Walks through job launch, foreground/background, process groups, and waiting — with real C code
+- Walks through job launch, foreground/background, process groups, and waiting - with real C code
 - THE single best resource for P2. Read this first, read it twice.
 
 **2. APUE Ch 8 "Process Control" or TLPI Ch 24-26**
@@ -222,9 +222,9 @@ P2 is the engine of the shell — taking the AST that P1 built and actually runn
 - Signal masks, async-signal-safe functions
 - Read the sections on SIGINT, SIGTSTP, SIGCHLD specifically
 
-**5. "Writing a Unix Shell" — Nelson Elhage (blog series)**
+**5. "Writing a Unix Shell" - Nelson Elhage (blog series)**
 - Step-by-step tutorial building a shell with pipes and job control
-- Shorter and more practical than APUE — good first pass before the textbooks
+- Shorter and more practical than APUE - good first pass before the textbooks
 
 ### Key Concepts for P2
 
@@ -267,16 +267,16 @@ waitpid(pid, &wstatus, 0):
 ```
 
 **Common P2 mistakes to avoid:**
-- Don't forget to close pipe fds — a leaked write end keeps the reader blocking forever
-- Don't call `setpgid` only in the child — parent must also call it (child might exec before parent runs)
-- Don't ignore `execve` return — if it returns, it failed (print error, `exit(126)` or `exit(127)`)
-- Don't double-fork in pipelines — each child either calls execve or runs a builtin and exits directly
+- Don't forget to close pipe fds - a leaked write end keeps the reader blocking forever
+- Don't call `setpgid` only in the child - parent must also call it (child might exec before parent runs)
+- Don't ignore `execve` return - if it returns, it failed (print error, `exit(126)` or `exit(127)`)
+- Don't double-fork in pipelines - each child either calls execve or runs a builtin and exits directly
 
 ---
 
 ## P3 Deep Dive: Expander and Variables
 
-P3 handles the most algorithmically complex module — turning raw strings with `$VAR`, quotes, and special syntax into the final expanded words. It's pure string manipulation, no fork/exec knowledge needed.
+P3 handles the most algorithmically complex module - turning raw strings with `$VAR`, quotes, and special syntax into the final expanded words. It's pure string manipulation, no fork/exec knowledge needed.
 
 ### What to Learn
 
@@ -290,11 +290,11 @@ P3 handles the most algorithmically complex module — turning raw strings with 
 **Expansion order (POSIX §2.6):**
 - Tilde expansion (`~` → home directory)
 - Parameter expansion (`$VAR`, `${VAR}`, `${VAR:-default}`)
-- Command substitution (`$(cmd)`) — modular feature
-- Arithmetic expansion (`$((expr))`) — modular feature
+- Command substitution (`$(cmd)`) - modular feature
+- Arithmetic expansion (`$((expr))`) - modular feature
 - Field splitting (split unquoted results on `$IFS`)
-- Pathname expansion (globbing) — modular feature
-- Quote removal (final step — strip the quote characters)
+- Pathname expansion (globbing) - modular feature
+- Quote removal (final step - strip the quote characters)
 
 **Quote-aware character walking:**
 - The expander reads the raw string character by character
@@ -307,14 +307,14 @@ P3 handles the most algorithmically complex module — turning raw strings with 
 - After parameter expansion, unquoted results are split on characters in `$IFS`
 - Default IFS is space, tab, newline
 - IFS whitespace is treated specially (leading/trailing ignored, runs collapsed)
-- Quoted expansions are NOT split — `"$VAR"` stays as one field even if VAR contains spaces
+- Quoted expansions are NOT split - `"$VAR"` stays as one field even if VAR contains spaces
 
 ### Recommended Resources (in order)
 
 **1. Bash Reference Manual §3.5 "Shell Expansions" (free online)**
 - https://www.gnu.org/software/bash/manual/bash.html#Shell-Expansions
 - Clear explanation of each expansion type with examples
-- This is your behavior reference — test in bash, then read this to confirm
+- This is your behavior reference - test in bash, then read this to confirm
 
 **2. POSIX §2.6 "Word Expansions"**
 - https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06
@@ -331,10 +331,10 @@ P3 handles the most algorithmically complex module — turning raw strings with 
 - Formal rules for which characters are special in which contexts
 - Use when bash manual is ambiguous
 
-**5. Bash source code — `subst.c`**
+**5. Bash source code - `subst.c`**
 - https://git.savannah.gnu.org/cgit/bash.git/tree/subst.c
 - This is where bash does all expansion. It's ~6000 lines and complex, but searching for specific function names (like `parameter_brace_expand`) shows how edge cases are handled.
-- Don't try to read it all — use it as a reference for specific questions
+- Don't try to read it all - use it as a reference for specific questions
 
 ### Key Concepts for P3
 
@@ -366,7 +366,7 @@ expand_word(shell, raw_string):
         else if raw_string[i] == '$':
             # Unquoted $: expand variable
             expanded = expand_variable(shell, raw_string, &i)
-            append expanded to result (marked unquoted — eligible for splitting)
+            append expanded to result (marked unquoted - eligible for splitting)
 
         else:
             append raw_string[i] to result
@@ -378,8 +378,8 @@ expand_word(shell, raw_string):
 ```
 Input:  VAR="hello   world"
 
-"$VAR"  → 1 field: "hello   world"     (quoted — no split)
-$VAR    → 2 fields: "hello", "world"   (unquoted — split on IFS)
+"$VAR"  → 1 field: "hello   world"     (quoted - no split)
+$VAR    → 2 fields: "hello", "world"   (unquoted - split on IFS)
 
 The expander must track which parts of the result came from
 quoted vs unquoted expansions, so field splitting knows what to split.
@@ -402,17 +402,17 @@ Any var_set/var_unset/var_export call sets env_dirty = true.
 ```
 
 **Common P3 mistakes to avoid:**
-- Don't expand inside single quotes — `'$VAR'` is literal, period
-- Don't field-split inside double quotes — `"$VAR"` is always one field
-- Don't forget quote removal is the LAST step — after all other expansions
-- Don't expand assignments the same as words — split on first `=`, only expand the value part
-- Don't rebuild the environ array on every execve — use the dirty flag pattern
+- Don't expand inside single quotes - `'$VAR'` is literal, period
+- Don't field-split inside double quotes - `"$VAR"` is always one field
+- Don't forget quote removal is the LAST step - after all other expansions
+- Don't expand assignments the same as words - split on first `=`, only expand the value part
+- Don't rebuild the environ array on every execve - use the dirty flag pattern
 
 ---
 
 ## P4 Deep Dive: Line Editor, Job Control, and Terminal
 
-P4 owns everything related to the terminal — reading input character by character, displaying edits, and managing which process group controls the terminal. These two modules (line editor + job control) are coupled through terminal ownership.
+P4 owns everything related to the terminal - reading input character by character, displaying edits, and managing which process group controls the terminal. These two modules (line editor + job control) are coupled through terminal ownership.
 
 ### What to Learn
 
@@ -440,7 +440,7 @@ P4 owns everything related to the terminal — reading input character by charac
 - Only one process group can be "foreground" (receives terminal input)
 - `tcsetpgrp(fd, pgid)` transfers terminal ownership to a process group
 - When a foreground job finishes or stops (Ctrl-Z), the shell takes the terminal back
-- Background jobs run without terminal access — they get SIGTTIN/SIGTTOU if they try to read/write the terminal
+- Background jobs run without terminal access - they get SIGTTIN/SIGTTOU if they try to read/write the terminal
 
 **SIGCHLD handling:**
 - When any child exits or stops, the parent receives SIGCHLD
@@ -453,12 +453,12 @@ P4 owns everything related to the terminal — reading input character by charac
 **1. GLIBC "Implementing a Shell" (free online, ~30 min)**
 - https://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html
 - Covers job launch, foreground/background, process groups, terminal ownership
-- Has complete C code for job control — closest thing to a tutorial for this
+- Has complete C code for job control - closest thing to a tutorial for this
 
 **2. APUE Ch 18 "Terminal I/O" or TLPI Ch 62**
 - Deep dive into termios: canonical vs raw mode, all the flags, tcgetattr/tcsetattr
 - Explains VMIN/VTIME for controlling read behavior in raw mode
-- Essential for the line editor — read before coding
+- Essential for the line editor - read before coding
 
 **3. `man termcap` and `man termios`**
 - The actual API reference you'll use daily while coding
@@ -474,9 +474,9 @@ P4 owns everything related to the terminal — reading input character by charac
 - https://git.savannah.gnu.org/cgit/readline.git
 - You can't use readline (using termcap instead), but reading its architecture helps
 - Look at `readline.c` (main loop), `input.c` (key reading), `display.c` (screen update)
-- Don't copy the code — understand the patterns (read key → update buffer → redisplay)
+- Don't copy the code - understand the patterns (read key → update buffer → redisplay)
 
-**6. "Build Your Own Text Editor" — antirez (Kilo editor tutorial)**
+**6. "Build Your Own Text Editor" - antirez (Kilo editor tutorial)**
 - https://viewsourcecode.org/snaptoken/kilo/
 - Step-by-step tutorial for building a terminal text editor in C using raw mode
 - Chapters 2-4 cover exactly what you need: raw mode, keypress reading, screen refresh
@@ -514,7 +514,7 @@ read_key():
     if c != '\x1b':
         return c   (normal character)
 
-    # Might be escape sequence — try to read more
+    # Might be escape sequence - try to read more
     read with short timeout → seq[0]
     if timeout (nothing came):
         return ESCAPE_KEY
@@ -589,17 +589,17 @@ User types "fg %1":
 ```
 
 **Common P4 mistakes to avoid:**
-- Don't forget to restore terminal settings on exit — register `exit_raw_mode` with `atexit()`
-- Don't disable OPOST — you need `\n` → `\r\n` translation for output
-- Don't use `read()` without a timeout for escape sequences — you'll block waiting for bytes that won't come
-- Don't call `tcsetpgrp` from a background process — it causes SIGTTOU. Only the foreground process can transfer terminal ownership.
-- Don't forget to take the terminal back after a foreground job finishes — or your shell can't read input
+- Don't forget to restore terminal settings on exit - register `exit_raw_mode` with `atexit()`
+- Don't disable OPOST - you need `\n` → `\r\n` translation for output
+- Don't use `read()` without a timeout for escape sequences - you'll block waiting for bytes that won't come
+- Don't call `tcsetpgrp` from a background process - it causes SIGTTOU. Only the foreground process can transfer terminal ownership.
+- Don't forget to take the terminal back after a foreground job finishes - or your shell can't read input
 
 ---
 
 ## Start Here: GLIBC "Implementing a Shell"
 
-**Every team member should read this first.** It's short (~30 min), free, and walks through job control with actual C code. It covers process groups, foreground/background, signals, and `tcsetpgrp` — exactly the hardest parts of the project.
+**Every team member should read this first.** It's short (~30 min), free, and walks through job control with actual C code. It covers process groups, foreground/background, signals, and `tcsetpgrp` - exactly the hardest parts of the project.
 
 - https://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html
 

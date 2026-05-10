@@ -2,9 +2,9 @@
  * @file test_heredoc_bugs.c
  * @brief Regression tests for heredoc bugs in parser_heredoc.c.
  *
- * Bug 1: WEXITSTATUS precedence — WEXITSTATUS(status == 130) should be
+ * Bug 1: WEXITSTATUS precedence - WEXITSTATUS(status == 130) should be
  *         WEXITSTATUS(status) == 130.
- * Bug 2: Pipe fd leak on fork() failure — pipe fds must be closed if
+ * Bug 2: Pipe fd leak on fork() failure - pipe fds must be closed if
  *         fork() fails.
  *
  * These tests verify correct behavior through the public API and

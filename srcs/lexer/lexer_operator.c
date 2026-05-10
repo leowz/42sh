@@ -35,10 +35,7 @@ static const	t_operator operators[] = {
 };
 
 /**
- * @param c character to check
- * @brief check if a char is the beginning of an operator
  * @details check if the character is in "&|><;{}\n"
- * @return 0 | 1
  */
 int	is_operator(char c)
 {
@@ -55,10 +52,7 @@ int	is_operator(char c)
 }
 
 /**
- * @param line string of operator to test
- * @brief check if a string is an operator
  * @details manage the digits in case of redirection then call is_operator
- * @return 1 | 0
  */
 int	is_operator_start(const char *line)
 {
@@ -114,10 +108,7 @@ static t_list	*create_operator_token(
 }
 
 /**
- * @param line a pointer on the string of the operator
- * @brief read the operator and tokenize it
  * @details choose the good function to tokenize
- * @return a t_list* node
  */
 t_list	*read_operator(const char **line)
 {

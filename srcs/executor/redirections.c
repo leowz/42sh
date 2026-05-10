@@ -104,11 +104,7 @@ static int	apply_one_redir(t_redir *redir)
 }
 
 /**
- * @brief Set up all redirections in the list.
  * @details If saved_fds is not NULL, save stdin/stdout/stderr first (for restore).
- * @param redirs The list of redirections.
- * @param saved_fds The array to store the saved file descriptors.
- * @return 0 on success, -1 on error.
  */
 int	setup_redirections(t_list *redirs, int saved_fds[3])
 {
@@ -134,10 +130,6 @@ int	setup_redirections(t_list *redirs, int saved_fds[3])
 	return (0);
 }
 
-/**
- * @brief Restore stdin/stdout/stderr from saved fds, then close the saved copies.
- * @param saved_fds The array of saved file descriptors.
- */
 void	restore_redirections(int saved_fds[3])
 {
 	dup2(saved_fds[0], 0);

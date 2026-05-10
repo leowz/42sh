@@ -1,4 +1,4 @@
-# Doxyfile for 42sh core project — generates man pages from Doxygen comments.
+# Doxyfile for 42sh core project - generates man pages from Doxygen comments.
 # Run "make docs" to generate, "make html" to build the full viewer.
 
 #---------------------------------------------------------------------------

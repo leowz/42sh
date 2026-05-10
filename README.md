@@ -94,7 +94,7 @@ Output looks like:
 A non-zero failed count causes the binary to exit with status `1`, which
 propagates through `make` so CI catches any regression.
 
-### Framework — `minunit.h`
+### Framework - `minunit.h`
 
 The test framework is a single header (`tests/minunit.h`) with no external
 dependencies. It exposes three assertion macros and two runner macros:
@@ -120,7 +120,7 @@ dependencies. It exposes three assertion macros and two runner macros:
    MU_RUN(test_mymodule_suite);
    ```
 5. Once all assertions are permanently green, remove the `#ifdef` guards and
-   the `-D` flag — the suite then compiles and runs unconditionally.
+   the `-D` flag - the suite then compiles and runs unconditionally.
 
 ## CI / CD
 

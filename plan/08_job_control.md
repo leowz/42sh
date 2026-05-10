@@ -27,7 +27,7 @@ SESSION
 ## Data Structures
 
 ```c
-// Process within a pipeline — NO *next; stored in t_job.processes (t_list*).
+// Process within a pipeline - NO *next; stored in t_job.processes (t_list*).
 typedef struct s_process
 {
     pid_t   pid;
@@ -37,7 +37,7 @@ typedef struct s_process
     int     stopped;
 }   t_process;
 
-// Job — NO *next; stored in t_shell.jobs (t_list*).
+// Job - NO *next; stored in t_shell.jobs (t_list*).
 typedef struct s_job
 {
     int             id;

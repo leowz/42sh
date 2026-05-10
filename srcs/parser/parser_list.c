@@ -26,11 +26,6 @@ static int	detect_separator(t_parser *p, t_node_type *operator)
 	return (0);
 }
 
-/**
- * @param p struct s_parser pointer
- * @brief handle list (& or ; separator)
- * @return struct s_ast pointer
- */
 t_ast	*parse_list(t_parser *p)
 {
 	t_ast		*left;

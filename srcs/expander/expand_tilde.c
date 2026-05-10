@@ -5,7 +5,7 @@
  *
  * Tilde expansion only fires at the very beginning of a word (or after
  * a ':' inside an assignment value, which the executor handles by
- * splitting the value first — not this module's concern).  When the
+ * splitting the value first - not this module's concern).  When the
  * substitution can't be resolved (e.g. no $HOME, unknown user) the
  * original text is emitted literally so that `ls ~unknownuser` still
  * passes a sensible argument to `ls` instead of failing silently.

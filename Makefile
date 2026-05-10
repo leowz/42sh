@@ -90,6 +90,18 @@ test: $(LIB) $(TEST_OBJS)
 	@printf "\n"$(GREEN)"running tests...\n"$(EOC)
 	@./$(TEST_NAME)
 
+# Integration tests: run each line in tests/integration/cases.txt through
+# ./42sh -c and bash --posix -c, compare stdout/stderr/exit, then re-run
+# the same line through ./42sh under valgrind (bash is never instrumented).
+# Use `make integration-quick` (or VALGRIND=0) to skip the valgrind pass.
+integration: $(NAME)
+	@printf $(GREEN)"running integration tests...\n"$(EOC)
+	@bash $(TEST_PATH)/integration/run.sh
+
+integration-quick: $(NAME)
+	@printf $(GREEN)"running integration tests (no valgrind)...\n"$(EOC)
+	@VALGRIND=0 bash $(TEST_PATH)/integration/run.sh
+
 # ---- Object rules ----
 
 # Project objects: srcs/**/*.c  ->  obj/**/*.o
@@ -162,18 +174,20 @@ help:
 	@printf $(WHITE)"42sh Makefile\n"$(EOC)
 	@printf "\n"
 	@printf "Targets:\n"
-	@printf "  "$(GREEN)"all"$(EOC)"           — build $(NAME) (default)\n"
-	@printf "  "$(GREEN)"debug"$(EOC)"         — build with AddressSanitizer + UBSan\n"
-	@printf "  "$(GREEN)"test"$(EOC)"          — build and run the test suite\n"
-	@printf "  "$(GREEN)"docs"$(EOC)"          — generate Doxygen XML + man pages\n"
-	@printf "  "$(GREEN)"html"$(EOC)"          — build Sphinx HTML docs (RTD theme)\n"
-	@printf "  "$(GREEN)"serve"$(EOC)"         — build and serve docs at localhost:8080\n"
-	@printf "  "$(RED)"dclean"$(EOC)"        — remove all generated docs\n"
-	@printf "  "$(RED)"clean"$(EOC)"         — remove object files\n"
-	@printf "  "$(RED)"fclean"$(EOC)"        — remove objects, binaries, and docs\n"
-	@printf "  "$(CYAN)"re"$(EOC)"            — rebuild from scratch\n"
-	@printf "  "$(CYAN)"install-hooks"$(EOC)" — set up Git hooks from .githooks/\n"
-	@printf "  "$(CYAN)"help"$(EOC)"          — show this message\n"
+	@printf "  "$(GREEN)"all"$(EOC)"           - build $(NAME) (default)\n"
+	@printf "  "$(GREEN)"debug"$(EOC)"         - build with AddressSanitizer + UBSan\n"
+	@printf "  "$(GREEN)"test"$(EOC)"          - build and run the test suite\n"
+	@printf "  "$(GREEN)"integration"$(EOC)"   - run integration tests (42sh vs bash --posix, +valgrind)\n"
+	@printf "  "$(GREEN)"integration-quick"$(EOC)" - same, but skip the valgrind pass\n"
+	@printf "  "$(GREEN)"docs"$(EOC)"          - generate Doxygen XML + man pages\n"
+	@printf "  "$(GREEN)"html"$(EOC)"          - build Sphinx HTML docs (RTD theme)\n"
+	@printf "  "$(GREEN)"serve"$(EOC)"         - build and serve docs at localhost:8080\n"
+	@printf "  "$(RED)"dclean"$(EOC)"        - remove all generated docs\n"
+	@printf "  "$(RED)"clean"$(EOC)"         - remove object files\n"
+	@printf "  "$(RED)"fclean"$(EOC)"        - remove objects, binaries, and docs\n"
+	@printf "  "$(CYAN)"re"$(EOC)"            - rebuild from scratch\n"
+	@printf "  "$(CYAN)"install-hooks"$(EOC)" - set up Git hooks from .githooks/\n"
+	@printf "  "$(CYAN)"help"$(EOC)"          - show this message\n"
 	@printf "\n"
 	@printf "Usage:\n"
 	@printf "  make           # build 42sh\n"
@@ -184,4 +198,4 @@ help:
 
 -include $(DEPS)
 
-.PHONY: all debug test docs html dclean serve clean fclean re help install-hooks
+.PHONY: all debug test integration integration-quick docs html dclean serve clean fclean re help install-hooks

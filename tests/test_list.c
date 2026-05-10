@@ -4,12 +4,12 @@
  * @author pulgamecanica (arosado-)
  *
  * Storage convention: ft_lstnew(ptr) stores the pointer directly in `content`.
- * Access pattern: `(T *)node->content` — wrapped here by the `LST_DUMMY()` macro.
+ * Access pattern: `(T *)node->content` - wrapped here by the `LST_DUMMY()` macro.
  *
  * Covers ft_lstnew(), ft_lstsize(), forward traversal, ft_lstdel()
  * (pointer-and-node free), and ft_lstadd() (prepend to front).
  *
- * This suite is always compiled and always runs — it is not guarded by a
+ * This suite is always compiled and always runs - it is not guarded by a
  * feature flag because `t_list` is a core Libft primitive.
  */
 

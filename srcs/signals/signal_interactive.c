@@ -8,7 +8,7 @@ volatile sig_atomic_t	g_signal_received;
 /**
  * @brief SIGINT handler for interactive mode (at prompt).
  *
- * @details: Ctrl-C abandons the current input line, prints a newline,
+ * @details Ctrl-C abandons the current input line, prints a newline,
  * and redisplays a fresh prompt. The old text stays visible above.
  *
  * @details We use rl_replace_line + rl_on_new_line + rl_redisplay to tell readline
@@ -24,8 +24,6 @@ static void	sigint_handler_interactive(int sig)
 }
 
 /**
- * @brief Set up signal handlers for interactive mode (at the prompt).
- *
  * @details SIGINT  - custom handler: newline + redisplay prompt (like bash)
  * @details SIGQUIT - ignored (Ctrl-\ does nothing at prompt)
  * @details SIGTSTP - ignored (Ctrl-Z at prompt is a no-op; children handle it)

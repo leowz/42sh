@@ -57,7 +57,7 @@ typedef enum e_token_type
     TOK_ERROR
 }   t_token_type;
 
-// Token data — NO *next pointer.
+// Token data - NO *next pointer.
 typedef struct s_token
 {
     t_token_type    type;
@@ -75,7 +75,7 @@ Free: `lexer_free_tokens(t_list *tokens)`.
 ## 2. AST Nodes (Parser Output)
 
 ```c
-// Redirection data — NO *next pointer.
+// Redirection data - NO *next pointer.
 typedef struct s_redir
 {
     t_token_type    type;
@@ -91,7 +91,7 @@ typedef struct s_cmd
 {
     char    **argv;         // NULL-terminated, unexpanded (for execve)
     int     argc;
-    t_list  *assignments;   // list of char* "NAME=val" — NO char **
+    t_list  *assignments;   // list of char* "NAME=val" - NO char **
     t_list  *redirs;        // list of t_redir*
 }   t_cmd;
 
@@ -131,7 +131,7 @@ typedef struct s_ast
 ## 3. Variable Storage
 
 ```c
-// Variable data — NO *next pointer.
+// Variable data - NO *next pointer.
 typedef struct s_var
 {
     char    *name;
@@ -152,7 +152,7 @@ is the baseline.
 ## 4. Job Control
 
 ```c
-// Process in a pipeline — NO *next pointer.
+// Process in a pipeline - NO *next pointer.
 typedef struct s_process
 {
     pid_t   pid;
@@ -162,7 +162,7 @@ typedef struct s_process
     int     stopped;
 }   t_process;
 
-// Job — NO *next pointer.
+// Job - NO *next pointer.
 typedef struct s_job
 {
     int             id;
@@ -184,7 +184,7 @@ Access: `LST_JOB(node)` → `*(t_job **)node->content`.
 ## 5. History
 
 ```c
-// History entry data — stored in t_dlist nodes (doubly-linked for navigation).
+// History entry data - stored in t_dlist nodes (doubly-linked for navigation).
 typedef struct s_history_entry
 {
     int     number;     // monotonically increasing history number (1-based)
@@ -234,7 +234,7 @@ via `rl_variable_bind()`, readline callbacks, and `rl_attempted_completion_funct
 ## 7. Alias
 
 ```c
-// Alias data — NO *next pointer.
+// Alias data - NO *next pointer.
 typedef struct s_alias
 {
     char    *name;

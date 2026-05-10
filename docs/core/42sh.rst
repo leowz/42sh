@@ -1,14 +1,6 @@
-42sh — Shell State
+42sh (Shell State)
 ==================
-
-Top-level header defining the central ``t_shell`` struct and
-variable-management API.
 
 .. doxygenfile:: 42sh.h
    :project: core
 
-main.c
-------
-
-.. doxygenfile:: main.c
-   :project: core

@@ -1,11 +1,11 @@
 #!/bin/sh
-# scripts/gendocs.sh — Documentation generation for 42sh
+# scripts/gendocs.sh - Documentation generation for 42sh
 #
 # Commands:
-#   docs       — run doxygen (core + tests) and add SEE ALSO cross-refs
-#   html       — convert man pages to HTML and regenerate docs/pages.json
-#   see-also   — only (re)add SEE ALSO sections to existing man pages
-#   pages-json — only regenerate docs/pages.json
+#   docs       - run doxygen (core + tests) and add SEE ALSO cross-refs
+#   html       - convert man pages to HTML and regenerate docs/pages.json
+#   see-also   - only (re)add SEE ALSO sections to existing man pages
+#   pages-json - only regenerate docs/pages.json
 #
 # Always run from the project root.
 
@@ -118,7 +118,7 @@ cmd_html() {
     man_to_html "$CORE_MAN" "$CORE_HTML"
     man_to_html "$TEST_MAN" "$TEST_HTML"
     gen_pages_json
-    info "Docs ready — run 'make serve' to view."
+    info "Docs ready - run 'make serve' to view."
 }
 
 # ---------------------------------------------------------------------------

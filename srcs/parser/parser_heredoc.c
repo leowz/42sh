@@ -185,10 +185,6 @@ static int	collect_heredocs_from_group(t_group *group)
 	return (0);
 }
 
-/**
- * @param redir : t_redir struct
- * @brief fill the heredoc_delim and heredoc_quoted fields of the t_redir struct
- */
 void	heredoc_expand_config(t_redir *redir)
 {
 	char	quote;
@@ -257,12 +253,6 @@ static void	heredoc_sigint_handler(int signal)
 	rl_done = 1;
 }
 
-/**
- * @param ast : struct s_ast pointer
- * @param shell : struct s_shell pointer
- * @brief stop ast walking and collect heredoc on SIGINT
- * @return 0 on success, -1 on SIGINT
- */
 int	parser_collect_heredocs(t_ast *ast, t_shell *shell)
 {
 	struct sigaction	sa_heredoc;

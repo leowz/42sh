@@ -339,7 +339,7 @@ ls: nonexistent: No such file or directory
    `signals_setup_interactive()` uses a write-only handler
 
 ### Deliverable
-- Left/right arrows, Home/End, Ctrl-A/E, Ctrl-K/U/W — all from readline for free
+- Left/right arrows, Home/End, Ctrl-A/E, Ctrl-K/U/W - all from readline for free
 - Up/Down arrows navigate both readline internal history and our `t_history`
 - Multi-line input works (continues with `> ` prompt on unclosed quotes)
 - History file loaded at startup and saved at exit
@@ -458,10 +458,10 @@ Suggested order based on dependencies:
 Build and run with `make test`.  A minimal test framework (`tests/minunit.h`)
 provides `MU_ASSERT`, `MU_ASSERT_INT`, `MU_ASSERT_STR`, `MU_RUN`, `MU_SUMMARY`.
 
-- `tests/test_dlist.c` — ft_dlstnew, ft_dlstadd_back, ft_dlstclear, prev/next linkage
-- `tests/test_list.c` — t_list (libft) pointer-storage pattern and del convention
-- `tests/test_array.c` — ft_array grow, ft_arritem_at, ft_arrswap, ft_arrdel
-- `tests/test_history.c` — history_add (dedup, max_size), history_prev/next navigation
+- `tests/test_dlist.c` - ft_dlstnew, ft_dlstadd_back, ft_dlstclear, prev/next linkage
+- `tests/test_list.c` - t_list (libft) pointer-storage pattern and del convention
+- `tests/test_array.c` - ft_array grow, ft_arritem_at, ft_arrswap, ft_arrdel
+- `tests/test_history.c` - history_add (dedup, max_size), history_prev/next navigation
 - Add `tests/test_<module>.c` as each module is implemented
 
 Compile flag `-DTEST_MODE` can gate debug-only code:

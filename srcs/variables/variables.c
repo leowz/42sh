@@ -15,7 +15,6 @@
  */
 
 #include "42sh.h"
-#include "variables.h"
 #include <stdlib.h>
 
 static int	is_valid_identifier(const char *name)

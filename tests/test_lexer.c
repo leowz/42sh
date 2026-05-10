@@ -14,11 +14,11 @@
  *
  * ## Sections
  *
- * - **token_new** — allocation and field initialisation
- * - **is_operator / is_operator_start** — character classification
- * - **read_word** — word boundary detection, quote handling, backslash escapes
- * - **read_operator** — every operator token type
- * - **lexer_tokenize** — end-to-end tokenisation of realistic shell inputs
+ * - **token_new** - allocation and field initialisation
+ * - **is_operator / is_operator_start** - character classification
+ * - **read_word** - word boundary detection, quote handling, backslash escapes
+ * - **read_operator** - every operator token type
+ * - **lexer_tokenize** - end-to-end tokenisation of realistic shell inputs
  */
 
 #ifdef TEST_LEXER_ENABLED
@@ -379,7 +379,7 @@ static void	test_read_operator_malformed_no_crash(void)
 }
 
 /* ========================================================================= */
-/*  lexer_tokenize — end-to-end                                              */
+/*  lexer_tokenize - end-to-end                                              */
 /* ========================================================================= */
 
 /**

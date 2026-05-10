@@ -1,4 +1,4 @@
-minunit.h — Test Framework
+minunit.h - Test Framework
 ==========================
 
 .. doxygenfile:: minunit.h

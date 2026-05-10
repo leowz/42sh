@@ -43,18 +43,13 @@ static const char	*tok_type_str(t_token_type type)
 	return ("UNKNOWN");
 }
 
-/**
- * @brief Print a human-readable representation of a token list to stdout.
- * @param tokens t_list* returned by lexer_tokenize()
- * @param input  The original input string (printed as header)
- */
 void	lexer_display(t_list *tokens, const char *input)
 {
 	t_list	*node;
 	t_token	*tok;
 	int		i;
 
-	printf("\n\033[1;36m┌─ Tokenization ────────────────────────────────\033[0m\n");
+	printf("\033[1;36m┌─ Tokenization ────────────────────────────────\033[0m\n");
 	printf("\033[1;36m│\033[0m Input : \033[1;33m%s\033[0m\n", input);
 	printf("\033[1;36m├────────────────────────────────────────────────\033[0m\n");
 	node = tokens;
@@ -70,7 +65,7 @@ void	lexer_display(t_list *tokens, const char *input)
 		node = node->next;
 		i++;
 	}
-	printf("\033[1;36m└────────────────────────────────────────────────\033[0m\n\n");
+	printf("\033[1;36m└────────────────────────────────────────────────\033[0m\n");
 }
 
 /* ─── JSON helpers ──────────────────────────────────────────────── */
@@ -167,12 +162,8 @@ static void	update_manifest(const char *json_filename)
 }
 
 /**
- * @brief Write a JSON file representing the tokenization of @p input.
  * @details Creates tokenizations/ if missing, writes a timestamped file,
- *          and updates tokenizations/manifest.json for the static viewer.
- * @param tokens t_list* from lexer_tokenize()
- * @param input  Original input string
- * @return The malloc'd path of the written file (caller must free), or NULL.
+ *                   and updates tokenizations/manifest.json for the static viewer.
  */
 char	*lexer_to_json(t_list *tokens, const char *input)
 {

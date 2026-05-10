@@ -52,8 +52,6 @@ static const char	*redir_type_str(t_token_type type)
 	return ("?");
 }
 
-/* ─── Pretty-print to stdout ──────────────────────────────────────── */
-
 static void	display_indent(int depth)
 {
 	int	i;
@@ -133,14 +131,12 @@ static void	ast_display_node(t_ast *node, int depth)
 
 void	ast_display(t_ast *ast, const char *input)
 {
-	printf("\n\033[1;36m┌─ AST ─────────────────────────────────────────\033[0m\n");
+	printf("\033[1;36m┌─ AST ─────────────────────────────────────────\033[0m\n");
 	printf("\033[1;36m│\033[0m Input : \033[1;33m%s\033[0m\n", input);
 	printf("\033[1;36m├────────────────────────────────────────────────\033[0m\n");
 	ast_display_node(ast, 0);
-	printf("\033[1;36m└────────────────────────────────────────────────\033[0m\n\n");
+	printf("\033[1;36m└────────────────────────────────────────────────\033[0m\n");
 }
-
-/* ─── JSON helpers ──────────────────────────────────────────────── */
 
 static void	json_str(FILE *fp, const char *s)
 {
@@ -306,9 +302,6 @@ static void	ast_to_json_node(FILE *fp, t_ast *node, int depth)
 	fprintf(fp, "}");
 }
 
-/**
- * @brief Append this AST entry to ast/manifest.json.
- */
 static void	update_manifest(const char *json_filename)
 {
 	FILE		*fp;
@@ -362,15 +355,9 @@ static void	update_manifest(const char *json_filename)
 }
 
 /**
- * @brief Write a JSON file representing the AST of @p input.
  * @details Creates viz/ast/ if missing, writes a timestamped file,
- *          and updates viz/ast/manifest.json for the static viewer.
- *          The tok_file field links this AST dump to its tokenization file.
- * @param ast      The AST root node.
- * @param input    Original input string.
- * @param tok_file Basename of the matching tokenization JSON (e.g. "tok_*.json"),
- *                 or NULL if unavailable.
- * @return The malloc'd path of the written file (caller must free), or NULL.
+ *                   and updates viz/ast/manifest.json for the static viewer.
+ *                   The tok_file field links this AST dump to its tokenization file.
  */
 char	*ast_to_json(t_ast *ast, const char *input, const char *tok_file)
 {

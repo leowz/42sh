@@ -48,18 +48,6 @@ static int	is_numeric(const char *str)
 	return (1);
 }
 
-/**
- * @brief Exit the shell with an optional status code.
- * @details Behavior matches bash:
- *          - exit       → exit with $?
- *          - exit N     → exit with N & 0xFF
- *          - exit foo   → "numeric argument required", exit 2
- *          - exit 1 2   → "too many arguments", do NOT exit, return 1
- * @param shell The shell instance.
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return Exit status.
- */
 int	builtin_exit(struct s_shell *shell, int argc, char **argv)
 {
 	if (shell->interactive)

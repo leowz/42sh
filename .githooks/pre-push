@@ -7,7 +7,7 @@ set -e
 printf "\033[1;36m[pre-push] Running make test...\033[0m\n"
 
 if ! make test; then
-  printf "\033[1;31m[pre-push] Tests FAILED — push aborted.\033[0m\n"
+  printf "\033[1;31m[pre-push] Tests FAILED - push aborted.\033[0m\n"
   exit 1
 fi
 

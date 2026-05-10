@@ -3,10 +3,25 @@
 #include "executor.h"
 #include "42sh.h"
 
-static int	shell_init(t_shell *shell, char **envp)
+/**
+ * @brief Resolve the final value of @c shell->interactive.
+ * @details Precedence (highest first): -c forces non-interactive (matches
+ *          bash --posix -c behaviour), -i forces interactive, otherwise
+ *          we autodetect based on whether stdin is a TTY.
+ */
+static void	resolve_interactive(t_shell *shell, int force_interactive)
 {
-	ft_bzero(shell, sizeof(t_shell));
-	shell->interactive = isatty(STDIN_FILENO);
+	if (shell->cmd_entrypoint)
+		shell->interactive = 0;
+	else if (force_interactive)
+		shell->interactive = 1;
+	else
+		shell->interactive = isatty(STDIN_FILENO);
+}
+
+static int	shell_init(t_shell *shell, char **envp, int force_interactive)
+{
+	resolve_interactive(shell, force_interactive);
 	shell->running = 1;
 	shell->terminal_fd = STDIN_FILENO;
 	shell->shell_pgid = getpid();
@@ -18,7 +33,6 @@ static int	shell_init(t_shell *shell, char **envp)
 		signals_setup_interactive();
 		job_control_init(shell);
 	}
-	// init a 42shrc file here if it exists
 	return (0);
 }
 
@@ -92,27 +106,42 @@ static char	*read_line(t_shell *shell)
 	return (line);
 }
 
-static void parse_options(int argc, char *argv[], t_shell *shell) {
-	int opt;
-	char *cmd_entrypoint;
+/**
+ * @brief Parse argv flags into @p shell.
+ * @details -c <cmd> stores the one-shot command (POSIX -c form) and
+ *          implicitly forces non-interactive mode when applied later.
+ *          -i forces interactive mode (returned via @p force_interactive
+ *          so the caller can apply it before history/job-control setup).
+ *          -h prints usage and exits 0.
+ */
+static void	parse_options(int argc, char *argv[], t_shell *shell,
+		int *force_interactive)
+{
+	int	opt;
 
-	cmd_entrypoint = NULL;
-	while ((opt = getopt(argc, argv, "hic:")) != -1) {
-		switch (opt) {
-		case 'c':
-			if (cmd_entrypoint) {
-				fprintf(stderr, "Error: Multiple -c options provided.\n");
-				exit(EXIT_FAILURE);
+	*force_interactive = 0;
+	while ((opt = getopt(argc, argv, "hic:")) != -1)
+	{
+		if (opt == 'c')
+		{
+			if (shell->cmd_entrypoint)
+			{
+				fprintf(stderr, "42sh: -c: only one command allowed\n");
+				exit(2);
 			}
 			shell->cmd_entrypoint = optarg;
-			break;
-		case 'i':
-			shell->interactive = 1;
-			break;
-		default: /* '?' */
-			fprintf(stderr, """Usage: %s [-i] [-c command]\n",
-							argv[0]);
-			exit(EXIT_FAILURE);
+		}
+		else if (opt == 'i')
+			*force_interactive = 1;
+		else if (opt == 'h')
+		{
+			printf("Usage: %s [-i] [-c command]\n", argv[0]);
+			exit(0);
+		}
+		else
+		{
+			fprintf(stderr, "Usage: %s [-i] [-c command]\n", argv[0]);
+			exit(2);
 		}
 	}
 }
@@ -121,23 +150,20 @@ static void parse_options(int argc, char *argv[], t_shell *shell) {
 static void _display(t_list *tokens, t_ast *ast, char *line)
 {
 	char	*tok_json;
+	char	*ast_json;
+
 	lexer_display(tokens, line);
 	tok_json = lexer_to_json(tokens, line);
 	if (tok_json)
-		printf("  \033[2mJSON → %s\033[0m\n\n", tok_json);
-
-	char	*ast_json;
-
+		printf("  \033[2mJSON → %s\033[0m\n", tok_json);
 	ast_display(ast, line);
 	ast_json = ast_to_json(ast, line, tok_json);
 	if (ast_json)
 	{
-		printf("  \033[2mAST  → %s\033[0m\n\n",
-			ast_json);
+		printf("  \033[2mAST  → %s\033[0m\n", ast_json);
 		free(ast_json);
 	}
 	free(tok_json);
-
 }
 #endif
 
@@ -173,25 +199,26 @@ static void process_line(t_shell *shell, char *line)
 }
 
 
-int	main(int argc, char *argv[], char *envp[])
+/**
+ * @brief Run the interactive / piped REPL loop until EOF or @c shell.running=0.
+ */
+static void	repl_loop(t_shell *shell)
 {
-	t_shell	shell;
-	char	*raw_line, *line;
+	char	*raw_line;
+	char	*line;
 
-	shell_init(&shell, envp);
-	parse_options(argc, argv, &shell);
-	while (shell.running)
+	while (shell->running)
 	{
-		signals_check(&shell);
-		if (shell.interactive)
+		signals_check(shell);
+		if (shell->interactive)
 		{
-			job_update_statuses(&shell);
-			job_notify(&shell);
+			job_update_statuses(shell);
+			job_notify(shell);
 		}
-		raw_line = read_line(&shell);
+		raw_line = read_line(shell);
 		if (!raw_line)
 		{
-			if (shell.interactive)
+			if (shell->interactive)
 				write(STDOUT_FILENO, "exit\n", 5);
 			break ;
 		}
@@ -202,14 +229,28 @@ int	main(int argc, char *argv[], char *envp[])
 			free(line);
 			continue ;
 		}
-		if (shell.interactive)
+		if (shell->interactive)
 		{
 			add_history(line);
-			history_save(shell.history_file);
+			history_save(shell->history_file);
 		}
-		process_line(&shell, line);
+		process_line(shell, line);
 		free(line);
 	}
+}
+
+int	main(int argc, char *argv[], char *envp[])
+{
+	t_shell	shell;
+	int		force_interactive;
+
+	ft_bzero(&shell, sizeof(t_shell));
+	parse_options(argc, argv, &shell, &force_interactive);
+	shell_init(&shell, envp, force_interactive);
+	if (shell.cmd_entrypoint)
+		process_line(&shell, shell.cmd_entrypoint);
+	else
+		repl_loop(&shell);
 	shell_cleanup(&shell);
 	return (shell.last_exit_status);
 }

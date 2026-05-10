@@ -103,9 +103,9 @@ The shell operates in two modes:
 All modules access a shared shell state structure.
 
 **List conventions** (see `01_data_structures.md`):
-- `t_list *variables` — list of `t_var *` (use `LST_VAR(node)`)
-- `t_list *jobs` — list of `t_job *` (use `LST_JOB(node)`)
-- `t_list *aliases` — list of `t_alias *` (use `LST_ALIAS(node)`)
+- `t_list *variables` - list of `t_var *` (use `LST_VAR(node)`)
+- `t_list *jobs` - list of `t_job *` (use `LST_JOB(node)`)
+- `t_list *aliases` - list of `t_alias *` (use `LST_ALIAS(node)`)
 - No raw `*next` pointers in any of these structs.
 
 ```c

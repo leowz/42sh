@@ -5,13 +5,6 @@
  */
 #include "parser.h"
 
-/**
- * @param type enum e_node_type
- * @param child struct s_ast
- * @param redirs struct s_list with a t_redir * as content
- * @brief helper function for the parse_subshell function
- * @return pointer on struct s_ast
- */
 t_ast	*ast_new_group(t_node_type type, t_ast *child, t_list *redirs)
 {
 	t_ast	*ast;
@@ -73,11 +66,6 @@ static t_ast	*parse_group(t_parser *p, t_ast *child, t_node_type node)
 	return (ast_new_group(node, child, redirs));
 }
 
-/**
- * @param p struct s_parser pointer
- * @brief create a new  NODE_SUBSHELL with its child and redirs
- * @return pointer on struct s_ast
- */
 t_ast	*parse_subshell(t_parser *p)
 {
 	t_ast	*child;
@@ -95,11 +83,6 @@ t_ast	*parse_subshell(t_parser *p)
 	return (parse_group(p, child, NODE_SUBSHELL));
 }
 
-/**
- * @param p struct s_parser pointer
- * @brief create a new  NODE_BLOCK with its child and redirs
- * @return pointer on struct s_ast
- */
 t_ast	*parse_block(t_parser *p)
 {
 	t_ast	*child;

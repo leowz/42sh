@@ -1,6 +1,6 @@
 /**
  * @file builtin_bg.c
- * @brief `bg [%spec]` — resume a stopped job in the background.
+ * @brief `bg [%spec]` - resume a stopped job in the background.
  * @author pulgamecanica
  */
 

@@ -1,0 +1,37 @@
+{
+  "input": "LS=/usr/bin/ls ; $LS -la && echo \"OK\"",
+  "tok_file": "viz/tokenizations/tok_1778446570_150702.json",
+  "tree": {
+    "type": "NODE_SEQUENCE",
+    "left": {
+      "type": "NODE_COMMAND",
+      "argv": [],
+      "argc": 0,
+      "assignments": ["LS=/usr/bin/ls"],
+      "redirs": [
+
+      ]
+    },
+    "right": {
+      "type": "NODE_AND",
+      "left": {
+        "type": "NODE_COMMAND",
+        "argv": ["$LS", "-la"],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["echo", "\"OK\""],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    }
+  }
+}

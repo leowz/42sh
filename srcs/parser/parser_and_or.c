@@ -26,11 +26,6 @@ static int	detect_and_or(t_parser *p, t_node_type *type)
 	return (0);
 }
 
-/**
- * @param p struct s_parser
- * @brief detect && or || and create a t_ast node with two commands
- * @return a pointer on a struct s_ast
- */
 t_ast	*parse_and_or(t_parser *p)
 {
 	t_ast		*left;

@@ -16,7 +16,6 @@ typedef struct s_builtin_entry
 
 /**
  * @brief Builtin lookup table.
- * @details Add new builtins here as they are implemented.
  */
 static const t_builtin_entry	g_builtins[] = {
 	{"history", builtin_history},
@@ -31,9 +30,8 @@ static const t_builtin_entry	g_builtins[] = {
 };
 
 /**
- * @brief Look up a builtin by name.
- * @param name The name of the builtin to look up.
- * @return The function pointer or NULL if not found.
+ * @param name Name of the builtin function to retrieve
+ * @return Pointer to the builtin function, or NULL if not found
  */
 t_builtin_fn	builtin_get(const char *name)
 {
@@ -51,11 +49,6 @@ t_builtin_fn	builtin_get(const char *name)
 	return (NULL);
 }
 
-/**
- * @brief Check if a name is a builtin.
- * @param name The name to check.
- * @return 1 if the name is a builtin, 0 otherwise.
- */
 int	builtin_is_builtin(const char *name)
 {
 	return (builtin_get(name) != NULL);

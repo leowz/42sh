@@ -7,7 +7,7 @@
  * 
  * Forward and backward traversal via `->next` / `->prev`, and ft_dlstclear().
  *
- * This suite is always compiled and always runs — it is not guarded by a
+ * This suite is always compiled and always runs - it is not guarded by a
  * feature flag because `t_list` is a core Libft primitive.
  */
 

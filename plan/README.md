@@ -44,7 +44,7 @@ Input → Lexer → Parser → Heredoc Collection → Executor → Result
 
 3. **Heredoc collection happens after parsing, before execution.** The parser records heredoc redirections in the AST. A separate pass walks the AST and reads heredoc content from input. Then execution begins.
 
-4. **No double-fork in pipelines.** Each pipeline child is forked once by the parent shell. The child either calls execve directly or runs a builtin and exits — never forks again.
+4. **No double-fork in pipelines.** Each pipeline child is forked once by the parent shell. The child either calls execve directly or runs a builtin and exits - never forks again.
 
 5. **Assignment detection is in the parser, not the lexer.** This avoids misclassifying `echo VAR=value` as an assignment.
 

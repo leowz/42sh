@@ -34,7 +34,7 @@ typedef struct s_history
 ```
 
 `ft_dlstnew(entry_ptr)` stores the pointer directly (`node->content = entry_ptr`).
-Access: `(t_history_entry *)node->content` — single cast, no double-deref needed
+Access: `(t_history_entry *)node->content` - single cast, no double-deref needed
 because `ft_dlstnew` does NOT copy content (unlike `ft_lstnew`).
 
 ## Interface

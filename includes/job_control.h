@@ -1,6 +1,6 @@
 /**
  * @file job_control.h
- * @brief Job control definitions for the 42sh shell.
+ * @brief Job and process tracking for foreground/background execution.
  * @author pulgamecanica
  *
  * A **job** is one pipeline launched by the shell (foreground or background).
@@ -8,16 +8,17 @@
  * deliver signals to the whole pipeline at once, and so the shell can suspend
  * or resume it independently of itself.
  *
- * Ownership model:
- *   - `t_shell.jobs`       : `t_list*` of `t_job*`       (one entry per known job)
- *   - `t_job.processes`    : `t_list*` of `t_process*`   (one entry per pipeline stage)
+ *   - `t_shell.jobs`       : `t_list*` of `t_job*`       (one entry per known
+ * job)
+ *   - `t_job.processes`    : `t_list*` of `t_process*`   (one entry per
+ * pipeline stage)
  */
 
 #ifndef JOB_CONTROL_H
-# define JOB_CONTROL_H
+#define JOB_CONTROL_H
 
-# include <sys/types.h>
-# include "libft.h"
+#include "libft.h"
+#include <sys/types.h>
 
 /* Forward declaration - the full definition lives in 42sh.h, which itself
  * includes this header.  We only need a pointer type here. */
@@ -25,73 +26,49 @@ struct s_shell;
 
 /**
  * @brief Lifecycle state of a job, recomputed from its processes.
- *
- * @details
- * - JOB_RUNNING    : at least one process is still running and none stopped.
- * - JOB_STOPPED    : at least one process received SIGTSTP/SIGSTOP (Ctrl-Z).
- * - JOB_DONE       : every process exited normally (any exit code).
- * - JOB_TERMINATED : at least one process was killed by a signal.
  */
-typedef enum e_job_status
-{
-	JOB_RUNNING,
-	JOB_STOPPED,
-	JOB_DONE,
-	JOB_TERMINATED
-}	t_job_status;
+typedef enum e_job_status {
+  JOB_RUNNING,   /**< At least one process is still running and none stopped. */
+  JOB_STOPPED,   /**< At least one process received SIGTSTP/SIGSTOP (Ctrl-Z). */
+  JOB_DONE,      /**< Every process exited normally (any exit code). */
+  JOB_TERMINATED /**< At least one process was killed by a signal. */
+} t_job_status;
 
 /**
  * @brief A single process belonging to a job (one pipeline stage).
- *
  * @details Stored in `t_job.processes` as the `content` of a `t_list` node.
  *          Reaped and updated by `job_update_statuses`.
- *
- * @param pid       The child pid returned by fork().
- * @param cmd       Human-readable description of this stage (for listings).
- * @param status    Raw `wstatus` value from the last waitpid() on this pid.
- * @param completed 1 once the process has exited (normally or by signal).
- * @param stopped   1 while the process is stopped (SIGTSTP/SIGSTOP).
  */
-typedef struct s_process
-{
-	pid_t	pid;
-	char	*cmd;
-	int		status;
-	int		completed;
-	int		stopped;
-}	t_process;
+typedef struct s_process {
+  pid_t pid;       /**< Child pid returned by fork(). */
+  char  *cmd;      /**< Human-readable description of this stage (for listings). */
+  int   status;    /**< Raw `wstatus` value from the last waitpid() on this pid. */
+  int   completed; /**< 1 once the process has exited (normally or by signal). */
+  int   stopped;   /**< 1 while the process is stopped (SIGTSTP/SIGSTOP). */
+} t_process;
 
 /**
  * @brief One pipeline launched by the shell (background or foreground).
- *
  * @details Stored in `t_shell.jobs` as the `content` of a `t_list` node.
  *          Built by `job_create`, grown by `job_add_process`, reaped by
  *          `job_update_statuses`, and released by `job_free` (either via
  *          `job_notify` when completed, or `job_control_cleanup` on exit).
- *
- * @param id         Shell-assigned sequential id (1-based).  Used by `%N`
- *                   job-spec and by `jobs` listings.
- * @param pgid       Process-group id shared by every stage of the pipeline.
- * @param cmd_line   Displayed by `jobs`/notifications.  Built from the AST
- *                   subtree via `ast_to_string`, not the raw input line,
- *                   so `ls ; sleep 5 &` shows only `sleep 5`.
- * @param processes  `t_list*` of `t_process*` - one node per pipeline stage.
- * @param status     Aggregate lifecycle state (see `t_job_status`).
- * @param notified   1 once the user has been informed about the current
- *                   `status`; cleared whenever `status` changes so the next
- *                   `job_notify` prints it again.
- * @param foreground 1 if the job currently owns the controlling terminal.
  */
-typedef struct s_job
-{
-	int				id;
-	pid_t			pgid;
-	char			*cmd_line;
-	t_list		*processes;
-	t_job_status	status;
-	int				notified;
-	int				foreground;
-}	t_job;
+typedef struct s_job {
+  int          id;         /**< Shell-assigned sequential id (1-based); used by
+                                `%N` job-spec and by `jobs` listings. */
+  pid_t        pgid;       /**< Process-group id shared by every pipeline stage. */
+  char         *cmd_line;  /**< Displayed by `jobs`/notifications.  Built from
+                                the AST subtree via `ast_to_string`, not the
+                                raw input line, so `ls ; sleep 5 &` shows only
+                                `sleep 5`. */
+  t_list       *processes; /**< `t_list*` of `t_process*` - one per pipeline stage. */
+  t_job_status status;     /**< Aggregate lifecycle state (see `t_job_status`). */
+  int          notified;   /**< 1 once the user has been informed about the
+                                current `status`; cleared whenever `status`
+                                changes so the next `job_notify` prints it again. */
+  int          foreground; /**< 1 if the job currently owns the controlling terminal. */
+} t_job;
 
 /**
  * @brief Place the shell in its own process group and claim the terminal.
@@ -101,7 +78,7 @@ typedef struct s_job
  *          and `shell->original_termios` holds the saved terminal settings.
  * @return 0 on success, 1 on `setpgid` failure.
  */
-int			job_control_init(struct s_shell *shell);
+int job_control_init(struct s_shell *shell);
 
 /**
  * @brief Allocate a job, append it to `shell->jobs`, and make it `current_job`.
@@ -109,19 +86,19 @@ int			job_control_init(struct s_shell *shell);
  *          duplicated with `ft_strdup` and released by `job_free`.
  * @return Newly created job, or NULL on allocation failure.
  */
-t_job		*job_create(struct s_shell *shell, const char *cmd_line);
+t_job *job_create(struct s_shell *shell, const char *cmd_line);
 
 /**
  * @brief Register a forked child as a stage of `job`.
  * @details Appends a `t_process` to `job->processes`.  `cmd` is duplicated.
  */
-void		job_add_process(t_job *job, pid_t pid, const char *cmd);
+void job_add_process(t_job *job, pid_t pid, const char *cmd);
 
 /** @brief Find a job by its shell-assigned id, or NULL. */
-t_job		*job_find_by_id(struct s_shell *shell, int id);
+t_job *job_find_by_id(struct s_shell *shell, int id);
 
 /** @brief Find the job containing a given pid, or NULL. */
-t_job		*job_find_by_pid(struct s_shell *shell, pid_t pid);
+t_job *job_find_by_pid(struct s_shell *shell, pid_t pid);
 
 /**
  * @brief Resolve a bash-style job spec to a `t_job*`.
@@ -130,20 +107,20 @@ t_job		*job_find_by_pid(struct s_shell *shell, pid_t pid);
  *          "%prefix" → first job whose `cmd_line` starts with `prefix`.
  * @return Matching job or NULL if spec is malformed / no such job.
  */
-t_job		*job_find_by_spec(struct s_shell *shell, const char *spec);
+t_job *job_find_by_spec(struct s_shell *shell, const char *spec);
 
 /**
  * @brief Free a job and all of its processes.
  * @details Matches the `void (*)(void *)` deleter signature of `ft_lstdel`.
  */
-void		job_free(void *job_ptr);
+void job_free(void *job_ptr);
 
 /**
  * @brief Unlink `job` from `shell->jobs` and release it.
  * @details Clears `shell->current_job` if it referenced the removed job.
  *          No-op if `job` is not in the list (silent for safety).
  */
-void		job_remove(struct s_shell *shell, t_job *job);
+void job_remove(struct s_shell *shell, t_job *job);
 
 /**
  * @brief Hand a job off to the background and print `[id] pgid` on stderr.
@@ -152,7 +129,7 @@ void		job_remove(struct s_shell *shell, t_job *job);
  *          `job_update_statuses` between prompts.
  * @return 0 on success, 1 if `job` is NULL.
  */
-int			job_launch_background(struct s_shell *shell, t_job *job);
+int job_launch_background(struct s_shell *shell, t_job *job);
 
 /**
  * @brief Hand the terminal to `job`, wait for it, then take it back.
@@ -164,7 +141,7 @@ int			job_launch_background(struct s_shell *shell, t_job *job);
  * @return Exit status of the pipeline (last completed process), or
  *         128+WSTOPSIG if the job was stopped.
  */
-int			job_launch_foreground(struct s_shell *shell, t_job *job);
+int job_launch_foreground(struct s_shell *shell, t_job *job);
 
 /**
  * @brief Resume a stopped job in the foreground.
@@ -173,7 +150,7 @@ int			job_launch_foreground(struct s_shell *shell, t_job *job);
  *          removes it on completion.
  * @return Exit status, or 128+WSTOPSIG if stopped again.
  */
-int			job_continue_foreground(struct s_shell *shell, t_job *job);
+int job_continue_foreground(struct s_shell *shell, t_job *job);
 
 /**
  * @brief Resume a stopped job in the background.
@@ -181,7 +158,7 @@ int			job_continue_foreground(struct s_shell *shell, t_job *job);
  *          wait - the job is reaped between prompts like any bg job.
  * @return 0 on success, 1 on invalid input or `kill` failure.
  */
-int			job_continue_background(struct s_shell *shell, t_job *job);
+int job_continue_background(struct s_shell *shell, t_job *job);
 
 /**
  * @brief Blocking reap of every process in `job`.
@@ -191,7 +168,7 @@ int			job_continue_background(struct s_shell *shell, t_job *job);
  * @return Exit status of the last completed process, 128+WSTOPSIG on stop,
  *         -1 on unrecoverable waitpid error.
  */
-int			job_wait(struct s_shell *shell, t_job *job);
+int job_wait(struct s_shell *shell, t_job *job);
 
 /**
  * @brief Apply a single `waitpid` result to one process of `job`.
@@ -201,7 +178,7 @@ int			job_wait(struct s_shell *shell, t_job *job);
  *          `job_recompute_status` afterwards.
  * @return 1 if `pid` belonged to this job, 0 otherwise.
  */
-int			job_apply_status(t_job *job, pid_t pid, int status);
+int job_apply_status(t_job *job, pid_t pid, int status);
 
 /**
  * @brief Recompute `job->status` from the flags of its processes.
@@ -209,7 +186,7 @@ int			job_apply_status(t_job *job, pid_t pid, int status);
  *          (preserved if set by `job_apply_status`), JOB_STOPPED (any stopped),
  *          or JOB_RUNNING.  Idempotent.
  */
-void		job_recompute_status(t_job *job);
+void job_recompute_status(t_job *job);
 
 /**
  * @brief Non-blocking reap of every shell-owned child.
@@ -218,7 +195,7 @@ void		job_recompute_status(t_job *job);
  *          recomputes the owning job's `status`.  Safe to call when no jobs
  *          are tracked.
  */
-void		job_update_statuses(struct s_shell *shell);
+void job_update_statuses(struct s_shell *shell);
 
 /**
  * @brief Print a status line for every job that has not been notified yet,
@@ -226,18 +203,18 @@ void		job_update_statuses(struct s_shell *shell);
  * @details Call between prompts.  `shell->current_job` is cleared if it
  *          referenced a job that gets removed.
  */
-void		job_notify(struct s_shell *shell);
+void job_notify(struct s_shell *shell);
 
 /**
  * @brief Human-readable label for a `t_job_status` value (for listings).
  */
-const char	*job_status_str(t_job_status s);
+const char *job_status_str(t_job_status s);
 
 /**
  * @brief Release every job and process still tracked by `shell`.
  * @details Called from `shell_cleanup` on exit.  Leaves `shell->jobs` NULL
  *          and `shell->current_job` NULL.
  */
-void		job_control_cleanup(struct s_shell *shell);
+void job_control_cleanup(struct s_shell *shell);
 
 #endif

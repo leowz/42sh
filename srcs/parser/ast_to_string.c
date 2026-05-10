@@ -1,8 +1,6 @@
 /**
  * @file ast_to_string.c
- * @brief Stringify an AST subtree for human-readable job listings (`jobs`).
- * @details Not a perfect round-trip of the input: redirections and
- *          sub-expressions are rendered in a canonical form.
+ * @brief Stringify an AST subtree for human-readable job listings (`t_jobs`).
  * @author pulgamecanica
  */
 

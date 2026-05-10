@@ -1,6 +1,6 @@
 {
   "input": "(which ls) | echo \"dude\" && which top",
-  "tok_file": "viz/tokenizations/tok_1775485830_999348.json",
+  "tok_file": "viz/tokenizations/tok_1778447184_820209.json",
   "tree": {
     "type": "NODE_AND",
     "left": {

@@ -4,7 +4,7 @@
  * @author pulgamecanica
  *
  * Field splitting (POSIX 2.6.5) only applies to bytes that came from
- * an unquoted expansion — exactly the bytes whose mask byte is 1 in
+ * an unquoted expansion - exactly the bytes whose mask byte is 1 in
  * t_xbuf.  Literal bytes (including spaces inside "..." or '...') are
  * preserved unconditionally.
  *
@@ -118,7 +118,7 @@ static void	consume_delimiter(const t_xbuf *buf, const char *ifs, size_t *i)
  * @brief Walk the buffer and record each field.
  * @return Field array (caller frees) or NULL on allocation failure.
  *         When the buffer expands to zero fields, *out_count is 0 and
- *         the returned pointer is NULL — that is not an error.
+ *         the returned pointer is NULL - that is not an error.
  */
 static t_field	*collect_fields(const t_xbuf *buf, const char *ifs,
 		size_t *out_count)

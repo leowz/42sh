@@ -40,15 +40,15 @@ Rough effort per module (implementation + testing + debugging):
 
 ### Why This Split Works
 
-1. **P1 gets History** — P1 finishes core parsing early (Phase 1-3). History is clean data-structure work (doubly linked list + file I/O) with a simple API. P1 can develop and test it independently. P4 integrates it into the line editor later via `history_add()`, `history_prev()`, `history_next()`.
+1. **P1 gets History** - P1 finishes core parsing early (Phase 1-3). History is clean data-structure work (doubly linked list + file I/O) with a simple API. P1 can develop and test it independently. P4 integrates it into the line editor later via `history_add()`, `history_prev()`, `history_next()`.
 
-2. **P1 gets echo** — echo is the simplest builtin. Building it helps P1 understand the builtin interface early, which helps them test their parser output against real execution.
+2. **P1 gets echo** - echo is the simplest builtin. Building it helps P1 understand the builtin interface early, which helps them test their parser output against real execution.
 
-3. **P2 gets signal setup for executing + child contexts** — P2 already handles fork/exec. Setting up signals in the child before execve (restore defaults) and in the parent during foreground wait (ignore SIGINT etc.) is naturally part of executor code.
+3. **P2 gets signal setup for executing + child contexts** - P2 already handles fork/exec. Setting up signals in the child before execve (restore defaults) and in the parent during foreground wait (ignore SIGINT etc.) is naturally part of executor code.
 
-4. **P4 keeps interactive signal context** — Interactive signals (Ctrl-C at prompt clears line) are tightly coupled with the line editor. P4 owns both.
+4. **P4 keeps interactive signal context** - Interactive signals (Ctrl-C at prompt clears line) are tightly coupled with the line editor. P4 owns both.
 
-5. **P4 keeps Job Control** — Job control is coupled with the line editor through terminal ownership (tcsetpgrp) and signals (SIGTSTP/SIGCHLD). P4 needs to own both for clean terminal management. The pipeline PGID setup code is in the executor (P2), but P4 provides the higher-level job API that P2 calls.
+5. **P4 keeps Job Control** - Job control is coupled with the line editor through terminal ownership (tcsetpgrp) and signals (SIGTSTP/SIGCHLD). P4 needs to own both for clean terminal management. The pipeline PGID setup code is in the executor (P2), but P4 provides the higher-level job API that P2 calls.
 
 ### Shared Infrastructure
 
@@ -123,7 +123,7 @@ src/lexer/*, src/parser/*, src/history/* (see 17_history.md), src/builtins/built
 - Walk AST and execute commands
 - Call expander (P3's code) for each command before execution
 - Implement pipe handling with PGID setup (setpgid in both parent+child)
-- Implement redirections (>, >>, <, <<, >&, <&) — applied left-to-right
+- Implement redirections (>, >>, <, <<, >&, <&) - applied left-to-right
 - Handle fork/exec and PATH search
 - Handle `&&`, `||` short-circuit logic and `;` sequences
 - Handle `&` (background) by calling P4's job_launch_background
@@ -177,7 +177,7 @@ src/builtins/builtin_exit.c, src/builtins/builtin_type.c
 - All: var_get_value, var_set, etc.
 
 **Why P3 works well:**
-Variables and expansion are deeply coupled (expansion needs var_get_value; builtins like export/unset modify the same data). The expander is algorithmically complex but self-contained — it doesn't need fork/exec or terminal knowledge, just string manipulation and variable lookup. P3 can unit-test expansion independently.
+Variables and expansion are deeply coupled (expansion needs var_get_value; builtins like export/unset modify the same data). The expander is algorithmically complex but self-contained - it doesn't need fork/exec or terminal knowledge, just string manipulation and variable lookup. P3 can unit-test expansion independently.
 
 **Files:**
 ```
@@ -364,7 +364,7 @@ main
 
 ### M4: Line Editing + History (P4 + P1)
 - Raw mode, key reading, buffer management (P4)
-- History module ready (P1) — P4 integrates into line editor
+- History module ready (P1) - P4 integrates into line editor
 - Test: interactive editing and history navigation works
 
 ### M5: Integration (All)
@@ -401,6 +401,6 @@ Each person takes features closest to their domain:
 | Globbing | **P3** | Part of expander |
 | History expansions (!!,!n) | **P1** | Owns history module |
 | Aliases | **P1** | Pre-tokenization step, P1 understands lexing |
-| Subshells/groups or test or hash | **P2** or **P4** | Flexible — executor or standalone |
+| Subshells/groups or test or hash | **P2** or **P4** | Flexible - executor or standalone |
 
 This gives each person 1-2 modular features on top of their mandatory work.
