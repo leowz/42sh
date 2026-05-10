@@ -266,6 +266,7 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 #ifdef FT_EXTRA_VERBOSE
 	debug_dispatch("external", cmd->argv[0]);
 #endif
+	fflush(NULL);
 	pid = fork();
 	if (pid == -1)
 	{

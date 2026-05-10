@@ -138,6 +138,7 @@ static int	fork_stage(t_shell *shell, t_ast *cmd_ast,
 {
 	pid_t	pid;
 
+	fflush(NULL);
 	pid = fork();
 	if (pid == -1)
 		return (-1);

@@ -57,6 +57,7 @@ int	execute_subshell(t_shell *shell, t_ast *ast)
 {
 	pid_t	pid;
 
+	fflush(NULL);
 	pid = fork();
 	if (pid == -1)
 	{
@@ -117,6 +118,7 @@ int	execute_background(t_shell *shell, t_ast *ast)
 	t_job	*job;
 	char	*cmd_line;
 
+	fflush(NULL);
 	pid = fork();
 	if (pid == -1)
 	{
