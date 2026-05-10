@@ -41,7 +41,9 @@ PREDEFINED				= TEST_DLIST_ENABLED \
 						  TEST_BTREE_ENABLED \
 						  TEST_EXECUTOR_ENABLED \
 						  TEST_PARSER_ENABLED \
-						  TEST_LIST_ENABLED
+						  TEST_LIST_ENABLED \
+						  TEST_BUILTIN_ECHO_ENABLED \
+						  TEST_BUILTIN_CD_ENABLED
 
 #---------------------------------------------------------------------------
 # Output: man pages + XML (XML consumed by Sphinx/Breathe)

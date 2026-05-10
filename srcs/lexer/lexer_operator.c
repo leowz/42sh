@@ -74,7 +74,7 @@ int	is_operator_start(const char *line)
 }
 
 /**
- * @param the string of the operator
+ * @param line a pointer on the string of the operator
  * @brief extract the file descriptor before the operator
  * @return an int
  */
@@ -114,7 +114,7 @@ static t_list	*create_operator_token(
 }
 
 /**
- * @param the string of the operator
+ * @param line a pointer on the string of the operator
  * @brief read the operator and tokenize it
  * @details choose the good function to tokenize
  * @return a t_list* node

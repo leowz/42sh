@@ -6,7 +6,7 @@
 /*   By: zweng <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/09 11:44:47 by zweng             #+#    #+#             */
-/*   Updated: 2026/03/08 17:16:40 by jguillem         ###   ########.fr       */
+/*   Updated: 2026/04/28 15:36:56 by jguillem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,8 @@ void				ft_lstadd(t_list **alst, t_list *new);
 void				ft_lstiter(t_list *lst, void (*f)(t_list *elem));
 t_list				*ft_lstmap(t_list *lst, t_list *(*f)(t_list *elem));
 void				ft_lstappend(t_list **alst, t_list *node);
+t_list				*ft_lstlast(t_list *lst);
+void				ft_lstdellast(t_list **alst, void (*del)(void *));
 void				ft_lstprint(t_list *alst);
 int					ft_abs(int n);
 size_t				ft_lstsize(t_list *lst);

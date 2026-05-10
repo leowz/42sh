@@ -21,6 +21,7 @@ typedef struct s_builtin_entry
 static const t_builtin_entry	g_builtins[] = {
 	{"history", builtin_history},
 	{"echo", builtin_echo},
+	{"cd", builtin_cd},
 	{"jobs", builtin_jobs},
 	{"fg", builtin_fg},
 	{"bg", builtin_bg},
