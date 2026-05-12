@@ -8,23 +8,23 @@
 #ifndef SHELL_42SH_H
 #define SHELL_42SH_H
 
-#include "history.h"
-#include "job_control.h"
-#include "libft.h"
-#include "signals.h"
-#include "variables.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <readline/history.h>
 #include <readline/readline.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <term.h>
 #include <termios.h>
 #include <unistd.h>
+#include "history.h"
+#include "job_control.h"
+#include "libft.h"
+#include "signals.h"
+#include "variables.h"
 
 /** Casts a `t_list` node's content to `t_job *`. */
 #define LST_JOB(n) ((t_job *)(n)->content)

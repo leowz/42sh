@@ -1,7 +1,7 @@
+#include "42sh.h"
 #include "lexer.h"
 #include "parser.h"
 #include "executor.h"
-#include "42sh.h"
 
 /**
  * @brief Resolve the final value of @c shell->interactive.
