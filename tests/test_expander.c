@@ -365,6 +365,26 @@ static void	test_expand_tilde_user(void)
 	stub_shell_cleanup(&shell);
 }
 
+static void	test_expand_tilde_no_home(void)
+{
+	t_shell			shell;
+	char			*out;
+	struct passwd	*pw;
+
+	stub_shell_init(&shell);
+	pw = getpwuid(getuid());
+	if (!pw || !pw->pw_dir)
+	{
+		MU_ASSERT("getpwuid skipped", 1);
+		stub_shell_cleanup(&shell);
+		return ;
+	}
+	out = expand_word(&shell, "~");
+	MU_ASSERT_STR("tilde no HOME uses passwd", pw->pw_dir, out);
+	free(out);
+	stub_shell_cleanup(&shell);
+}
+
 /* ===== field_split via expand_word_to_fields =========================== */
 
 static int	count_fields(char **fields)
@@ -593,6 +613,27 @@ static void	test_expand_command_redir_target(void)
 	stub_shell_cleanup(&shell);
 }
 
+static void	test_expand_command_ambiguous_redir(void)
+{
+	t_shell	shell;
+	t_cmd	*cmd;
+	t_redir	*redir;
+	int		ret;
+
+	stub_shell_init(&shell);
+	inject_var(&shell, "MULTI", "/tmp/a /tmp/b");
+	cmd = malloc(sizeof(t_cmd));
+	cmd->argv = NULL;
+	cmd->argc = 0;
+	cmd->assignments = NULL;
+	redir = make_redir(TOK_REDIR_OUT, -1, "$MULTI");
+	cmd->redirs = ft_lstnew(redir);
+	ret = expand_command(&shell, cmd);
+	MU_ASSERT("ambiguous redir is an error", ret != 0);
+	ast_free(ast_new_command(cmd));
+	stub_shell_cleanup(&shell);
+}
+
 static void	test_expand_command_heredoc_target_skipped(void)
 {
 	t_shell	shell;
@@ -635,6 +676,7 @@ void	test_expander_suite(void)
 	test_expand_lone_dollar();
 	test_expand_tilde();
 	test_expand_tilde_user();
+	test_expand_tilde_no_home();
 	test_split_default_ifs();
 	test_split_quoted_value();
 	test_split_literal_spaces_protected();
@@ -647,6 +689,7 @@ void	test_expander_suite(void)
 	test_expand_command_argv();
 	test_expand_command_assignment();
 	test_expand_command_redir_target();
+	test_expand_command_ambiguous_redir();
 	test_expand_command_heredoc_target_skipped();
 }
 
