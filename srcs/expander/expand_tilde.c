@@ -15,6 +15,7 @@
 #include "expander.h"
 #include <pwd.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 static int	is_tilde_terminator(char c)
 {
@@ -45,14 +46,21 @@ static int	push_literal_tilde(const char *input, size_t start, size_t end,
 static int	expand_home(t_shell *shell, const char *input,
 		size_t *pos, t_xbuf *out)
 {
-	const char	*home;
-	int			rc;
+	const char		*home;
+	struct passwd	*pw;
+	int				rc;
 
 	home = var_get_value(shell, "HOME");
-	if (!home)
-		rc = push_literal_tilde(input, *pos, *pos + 1, out);
-	else
+	if (home)
 		rc = xbuf_puts(out, home, 0);
+	else
+	{
+		pw = getpwuid(getuid());
+		if (pw && pw->pw_dir)
+			rc = xbuf_puts(out, pw->pw_dir, 0);
+		else
+			rc = push_literal_tilde(input, *pos, *pos + 1, out);
+	}
 	*pos += 1;
 	return (rc);
 }

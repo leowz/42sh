@@ -205,6 +205,52 @@ static int	is_heredoc(t_token_type type)
 }
 
 /**
+ * @brief Report "<target>: ambiguous redirect" to stderr.
+ */
+static void	report_ambiguous_redir(const char *target)
+{
+	ft_putstr_fd("42sh: ", 2);
+	if (target)
+		ft_putstr_fd(target, 2);
+	ft_putendl_fd(": ambiguous redirect", 2);
+}
+
+/**
+ * @brief Expand a redir target with field splitting and reject ambiguity.
+ * @details After full expansion + field splitting, the target must
+ *          collapse to exactly one field. Zero fields (e.g. an empty
+ *          unquoted variable) and >1 fields are both rejected as
+ *          ambiguous, matching bash behaviour.
+ * @return Newly-allocated single-field string on success, or NULL on
+ *         allocation failure / ambiguity (error already reported).
+ */
+static char	*expand_redir_target(t_shell *shell, const char *word)
+{
+	char	**fields;
+	char	*result;
+	int		count;
+
+	fields = expand_word_to_fields(shell, word);
+	if (!fields)
+		return (NULL);
+	count = 0;
+	while (fields[count])
+		count++;
+	if (count != 1)
+	{
+		report_ambiguous_redir(word);
+		count = 0;
+		while (fields[count])
+			free(fields[count++]);
+		free(fields);
+		return (NULL);
+	}
+	result = fields[0];
+	free(fields);
+	return (result);
+}
+
+/**
  * @brief Walk cmd->redirs and expand each non-heredoc target in place.
  */
 static int	expand_redirs(t_shell *shell, t_cmd *cmd)
@@ -219,7 +265,7 @@ static int	expand_redirs(t_shell *shell, t_cmd *cmd)
 		redir = (t_redir *)node->content;
 		if (redir && redir->target && !is_heredoc(redir->type))
 		{
-			expanded = expand_word(shell, redir->target);
+			expanded = expand_redir_target(shell, redir->target);
 			if (!expanded)
 				return (-1);
 			free(redir->target);
