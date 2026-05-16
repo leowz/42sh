@@ -43,6 +43,63 @@ static int	write_line(int fd, char *line, size_t len)
 	return (0);
 }
 
+/*
+ * @param fd   : file descriptor to read from
+ * @param out  : address of a malloc'd buffer (caller must free)
+ * @brief      : read one '\n'-terminated line from fd, one byte at a time,
+ *               so no byte beyond the '\n' is ever consumed from the fd.
+ *               The returned string has the trailing '\n' stripped.
+ * @return     : number of bytes in the line (>=0) or -1 on EOF/error
+ */
+static ssize_t	read_line_fd(int fd, char **out)
+{
+	char	*buf = NULL;
+	size_t	cap = 0;
+	size_t	len = 0;
+	char	c;
+	ssize_t	n;
+
+	while (1)
+	{
+		n = read(fd, &c, 1);
+		if (n <= 0)
+		{
+			if (len == 0)
+			{
+				free(buf);
+				*out = NULL;
+				return (-1);
+			}
+			break;
+		}
+		if (c == '\n')
+			break;
+		if (len + 1 >= cap)
+		{
+			cap = cap ? cap * 2 : 64;
+			buf = realloc(buf, cap);
+			if (!buf)
+			{
+				*out = NULL;
+				return (-1);
+			}
+		}
+		buf[len++] = c;
+	}
+	if (!buf)
+	{
+		buf = malloc(1);
+		if (!buf)
+		{
+			*out = NULL;
+			return (-1);
+		}
+	}
+	buf[len] = '\0';
+	*out = buf;
+	return ((ssize_t)len);
+}
+
 /**
  * @param redir : a pointer on struct s_redir 
  * @param prompt : the prompt symbol of the heredoc
@@ -52,12 +109,20 @@ static int	write_line(int fd, char *line, size_t len)
  */
 static int	read_heredoc(t_redir *redir, const char *prompt, int fd)
 {
-	char		*line;
+	char		*line = NULL;
 	char		*convert_line;
+	ssize_t		nread;
 
 	while (!g_sigint_heredoc)
 	{
-		line = readline(prompt);
+		if (isatty(STDIN_FILENO))
+			line = readline(prompt);
+		else
+		{
+			nread = read_line_fd(STDIN_FILENO, &line);
+			if (nread == -1)
+			line = NULL;
+		}
 		if (!line)
 		{
 			fprintf(stderr,

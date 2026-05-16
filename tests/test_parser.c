@@ -1271,6 +1271,369 @@ static void test_assignment_with_two_redirs(void)
 	ast_free(ast);
 }
 
+static t_ast	*write_to_pipe_nontty(const char *stdin_payload, char *cmd)
+{
+	t_shell	shell;
+	int		pipefd[2];
+	t_ast	*ast;
+
+	pipe(pipefd);
+	write(pipefd[1], stdin_payload, strlen(stdin_payload));
+	close(pipefd[1]);
+
+	int saved_stdin = dup(STDIN_FILENO);
+	dup2(pipefd[0], STDIN_FILENO);
+	close(pipefd[0]);
+
+	ast = parser_parse(lexer_tokenize(cmd), &shell);
+
+	dup2(saved_stdin, STDIN_FILENO);
+	close(saved_stdin);
+	return (ast);
+}
+
+static void	test_heredoc_nontty_basic(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("hello\nEOF\n", "cat << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_COMMAND, ast->type);
+	MU_ASSERT("has redirs", ast->data.cmd->redirs != NULL);
+
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("content", "hello\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_multiline(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("line1\nline2\nline3\nEOF\n", "cat << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("content", "line1\nline2\nline3\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_empty_body(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	ssize_t	n;
+	char	buf[BUFSIZE];
+
+	ast = write_to_pipe_nontty("EOF\n", "cat << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	MU_ASSERT_INT(0, (int)n); /* pipe must be empty */
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_eof_before_delim(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("hello\n", "cat << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("content before EOF", "hello\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_strip_tabs(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("\thello\n\tworld\n\tEOF\n", "cat <<- EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("tabs stripped", "hello\nworld\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_strip_multiple_tabs(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("\t\t\tindented\n\tEOF\n", "cat <<- EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC_STRIP, redir->type);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("all tabs stripped", "indented\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_quoted_delim_no_expand(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("$USER\nEOF\n", "cat << 'EOF'");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT("quoted flag set", redir->heredoc_quoted == 1);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("literal dollar", "$USER\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_dquoted_delim_no_expand(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("$HOME\nEOF\n", "cat << \"EOF\"");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT("quoted flag set", redir->heredoc_quoted == 1);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("literal dollar", "$HOME\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_in_pipeline(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("hello\nEOF\n", "cat << EOF | grep hello");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_PIPE, ast->type);
+
+	redir = REDIR(ast->data.binary->left->data.cmd->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("content", "hello\n", buf);
+	MU_ASSERT_STR("right cmd", "grep",
+			ast->data.binary->right->data.cmd->argv[0]);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_two_heredocs(void)
+{
+	t_ast	*ast;
+	t_list	*redirs;
+	t_redir	*r0;
+	t_redir	*r1;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("aaa\nEOF1\nbbb\nEOF2\n",
+			"cmd << EOF1 << EOF2");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_COMMAND, ast->type);
+
+	redirs = ast->data.cmd->redirs;
+	MU_ASSERT("has two redirs", redirs != NULL && redirs->next != NULL);
+
+	r0 = (t_redir *)redirs->content;
+	r1 = (t_redir *)redirs->next->content;
+
+	MU_ASSERT_INT(TOK_HEREDOC, r0->type);
+	MU_ASSERT_INT(TOK_HEREDOC, r1->type);
+	MU_ASSERT("fd0 >= 0", r0->heredoc_fd >= 0);
+	MU_ASSERT("fd1 >= 0", r1->heredoc_fd >= 0);
+
+	n = read(r0->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("first heredoc", "aaa\n", buf);
+
+	n = read(r1->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("second heredoc", "bbb\n", buf);
+
+	close(r0->heredoc_fd);
+	close(r1->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_with_output_redir(void)
+{
+	t_ast	*ast;
+	t_list	*redirs;
+	t_redir	*hd;
+	t_redir	*out;
+
+	ast = write_to_pipe_nontty("hello\nEOF\n", "cat << EOF > /dev/null");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_COMMAND, ast->type);
+
+	redirs = ast->data.cmd->redirs;
+	MU_ASSERT("has two redirs", redirs != NULL && redirs->next != NULL);
+
+	hd  = (t_redir *)redirs->content;
+	out = (t_redir *)redirs->next->content;
+
+	MU_ASSERT_INT(TOK_HEREDOC, hd->type);
+	MU_ASSERT("heredoc_fd >= 0", hd->heredoc_fd >= 0);
+	MU_ASSERT_INT(TOK_REDIR_OUT, out->type);
+	MU_ASSERT_STR("out target", "/dev/null", out->target);
+
+	close(hd->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_subshell(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("hello\nEOF\n", "(cat) << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	MU_ASSERT_INT(NODE_SUBSHELL, ast->type);
+
+	redir = REDIR(ast->data.group->redirs);
+	MU_ASSERT_INT(TOK_HEREDOC, redir->type);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("content", "hello\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_special_delim(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("data\nSTOP!\n", "cat << STOP!");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("content before special delim", "data\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_partial_delim_not_matched(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("EOFX\nEOF\n", "cat << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	/* "EOFX" must be kept; it is not the delimiter */
+	MU_ASSERT_STR("partial delim kept", "EOFX\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
+static void	test_heredoc_nontty_blank_lines_preserved(void)
+{
+	t_ast	*ast;
+	t_redir	*redir;
+	char	buf[BUFSIZE];
+	ssize_t	n;
+
+	ast = write_to_pipe_nontty("\n\nhello\n\nEOF\n", "cat << EOF");
+	MU_ASSERT("ast not NULL", ast != NULL);
+	redir = REDIR(ast->data.cmd->redirs);
+	MU_ASSERT("heredoc_fd >= 0", redir->heredoc_fd >= 0);
+
+	n = read(redir->heredoc_fd, buf, BUFSIZE - 1);
+	buf[n] = '\0';
+	MU_ASSERT_STR("blank lines kept", "\n\nhello\n\n", buf);
+
+	close(redir->heredoc_fd);
+	ast_free(ast);
+}
+
 void	test_parser_suite(void)
 {
 	test_simple_command();
@@ -1343,4 +1706,19 @@ void	test_parser_suite(void)
 	test_assignment_dash_in_name_falls_to_argv();
 	test_assignment_pipeline_quoted_both_sides();
 	test_assignment_with_two_redirs();
+	test_heredoc_nontty_basic();
+	test_heredoc_nontty_multiline();
+	test_heredoc_nontty_empty_body();
+	test_heredoc_nontty_eof_before_delim();
+	test_heredoc_nontty_strip_tabs();
+	test_heredoc_nontty_strip_multiple_tabs();
+	test_heredoc_nontty_quoted_delim_no_expand();
+	test_heredoc_nontty_dquoted_delim_no_expand();
+	test_heredoc_nontty_in_pipeline();
+	test_heredoc_nontty_two_heredocs();
+	test_heredoc_nontty_with_output_redir();
+	test_heredoc_nontty_subshell();
+	test_heredoc_nontty_special_delim();
+	test_heredoc_nontty_partial_delim_not_matched();
+	test_heredoc_nontty_blank_lines_preserved();
 }
