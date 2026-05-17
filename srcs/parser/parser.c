@@ -31,6 +31,7 @@ t_ast	*parser_parse(t_list *tokens, t_shell *shell)
 	if (p.error)
 	{
 		fprintf(stderr, "%s\n", p.error);
+		shell->last_exit_status = 2;
 		free(p.error);
 		ast_free(ast);
 		return (NULL);
@@ -39,6 +40,7 @@ t_ast	*parser_parse(t_list *tokens, t_shell *shell)
 	if (!token || token->type != TOK_EOF)
 	{
 		fprintf(stderr, "syntax error: EOF not found\n");
+		shell->last_exit_status = 2;
 		free(p.error);
 		ast_free(ast);
 		return (NULL);

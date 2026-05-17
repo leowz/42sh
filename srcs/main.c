@@ -148,10 +148,15 @@ static void _display(t_list *tokens, t_ast *ast, char *line)
 
 static void process_line(t_shell *shell, char *line)
 {
-	/* Tokenize, display, and convert to JSON */
-	t_list *tokens;
-	t_ast  *ast;
+	t_list		*tokens;
+	t_ast		*ast;
+	const char	*scan;
 
+	scan = line;
+	while (*scan == ' ' || *scan == '\t' || *scan == '\n')
+		scan++;
+	if (*scan == '\0')
+		return ;
 	tokens = lexer_tokenize(line);
 	if (!tokens)
 	{
@@ -167,10 +172,7 @@ static void process_line(t_shell *shell, char *line)
 
 	lexer_free_tokens(tokens);
 	if (!ast)
-	{
-		fprintf(stderr, "Error: Failed to parse tokens into AST.\n");
 		return;
-	}
 
 	executor_execute(shell, ast);
 

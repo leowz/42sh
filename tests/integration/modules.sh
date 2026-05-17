@@ -130,7 +130,10 @@ m_case "adjacent quote concatenation"          'echo a'\''b'\''c"d"e'
 m_case "single quote inside double quote"      'echo "it'\''s working"'
 m_case "double quote inside single quote"      "echo 'say \"hi\" now'"
 m_case "all three inhibitors in one word"      'echo a\ b'\''c d'\''"e f"'
-m_case "backslash-newline line continuation"   $'echo a\\\nb'   xfail
+m_case "backslash-newline line continuation"   $'echo a\\\nb'
+m_case "line continuation mid-word"             $'ec\\\nho hi'
+m_case "line continuation inside double quotes" $'echo "a\\\nb"'
+m_case "line continuation literal in single q"  $'echo \'a\\\nb\''
 
 # ============================================================================
 # MODULE 2 -- Globbing  (*  ?  [])
@@ -183,7 +186,8 @@ m_case "subshell rescues with ||"           '(false || echo rescued)'
 m_case "redirection applied to subshell"    "(echo r1; echo r2) > $TMP/gr; cat $TMP/gr"
 m_case "redirection applied to block"       "{ echo b1; echo b2; } > $TMP/gb; cat $TMP/gb"
 m_case "exit status mid-sequence of groups" '(exit 3); echo a; (exit 5); echo $?'
-m_case "empty subshell () is rejected"      '(); echo done'   xfail
+m_case "empty subshell () is a syntax error" '()'
+m_case "unclosed ( is a syntax error"        '('
 
 # ============================================================================
 # MODULE 6 -- Command substitution  $()  ``

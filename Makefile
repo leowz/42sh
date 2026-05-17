@@ -113,6 +113,13 @@ modules: $(NAME)
 	@printf $(GREEN)"running module scoreboard...\n"$(EOC)
 	@bash $(TEST_PATH)/integration/modules.sh
 
+# Full test suite: unit tests FIRST, then integration tests. Each step is a
+# separate sub-make so the order holds even under `make -j`; if the unit
+# tests fail, make aborts and the integration step never runs.
+check:
+	@$(MAKE) --no-print-directory test
+	@$(MAKE) --no-print-directory integration
+
 # ---- Object rules ----
 
 # Project objects: srcs/**/*.c  ->  obj/**/*.o
@@ -191,6 +198,7 @@ help:
 	@printf "  "$(GREEN)"integration"$(EOC)"   - run integration tests (42sh vs bash --posix, +valgrind)\n"
 	@printf "  "$(GREEN)"integration-quick"$(EOC)" - same, but skip the valgrind pass\n"
 	@printf "  "$(GREEN)"modules"$(EOC)"       - module scoreboard (per-feature status vs the subject)\n"
+	@printf "  "$(GREEN)"check"$(EOC)"         - full suite: unit tests first, then integration\n"
 	@printf "  "$(GREEN)"docs"$(EOC)"          - generate Doxygen XML + man pages\n"
 	@printf "  "$(GREEN)"html"$(EOC)"          - build Sphinx HTML docs (RTD theme)\n"
 	@printf "  "$(GREEN)"serve"$(EOC)"         - build and serve docs at localhost:8080\n"
@@ -210,4 +218,4 @@ help:
 
 -include $(DEPS)
 
-.PHONY: all debug test integration integration-quick modules docs html dclean serve clean fclean re help install-hooks
+.PHONY: all debug test integration integration-quick modules check docs html dclean serve clean fclean re help install-hooks
