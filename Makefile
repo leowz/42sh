@@ -100,10 +100,18 @@ test: $(NAME) $(LIB) $(TEST_OBJS)
 integration: $(NAME)
 	@printf $(GREEN)"running integration tests...\n"$(EOC)
 	@bash $(TEST_PATH)/integration/run.sh
+	@bash $(TEST_PATH)/integration/modules.sh
 
 integration-quick: $(NAME)
 	@printf $(GREEN)"running integration tests (no valgrind)...\n"$(EOC)
 	@VALGRIND=0 bash $(TEST_PATH)/integration/run.sh
+	@bash $(TEST_PATH)/integration/modules.sh
+
+# Modular-feature scoreboard: per-module status against the subject's
+# "6 modules to pass" requirement (tests/integration/modules.sh).
+modules: $(NAME)
+	@printf $(GREEN)"running module scoreboard...\n"$(EOC)
+	@bash $(TEST_PATH)/integration/modules.sh
 
 # ---- Object rules ----
 
@@ -182,6 +190,7 @@ help:
 	@printf "  "$(GREEN)"test"$(EOC)"          - build and run the test suite\n"
 	@printf "  "$(GREEN)"integration"$(EOC)"   - run integration tests (42sh vs bash --posix, +valgrind)\n"
 	@printf "  "$(GREEN)"integration-quick"$(EOC)" - same, but skip the valgrind pass\n"
+	@printf "  "$(GREEN)"modules"$(EOC)"       - module scoreboard (per-feature status vs the subject)\n"
 	@printf "  "$(GREEN)"docs"$(EOC)"          - generate Doxygen XML + man pages\n"
 	@printf "  "$(GREEN)"html"$(EOC)"          - build Sphinx HTML docs (RTD theme)\n"
 	@printf "  "$(GREEN)"serve"$(EOC)"         - build and serve docs at localhost:8080\n"
@@ -201,4 +210,4 @@ help:
 
 -include $(DEPS)
 
-.PHONY: all debug test integration integration-quick docs html dclean serve clean fclean re help install-hooks
+.PHONY: all debug test integration integration-quick modules docs html dclean serve clean fclean re help install-hooks
