@@ -56,4 +56,13 @@ typedef struct s_shell {
   t_list *variables;       /**< `t_var*` list; all shell/env variables. */
 } t_shell;
 
+/**
+ * @brief Read one line of shell input — the single owner of stdin.
+ * @details readline in interactive mode, getline on the shared `stdin`
+ *          FILE* otherwise. The REPL and the heredoc collector both call
+ *          this so command lines and heredoc bodies stay synchronised.
+ * @return Heap-allocated line without trailing newline, or NULL on EOF.
+ */
+char	*shell_read_line(t_shell *shell, const char *prompt);
+
 #endif

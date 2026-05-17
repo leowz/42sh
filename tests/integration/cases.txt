@@ -10,9 +10,9 @@ ls > /tmp/ftsh_ls_out /
 cat /tmp/ftsh_ls_out
 < /tmp/ftsh_ls_out cat -e >> /tmp/ftsh_ls_out2
 echo 1 >out >&2 2>err
-base64 < /dev/urandom | head -c 1000 | grep 42 | wc -l | sed -e 's/1/Yes/g' -e 's/0/No/g'
+printf 'a\nb\nc\n' | base64 | base64 -d | grep -c b | sed -e 's/1/Yes/g' -e 's/0/No/g'
 ps a | grep 'base64' | grep -v 'grep'
-ls -1; touch test_file; ls -1
+touch test_file; ls -1 test_file
 exit 1 | exit 2 | exit 3; echo "stayin' alive"
 echo out >&-; echo out2
 echo out >&- | echo out2

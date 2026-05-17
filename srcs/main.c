@@ -85,27 +85,6 @@ static void	shell_cleanup(t_shell *shell)
 	free_env_cache(shell);
 }
 
-static char	*read_line(t_shell *shell)
-{
-	char	*line;
-	size_t	len;
-	ssize_t	n;
-
-	if (shell->interactive)
-		return (readline("42sh$ "));
-	line = NULL;
-	len = 0;
-	n = getline(&line, &len, stdin);
-	if (n <= 0)
-	{
-		free(line);
-		return (NULL);
-	}
-	if (line[n - 1] == '\n')
-		line[n - 1] = '\0';
-	return (line);
-}
-
 /**
  * @brief Parse argv flags into @p shell.
  * @details -c <cmd> stores the one-shot command (POSIX -c form) and
@@ -215,7 +194,7 @@ static void	repl_loop(t_shell *shell)
 			job_update_statuses(shell);
 			job_notify(shell);
 		}
-		raw_line = read_line(shell);
+		raw_line = shell_read_line(shell, "42sh$ ");
 		if (!raw_line)
 		{
 			if (shell->interactive)
