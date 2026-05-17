@@ -332,4 +332,30 @@ int	builtin_unset(struct s_shell *shell, int argc, char **argv);
  */
 int	builtin_export(struct s_shell *shell, int argc, char **argv);
 
+/**
+ * @brief The alias builtin command.
+ *
+ * **Usage**: `alias [name[=value] ...]`
+ *
+ * - With no arguments, lists every alias as `alias name='value'`, sorted
+ *   by name, with embedded single quotes escaped as `'\''`.
+ * - With `name=value`, defines or redefines an alias.
+ * - With `name`, prints that alias, or reports it as not found.
+ *
+ * @return 0 on success, 1 if a queried name is not an alias.
+ */
+int	builtin_alias(struct s_shell *shell, int argc, char **argv);
+
+/**
+ * @brief The unalias builtin command.
+ *
+ * **Usage**: `unalias [-a] name [name ...]`
+ *
+ * - `-a` removes every alias.
+ * - Each `name` removes one alias; an unknown name is reported on stderr.
+ *
+ * @return 0 on success, 1 if a name was not an alias or on usage error.
+ */
+int	builtin_unalias(struct s_shell *shell, int argc, char **argv);
+
 #endif

@@ -20,6 +20,7 @@
 #include <term.h>
 #include <termios.h>
 #include <unistd.h>
+#include "aliases.h"
 #include "history.h"
 #include "job_control.h"
 #include "libft.h"

@@ -105,6 +105,29 @@ m_case() {
 	fi
 }
 
+# m_alias DESC SCRIPT EXPECTED -- pipe a multi-line SCRIPT to 42sh and check
+# its stdout against a fixed EXPECTED value. Aliases are not diffed against
+# bash: bash does not expand aliases in a non-interactive shell unless
+# `shopt -s expand_aliases` is set, so a direct bash comparison is not
+# meaningful. The script is piped (not -c) so the REPL reads it line by
+# line -- an alias only takes effect on a line read after its definition.
+m_alias() {
+	local label="$1" script="$2" want="$3" got
+	total=$((total + 1))
+	cur_n=$((cur_n + 1))
+	got="$(printf '%s' "$script" | "$SH" 2>/dev/null)"
+	if [ "$got" = "$want" ]; then
+		pass=$((pass + 1))
+		cur_ok=$((cur_ok + 1))
+		printf "  %sPASS%s  %s\n" "$G" "$Z" "$label"
+	else
+		fail=$((fail + 1))
+		printf "  %sFAIL%s  %s\n" "$R" "$Z" "$label"
+		printf "        expected: [%s]\n" "$want"
+		printf "        actual:   [%s]\n" "$got"
+	fi
+}
+
 # ============================================================================
 # MODULE 1 -- Inhibitors  ('  "  \)
 # ============================================================================
@@ -227,8 +250,27 @@ skip "11. Vi/Emacs editing modes" "not implemented (no 'set -o vi' / 'set -o ema
 # ============================================================================
 # MODULE 12 -- Aliases
 # ============================================================================
-skip "12. Aliases" "not implemented (no alias/unalias builtin; t_alias struct unused)"
-# when implemented: alias ll='ls -la'; ll ; unalias ll ; alias (list)
+module "12. Aliases"
+m_alias "alias expands on a later line" \
+	$'alias ll=\'echo HI\'\nll\n' "HI"
+m_alias "arguments after the alias are kept" \
+	$'alias g=\'echo\'\ng a b c\n' "a b c"
+m_alias "alias chain a->b->echo resolves" \
+	$'alias a=b\nalias b=echo\na deep\n' "deep"
+m_alias "self-referential alias expands once" \
+	$'alias ls=\'echo SELF\'\nls\n' "SELF"
+m_alias "alias expands after ;" \
+	$'alias g=\'echo\'\necho x ; g y\n' $'x\ny'
+m_alias "alias expands after |" \
+	$'alias up=\'tr a-z A-Z\'\necho hi | up\n' "HI"
+m_alias "alias not expanded as an argument" \
+	$'alias z=\'echo Z\'\necho z\n' "z"
+m_alias "quoted command word not expanded" \
+	$'alias x=\'echo BAD\'\n"x"\n' ""
+m_alias "unalias stops expansion" \
+	$'alias e=\'echo VISIBLE\'\ne\nunalias e\ne\n' "VISIBLE"
+m_alias "unalias -a clears every alias" \
+	$'alias e=\'echo SEEN\'\ne\nunalias -a\ne\n' "SEEN"
 
 # ============================================================================
 # MODULE 13 -- Hash table

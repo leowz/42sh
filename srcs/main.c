@@ -83,6 +83,7 @@ static void	shell_cleanup(t_shell *shell)
 	job_control_cleanup(shell);
 	free_variables(shell);
 	free_env_cache(shell);
+	alias_clear(shell);
 }
 
 /**
@@ -163,6 +164,7 @@ static void process_line(t_shell *shell, char *line)
 		fprintf(stderr, "Error: Failed to tokenize input.\n");
 		return;
 	}
+	alias_expand_tokens(shell, &tokens);
 
 	ast = parser_parse(tokens, shell);
 
