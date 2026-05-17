@@ -30,6 +30,8 @@ set -u
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SH="${SHELL_BIN:-$ROOT/42sh}"
 TMP="$(mktemp -d)"
+SUPP="${SUPP:-$ROOT/suppression.file}"
+USE_VALGRIND="${VALGRIND:-1}"
 trap 'rm -rf "$TMP"' EXIT
 
 if [ -t 1 ]; then
@@ -158,6 +160,10 @@ m_case "line continuation mid-word"             $'ec\\\nho hi'
 m_case "line continuation inside double quotes" $'echo "a\\\nb"'
 m_case "line continuation literal in single q"  $'echo \'a\\\nb\''
 
+m_case "lone dollar in double quotes"          'echo "$"'
+m_case "backslash sequences literal in quotes" "echo '\\n\\t raw'"
+m_case "escaped metacharacters are literal"    'echo \(\)\;'
+
 # ============================================================================
 # MODULE 2 -- Globbing  (*  ?  [])
 # ============================================================================
@@ -211,6 +217,9 @@ m_case "redirection applied to block"       "{ echo b1; echo b2; } > $TMP/gb; ca
 m_case "exit status mid-sequence of groups" '(exit 3); echo a; (exit 5); echo $?'
 m_case "empty subshell () is a syntax error" '()'
 m_case "unclosed ( is a syntax error"        '('
+m_case "(echo a|) is a syntax error"         '(echo a|)'
+m_case "(; echo b) is a syntax error"        '(; echo b)'
+m_case "nested empty () is a syntax error"   '(echo c; ())'
 
 # ============================================================================
 # MODULE 6 -- Command substitution  $()  ``
@@ -271,6 +280,12 @@ m_alias "unalias stops expansion" \
 	$'alias e=\'echo VISIBLE\'\ne\nunalias e\ne\n' "VISIBLE"
 m_alias "unalias -a clears every alias" \
 	$'alias e=\'echo SEEN\'\ne\nunalias -a\ne\n' "SEEN"
+m_alias "alias value with a semicolon" \
+	$'alias two=\'echo X; echo Y\'\ntwo\n' $'X\nY'
+m_alias "alias redefinition takes effect" \
+	$'alias r=\'echo first\'\nalias r=\'echo second\'\nr\n' "second"
+m_alias "three-level alias chain" \
+	$'alias a=b\nalias b=c\nalias c=echo\na deep3\n' "deep3"
 
 # ============================================================================
 # MODULE 13 -- Hash table
@@ -283,6 +298,42 @@ skip "13. Hash table" "not implemented (no 'hash' builtin)"
 # ============================================================================
 skip "14. test / [ builtin" "not implemented (uses external /usr/bin/test)"
 # when implemented: test -f F ; [ -d /tmp ] ; [ 5 -gt 3 ] ; test -z "" ; ! test ...
+
+# ============================================================================
+# Valgrind sweep -- representative commands for each implemented module must
+# run leak-clean (the module sections above check behaviour; this checks the
+# same code paths for memory errors and fd leaks).
+# ============================================================================
+if [ "$USE_VALGRIND" = "1" ] && command -v valgrind >/dev/null 2>&1; then
+	module "valgrind sweep (implemented modules)"
+	vg_one() {
+		local label="$1" script="$2"
+		total=$((total + 1))
+		cur_n=$((cur_n + 1))
+		vg_args=(--error-exitcode=99 --leak-check=full
+			--show-leak-kinds=definite,indirect
+			--errors-for-leak-kinds=definite,indirect
+			--track-fds=yes --log-file="$TMP/vg.log")
+		[ -r "$SUPP" ] && vg_args+=(--suppressions="$SUPP")
+		printf '%s' "$script" | valgrind "${vg_args[@]}" "$SH" \
+			>/dev/null 2>&1
+		if [ "$?" = "99" ]; then
+			fail=$((fail + 1))
+			printf "  %sFAIL%s  %s\n" "$R" "$Z" "$label"
+			grep -E "Invalid|lost|leaked" "$TMP/vg.log" | head -2 \
+				| sed 's/^/        /'
+		else
+			pass=$((pass + 1))
+			cur_ok=$((cur_ok + 1))
+			printf "  %sPASS%s  %s\n" "$G" "$Z" "$label"
+		fi
+	}
+	vg_one "inhibitors: quotes + backslash" \
+		$'echo \'a $HOME\' "b $HOME" c\\ d\n'
+	vg_one "tilde expansion"            $'echo ~ ~/x ~root\n'
+	vg_one "control groups"             $'(echo a; echo b) | cat\n{ echo c; }\n'
+	vg_one "aliases: define + expand"   $'alias ll=\'echo hi\'\nll\nunalias ll\n'
+fi
 
 # ============================================================================
 flush_module

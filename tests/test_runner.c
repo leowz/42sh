@@ -45,6 +45,7 @@ void	test_builtin_unset_suite(void);
 void	test_builtin_export_suite(void);
 void	test_alias_suite(void);
 void	test_builtin_alias_suite(void);
+void	test_interactive_suite(void);
 
 int	main(void)
 {
@@ -70,6 +71,7 @@ int	main(void)
 	MU_RUN(test_builtin_export_suite);
 	MU_RUN(test_alias_suite);
 	MU_RUN(test_builtin_alias_suite);
+	MU_RUN(test_interactive_suite);
 
 	MU_SUMMARY();
 }

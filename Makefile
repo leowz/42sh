@@ -47,6 +47,7 @@ TEST_FLAGS += -DTEST_BUILTIN_EXIT_ENABLED
 TEST_FLAGS += -DTEST_BUILTIN_TYPE_ENABLED
 TEST_FLAGS += -DTEST_HEREDOC_BUGS_ENABLED
 TEST_FLAGS += -DTEST_ALIAS_ENABLED
+TEST_FLAGS += -DTEST_INTERACTIVE_ENABLED
 
 # ----- Source discovery (recursive) -----
 SRCS		= $(shell find $(SRC_PATH) -name '*.c')
@@ -101,11 +102,15 @@ test: $(NAME) $(LIB) $(TEST_OBJS)
 integration: $(NAME)
 	@printf $(GREEN)"running integration tests...\n"$(EOC)
 	@bash $(TEST_PATH)/integration/run.sh
+	@bash $(TEST_PATH)/integration/correction.sh
+	@bash $(TEST_PATH)/integration/signals.sh
 	@bash $(TEST_PATH)/integration/modules.sh
 
 integration-quick: $(NAME)
 	@printf $(GREEN)"running integration tests (no valgrind)...\n"$(EOC)
 	@VALGRIND=0 bash $(TEST_PATH)/integration/run.sh
+	@VALGRIND=0 bash $(TEST_PATH)/integration/correction.sh
+	@bash $(TEST_PATH)/integration/signals.sh
 	@bash $(TEST_PATH)/integration/modules.sh
 
 # Modular-feature scoreboard: per-module status against the subject's
@@ -113,6 +118,21 @@ integration-quick: $(NAME)
 modules: $(NAME)
 	@printf $(GREEN)"running module scoreboard...\n"$(EOC)
 	@bash $(TEST_PATH)/integration/modules.sh
+
+# Stability suite: hostile / malformed input must not crash or leak 42sh.
+stability: $(NAME)
+	@printf $(GREEN)"running stability suite...\n"$(EOC)
+	@bash $(TEST_PATH)/integration/stability.sh
+
+# Correction replay: the official correction PDF's mandatory tests vs bash.
+correction: $(NAME)
+	@printf $(GREEN)"running correction replay...\n"$(EOC)
+	@bash $(TEST_PATH)/integration/correction.sh
+
+# Signals suite: a child killed by any signal must not take 42sh down.
+signals: $(NAME)
+	@printf $(GREEN)"running signals suite...\n"$(EOC)
+	@bash $(TEST_PATH)/integration/signals.sh
 
 # Full test suite: unit tests FIRST, then integration tests. Each step is a
 # separate sub-make so the order holds even under `make -j`; if the unit
@@ -219,4 +239,4 @@ help:
 
 -include $(DEPS)
 
-.PHONY: all debug test integration integration-quick modules check docs html dclean serve clean fclean re help install-hooks
+.PHONY: all debug test integration integration-quick modules stability correction signals check docs html dclean serve clean fclean re help install-hooks
