@@ -11,6 +11,22 @@
 
 #include "42sh.h"
 
+/**
+ * t_test_context - Context structure for test command execution
+ * @argc: Argument count for the test command
+ * @argv: Argument vector containing test command arguments
+ * @pos: Current position or index within the argument parsing
+ *
+ * This structure maintains the state and arguments needed to execute
+ * and parse test builtin commands in the shell.
+ */
+typedef struct s_test_context
+{
+    int		argc;
+    char	**argv;
+    int		pos;
+}	t_test_context;
+
 /** Forward declaration to avoid circular dependency with 42sh.h */
 typedef struct s_shell t_shell;
 
@@ -331,5 +347,16 @@ int	builtin_unset(struct s_shell *shell, int argc, char **argv);
  * @return 0 on success, 1 on error
  */
 int	builtin_export(struct s_shell *shell, int argc, char **argv);
+
+
+/**
+ * Execute the shell builtin `test`.
+ *
+ * @param shell Pointer to the current shell state.
+ * @param argc Number of arguments in argv.
+ * @param argv Array of argument strings.
+ * @return Exit status for the builtin command.
+ */
+int	builtin_test(struct s_shell *shell, int argc, char **argv);
 
 #endif
