@@ -18,7 +18,9 @@
 static const	t_operator operators[] = {
 	{";",	TOK_SEMICOLON},
 	{"\n",	TOK_NEWLINE},
+	{"$((",	TOK_ARITH_OPEN},
 	{"(",	TOK_LPAREN},
+	{"))",	TOK_ARITH_CLOSE},
 	{")",	TOK_RPAREN},
 	{"||",	TOK_OR},
 	{"|",	TOK_PIPE},

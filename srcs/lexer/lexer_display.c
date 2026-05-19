@@ -34,6 +34,8 @@ static const char	*tok_type_str(t_token_type type)
 		"TOK_REDIR_DUP_OUT",
 		"TOK_LPAREN",
 		"TOK_RPAREN",
+		"TOK_ARITH_OPEN",
+		"TOK_ARITH_CLOSE",
 		"TOK_EOF",
 		"TOK_ERROR"
 	};

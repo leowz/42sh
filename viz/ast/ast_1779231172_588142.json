@@ -1,0 +1,5 @@
+{
+  "input": "echo $((1 + 2))",
+  "tok_file": "viz/tokenizations/tok_1779231172_586623.json",
+  "tree": null
+}
