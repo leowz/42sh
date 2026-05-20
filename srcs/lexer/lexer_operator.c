@@ -46,7 +46,7 @@ int	is_operator(char c)
 	i = 0;
 	while (operators[i].literal)
 	{
-		if (operators[i].literal[0] == c)
+		if (operators[i].literal[0] != '$' && operators[i].literal[0] == c)
 			return (1);
 		i++;
 	}
@@ -58,6 +58,8 @@ int	is_operator(char c)
  */
 int	is_operator_start(const char *line)
 {
+	if (strncmp("$((", line, 3) == 0)
+		return (1);
 	if (isdigit(*line))
 	{
 		while (*line && isdigit(*line))
