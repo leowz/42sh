@@ -83,11 +83,21 @@ static char	**command_size(t_parser *p, t_cmd *command)
 	while (parser_accept(p, TOK_NEWLINE));
 	start = p->current;
 	while ((token = parser_peek(p))
-		&& (token->type == TOK_WORD || is_redir(token->type)))
+		&& (token->type == TOK_WORD
+			|| token->type == TOK_ARITH_OPEN
+			|| is_redir(token->type)))
 	{
 		token = parser_next(p);
 		if (token->type == TOK_WORD)
 			command->argc++;
+		else if (token->type == TOK_ARITH_OPEN)
+		{
+			command->argc++;
+			while ((token = parser_next(p))
+					&& token->type != TOK_ARITH_CLOSE
+					&& token->type != TOK_EOF)
+				;
+		}
 		else
 			parser_next(p);
 	}
@@ -109,6 +119,42 @@ static char	**command_size(t_parser *p, t_cmd *command)
 
 /**
  * @param p t_parser struct
+ * @brief helper to reconstruct "$((a + b)" from token into one string
+ * @return char	*string reconstructed
+ */
+static char	*collect_arith_token(t_parser *p)
+{
+	t_token	*token;
+	char	buf[4096];
+	int		pos = 0;
+
+	buf[pos] = '\0';
+	strlcat(buf, "$((", sizeof(buf));
+	pos += 3;
+	while ((token = parser_peek(p))
+			&& token->type != TOK_ARITH_CLOSE
+			&& token->type != TOK_EOF)
+	{
+		token = parser_next(p);
+		if (pos > 0 && buf[pos - 1] != '(')
+		{
+			strlcat(buf, " ", sizeof(buf));
+			pos++;
+		}
+		strlcat(buf, token->value, sizeof(buf));
+		pos += strlen(token->value);
+	}
+	if (parser_accept(p, TOK_ARITH_CLOSE))
+	{
+		strlcat(buf, "))", sizeof(buf));
+		return (strdup(buf));
+	}
+	else
+		return (strdup(""));
+}
+
+/**
+ * @param p t_parser struct
  * @param command t_cmd struct
  * @brief fill the t_cmd struct
  * @return t_ast struct
@@ -121,11 +167,15 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 
 	i = 0;
 	while ((token = parser_peek(p))
-		&& (token->type == TOK_WORD || is_redir(token->type)))
+		&& (token->type == TOK_WORD
+			|| token->type == TOK_ARITH_OPEN
+			|| is_redir(token->type)))
 	{
 		token = parser_next(p);
 		if (token->type == TOK_WORD)
 			command->argv[i++] = strdup(token->value);
+		else if (token->type == TOK_ARITH_OPEN)
+			command->argv[i++] = collect_arith_token(p);
 		else
 		{
 			redir = malloc(sizeof(t_redir));
