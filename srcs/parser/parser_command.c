@@ -150,7 +150,13 @@ static char	*collect_arith_token(t_parser *p)
 		return (strdup(buf));
 	}
 	else
-		return (strdup(""));
+	{
+		fprintf(stderr,
+			"42sh: syntax error: missing '))'  near unexpected token `%s'\n",
+			parser_peek(p) ? parser_peek(p)->value : "EOF");
+		p->error = strdup("syntax error: missing '))'");
+		return (NULL);
+	}
 }
 
 /**
@@ -233,12 +239,26 @@ static int	is_assignment(char *str)
 static void	parse_assignment(t_parser *p, t_cmd *command)
 {
 	t_token	*token;
+	char	*var;
+	char	*value;
+	char	*expr;
+
 	while ((token = parser_peek(p))
 		&& token->type == TOK_WORD
 		&& is_assignment(token->value))
 	{
 		token = parser_next(p);
-		ft_lstappend(&command->assignments, ft_lstnew(strdup(token->value)));
+		var = token->value;
+		if (parser_peek(p) && parser_peek(p)->type == TOK_ARITH_OPEN)
+		{
+			parser_next(p);
+			value = collect_arith_token(p);
+			expr = ft_strjoin(var, value);
+			free(value);
+		}
+		else
+			expr = strdup(var);
+		ft_lstappend(&command->assignments, ft_lstnew(expr));
 	}
 }
 

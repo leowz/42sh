@@ -4,6 +4,7 @@
  * @brief Arithmetic expansions: $((expr))
  * @author jguillem
  */
+#include <stdio.h>
 #include "expander.h"
 #include "ctype.h"
 
@@ -32,7 +33,22 @@ static long long int	parse_factor(t_arith *a)
 		skip_spaces(a);
 		if (a->s[a->i] && a->s[a->i] == ')')
 			a->i++;
+		else
+		{
+			fprintf(stderr,
+					"42sh: %s: arithmetic syntax error: missing ')'\n", a->s);
+			a->error = 1;
+			return (0);
+		}
 		return (sign * val);
+	}
+	if (!isdigit((unsigned char)a->s[a->i]))
+	{
+		fprintf(stderr,
+				"42sh: %s: arithmetic syntax error: operand expected (error token is \"%s\")\n",
+				a->s, a->s + a->i - 1);
+		a->error = 1;
+		return (0);
 	}
 	val = 0;
 	while (a->s[a->i] && isdigit(a->s[a->i]))
@@ -43,20 +59,29 @@ static long long int	parse_factor(t_arith *a)
 static long long int	parse_term(t_arith *a)
 {
 	long long int	val;
+	long long int	factor;
 	char			op;
 
 	val = parse_factor(a);
 	skip_spaces(a);
-	while (a->s[a->i]
+	while (!a->error && a->s[a->i]
 			&& (a->s[a->i] == '*' || a->s[a->i] == '/' || a->s[a->i] == '%'))
 	{
 		op = a->s[a->i++];
+		factor = parse_factor(a);
 		if (op == '*')
-			val *= parse_factor(a);
+			val *= factor;
+		else if (factor == 0)
+		{
+			fprintf(stderr,
+					"42sh: val %c 0: division by 0 (error token is \"0\")\n", op);
+			a->error = 1;
+			return (0);
+		}
 		else if (op == '/')
-			val /= parse_factor(a);
+			val /= factor;
 		else
-			val %= parse_factor(a);
+			val %= factor;
 		skip_spaces(a);
 	}
 	return (val);
@@ -69,7 +94,7 @@ long long int	parse_expr(t_arith *a)
 
 	val = parse_term(a);
 	skip_spaces(a);
-	while (a->s[a->i] && (a->s[a->i] == '+' || a->s[a->i] == '-'))
+	while (!a->error && a->s[a->i] && (a->s[a->i] == '+' || a->s[a->i] == '-'))
 	{
 		op = a->s[a->i++];
 		if (op == '+')
@@ -87,7 +112,10 @@ int	arith_eval(const char *expr, long long int *result)
 
 	a.s = expr;
 	a.i = 0;
+	a.error = 0;
 	*result = parse_expr(&a);
+	if (a.error)
+		return (-1);
 	skip_spaces(&a);
 	if (a.s[a.i])
 		return (-1);
