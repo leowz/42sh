@@ -27,6 +27,14 @@
 struct s_shell;
 
 /**
+ * @brief Helper structure to handle arithmetic expression
+ */
+typedef struct s_arith {
+	const char	*s;
+	int			i;
+}	t_arith;
+
+/**
  * @brief Expansion buffer with a parallel "splittable" mask.
  * @details Phase 1 of expansion writes into a t_xbuf instead of a plain
  *          C string so that field splitting can later distinguish IFS
@@ -148,4 +156,21 @@ int expand_tilde_at(struct s_shell *shell, const char *input, size_t *pos,
  */
 char **field_split(struct s_shell *shell, const t_xbuf *expanded);
 
+/**
+ * @brief expand arithmetic expression $((expr))
+ * @details check the depth of double parenthesis and call arith_eval
+ * @return if OK 0 - else -1
+ */
+int	expand_arithmetic(struct s_shell *shell, const char *input,
+		size_t *pos, int dq, t_xbuf *out);
+
+/**
+ *
+ */
+int	arith_eval(const char *expr, long long int *result);
+
+/**
+ *
+ */
+long long int	parse_expr(t_arith *a);
 #endif
