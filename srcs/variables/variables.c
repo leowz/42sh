@@ -15,6 +15,7 @@
  */
 
 #include "42sh.h"
+#include "executor.h"
 #include <stdlib.h>
 
 /**
@@ -146,6 +147,8 @@ int	var_set(t_shell *shell, const char *name, const char *value)
 		free(existing->value);
 		existing->value = new_value;
 		shell->env_dirty = 1;
+		if (ft_strequ(name, "PATH"))
+			cmd_hash_clear(shell);
 		return (0);
 	}
 	created = var_new(name, value);
@@ -183,6 +186,8 @@ int	var_unset(t_shell *shell, const char *name)
 			var_destroy(var);
 			free(node);
 			shell->env_dirty = 1;
+			if (ft_strequ(name, "PATH"))
+				cmd_hash_clear(shell);
 			return (0);
 		}
 		prev = node;

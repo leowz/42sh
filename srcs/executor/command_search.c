@@ -120,7 +120,10 @@ char	*find_command(t_shell *shell, const char *name)
 		return (NULL);
 	found = search_path(path_var, name);
 	if (found)
+	{
 		cmd_hash_set(shell, name, found);
+		cmd_hash_get(shell, name)->hits = 1;
+	}
 	return (found);
 }
 
