@@ -155,7 +155,7 @@ static void process_line(t_shell *shell, char *line)
 	tokens = lexer_tokenize(line);
 	if (!tokens)
 	{
-		fprintf(stderr, "Error: Failed to tokenize input.\n");
+		shell->last_exit_status = 1;
 		return;
 	}
 
@@ -168,7 +168,7 @@ static void process_line(t_shell *shell, char *line)
 	lexer_free_tokens(tokens);
 	if (!ast)
 	{
-		fprintf(stderr, "Error: Failed to parse tokens into AST.\n");
+		shell->last_exit_status = 1;
 		return;
 	}
 

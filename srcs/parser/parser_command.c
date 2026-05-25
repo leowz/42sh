@@ -58,11 +58,11 @@ static void	parser_error_unexpected(t_parser *p, t_token *token)
 	char	buf[256];
 
 	if (!token || token->type == TOK_EOF)
-		p->error = strdup("syntax error near unexpected token `newline'");
+		p->error = strdup("42sh: syntax error near unexpected token `newline'");
 	else
 	{
 		snprintf(buf, sizeof(buf),
-			"syntax error near unexpected token `%s'",
+			"42sh: syntax error near unexpected token `%s'",
 			token->value);
 		p->error = strdup(buf);
 	}
@@ -151,10 +151,7 @@ static char	*collect_arith_token(t_parser *p)
 	}
 	else
 	{
-		fprintf(stderr,
-			"42sh: syntax error: missing '))'  near unexpected token `%s'\n",
-			parser_peek(p) ? parser_peek(p)->value : "EOF");
-		p->error = strdup("syntax error: missing '))'");
+		p->error = strdup("42sh: error syntax: arithmetic expression must be closed by '))'");
 		return (NULL);
 	}
 }
