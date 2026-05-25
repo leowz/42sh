@@ -39,6 +39,7 @@
  */
 typedef struct s_shell {
   t_list *aliases;         /**< `t_alias*` list; alias table. */
+  t_hash *cmd_hash;        /**< Cached PATH lookups for the `hash` builtin. */
   char   *cmd_entrypoint;  /**< `./42sh -c <cmd>` command string, or NULL. */
   t_job  *current_job;     /**< Most recent job (`%+` / `%%`). */
   char   **env;            /**< Cached NULL-terminated array for execve. */

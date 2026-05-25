@@ -224,6 +224,30 @@ static int	debug_status(const char *kind, const char *name, int status)
 }
 #endif
 
+/**
+ * @brief Resolve and cache the external command in the parent before
+ *        forking, so the cache survives in the shell process.
+ * @details Skipped when the command has prefix assignments - those may
+ *          change `PATH` for this invocation only, so resolution must
+ *          happen in the child after apply_assignments. The result is
+ *          freed immediately; we're only here to warm `shell->cmd_hash`.
+ */
+static void	prewarm_cmd_cache(t_shell *shell, t_cmd *cmd)
+{
+	char	*path;
+
+	if (cmd->assignments)
+		return ;
+	if (!cmd->argv || !cmd->argv[0])
+		return ;
+	if (ft_strchr(cmd->argv[0], '/'))
+		return ;
+	if (builtin_get(cmd->argv[0]))
+		return ;
+	path = find_command(shell, cmd->argv[0]);
+	free(path);
+}
+
 int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 {
 	t_builtin_fn	fn;
@@ -262,6 +286,7 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 #ifdef FT_EXTRA_VERBOSE
 	debug_dispatch("external", cmd->argv[0]);
 #endif
+	prewarm_cmd_cache(shell, cmd);
 	fflush(NULL);
 	pid = fork();
 	if (pid == -1)

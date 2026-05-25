@@ -27,6 +27,7 @@ static int	shell_init(t_shell *shell, char **envp, int force_interactive)
 	shell->shell_pgid = getpid();
 	shell->env_dirty = 1;
 	var_init_from_environ(shell, envp);
+	cmd_hash_init(shell);
 	if (shell->interactive)
 	{
 		history_init(shell);
@@ -81,6 +82,7 @@ static void	shell_cleanup(t_shell *shell)
 		shell->history_file = NULL;
 	}
 	job_control_cleanup(shell);
+	cmd_hash_destroy(shell);
 	free_variables(shell);
 	free_env_cache(shell);
 }

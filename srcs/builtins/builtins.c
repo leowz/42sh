@@ -30,6 +30,7 @@ static const t_builtin_entry	g_builtins[] = {
 	{"set", builtin_set},
 	{"unset", builtin_unset},
 	{"export", builtin_export},
+	{"hash", builtin_hash},
 	{NULL, NULL}
 };
 
