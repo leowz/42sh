@@ -16,6 +16,12 @@ static int	test_file_exists(const char *file, int flag)
 {
     struct stat	buf;
 
+    if (flag == 'L' || flag == 'h')
+    {
+        if (lstat(file, &buf) < 0)
+            return (0);
+        return (S_ISLNK(buf.st_mode));
+    }
     if (stat(file, &buf) < 0)
         return (0);
     if (flag == 'e')
