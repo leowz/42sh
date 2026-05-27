@@ -14,9 +14,10 @@
  *     expansion of any kind.  No backslash escape inside.
  *   - Double quotes: parameter expansion still runs, but field
  *     splitting does not (the mask byte stays 0 for everything inside).
- *     A backslash escapes only $, `, ", \ and newline; otherwise the
- *     backslash is preserved literally.
- *   - Unquoted: backslash escapes the next character (one-byte copy).
+ *     A backslash escapes only $, `, ", \; backslash-newline is a line
+ *     continuation (removed); otherwise the backslash is preserved.
+ *   - Unquoted: backslash escapes the next character (one-byte copy);
+ *     backslash-newline is a line continuation (removed).
  *
  * Tilde expansion only triggers at byte 0 of the word and only when
  * unquoted.
@@ -36,22 +37,31 @@ typedef struct s_qstate
 
 /**
  * @brief True if @p c is one of the bytes a backslash escapes inside "".
+ * @details Newline is NOT in this set: a backslash-newline pair is a line
+ *          continuation (both bytes removed), handled before this check.
  */
 static int	is_dq_escapable(char c)
 {
-	return (c == '$' || c == '`' || c == '"' || c == '\\' || c == '\n');
+	return (c == '$' || c == '`' || c == '"' || c == '\\');
 }
 
 /**
  * @brief Handle a backslash sitting at @c input[*pos] in unquoted state.
- * @details Copies the next byte literally (with split=0 so it never
- *          becomes a field boundary).  A trailing backslash is a no-op.
+ * @details A backslash-newline pair is a line continuation: both bytes are
+ *          dropped and nothing is emitted. Otherwise the next byte is
+ *          copied literally (split=0 so it never becomes a field
+ *          boundary). A trailing backslash is a no-op.
  */
 static int	handle_bs_unquoted(const char *input, size_t *pos, t_xbuf *out)
 {
 	*pos += 1;
 	if (input[*pos] == '\0')
 		return (0);
+	if (input[*pos] == '\n')
+	{
+		*pos += 1;
+		return (0);
+	}
 	if (xbuf_putc(out, input[*pos], 0) == -1)
 		return (-1);
 	*pos += 1;
@@ -60,16 +70,22 @@ static int	handle_bs_unquoted(const char *input, size_t *pos, t_xbuf *out)
 
 /**
  * @brief Handle a backslash inside double quotes.
- * @details Per POSIX 2.2.3 the backslash retains its special meaning
- *          only when followed by $, `, ", \ or newline; otherwise
- *          both the backslash and the next character are passed
- *          through literally.
+ * @details A backslash-newline pair is a line continuation: both bytes are
+ *          dropped. Otherwise, per POSIX 2.2.3, the backslash retains its
+ *          special meaning only when followed by $, `, " or \; in every
+ *          other case both the backslash and the next character are
+ *          passed through literally.
  */
 static int	handle_bs_dq(const char *input, size_t *pos, t_xbuf *out)
 {
 	char	next;
 
 	next = input[*pos + 1];
+	if (next == '\n')
+	{
+		*pos += 2;
+		return (0);
+	}
 	if (next != '\0' && is_dq_escapable(next))
 	{
 		if (xbuf_putc(out, next, 0) == -1)
