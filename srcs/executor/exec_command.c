@@ -156,9 +156,11 @@ static void	exec_child(t_shell *shell, t_cmd *cmd)
 {
 	char	*path;
 
-	setpgid(0, 0);
 	if (shell->interactive)
+	{
+		setpgid(0, 0);
 		tcsetpgrp(shell->terminal_fd, getpid());
+	}
 	signals_setup_child();
 	apply_assignments(shell, cmd->assignments, 1);
 	if (setup_redirections(cmd->redirs, NULL) == -1)
@@ -181,6 +183,11 @@ static int	launch_simple_job(t_shell *shell, t_cmd *cmd, pid_t pid)
 	char	*cmd_line;
 	int		status;
 
+	if (!shell->interactive)
+	{
+		waitpid(pid, &status, 0);
+		return (get_exit_status(status));
+	}
 	setpgid(pid, pid);
 	cmd_line = cmd_to_string(cmd);
 	job = job_create(shell, cmd_line);

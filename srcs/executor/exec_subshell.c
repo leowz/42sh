@@ -19,6 +19,7 @@ static void	subshell_child(t_shell *shell, t_ast *ast)
 	setpgid(0, 0);
 	if (shell->interactive)
 		tcsetpgrp(shell->terminal_fd, getpid());
+	shell->interactive = 0;
 	signals_setup_child();
 	if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 		_exit(1);
