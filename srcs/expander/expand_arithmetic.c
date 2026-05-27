@@ -164,7 +164,7 @@ int	expand_arithmetic(struct s_shell *shell, const char *input,
 		return (-1);
 	}
 	free(expanded_expr);
-	result_str = ft_itoa(result);
+	result_str = ft_lltoa(result);
 	if (!result_str)
 		return (-1);
 	rc = xbuf_puts(out, result_str, !dq);
