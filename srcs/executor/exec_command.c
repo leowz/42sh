@@ -257,7 +257,8 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 #ifdef FT_EXTRA_VERBOSE
 	debug_cmd("Pre-expand", cmd);
 #endif
-	expand_command(shell, cmd);
+	if (expand_command(shell, cmd) < 0)
+		return (1);
 #ifdef FT_EXTRA_VERBOSE
 	debug_cmd("Post-expand", cmd);
 #endif

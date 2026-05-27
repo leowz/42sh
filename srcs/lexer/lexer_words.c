@@ -40,7 +40,7 @@ t_list	*read_word(const char **line)
 	scout = *line;
 	while (*scout
 		&& (in_squote || in_dquote
-			|| (!isspace(*scout) && !is_operator(*scout))))
+			|| (!isspace(*scout) && !is_operator_start(scout))))
 	{
 		if (*scout == '\'' && !in_dquote)
 			toggle(&in_squote);

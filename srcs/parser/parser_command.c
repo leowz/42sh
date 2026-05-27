@@ -58,11 +58,11 @@ static void	parser_error_unexpected(t_parser *p, t_token *token)
 	char	buf[256];
 
 	if (!token || token->type == TOK_EOF)
-		p->error = strdup("syntax error near unexpected token `newline'");
+		p->error = strdup("42sh: syntax error near unexpected token `newline'");
 	else
 	{
 		snprintf(buf, sizeof(buf),
-			"syntax error near unexpected token `%s'",
+			"42sh: syntax error near unexpected token `%s'",
 			token->value);
 		p->error = strdup(buf);
 	}
@@ -83,11 +83,21 @@ static char	**command_size(t_parser *p, t_cmd *command)
 	while (parser_accept(p, TOK_NEWLINE));
 	start = p->current;
 	while ((token = parser_peek(p))
-		&& (token->type == TOK_WORD || is_redir(token->type)))
+		&& (token->type == TOK_WORD
+			|| token->type == TOK_ARITH_OPEN
+			|| is_redir(token->type)))
 	{
 		token = parser_next(p);
 		if (token->type == TOK_WORD)
 			command->argc++;
+		else if (token->type == TOK_ARITH_OPEN)
+		{
+			command->argc++;
+			while ((token = parser_next(p))
+					&& token->type != TOK_ARITH_CLOSE
+					&& token->type != TOK_EOF)
+				;
+		}
 		else
 			parser_next(p);
 	}
@@ -109,6 +119,45 @@ static char	**command_size(t_parser *p, t_cmd *command)
 
 /**
  * @param p t_parser struct
+ * @brief helper to reconstruct "$((a + b)" from token into one string
+ * @return char	*string reconstructed
+ */
+static char	*collect_arith_token(t_parser *p)
+{
+	t_token	*token;
+	char	buf[4096];
+	int		pos = 0;
+
+	buf[pos] = '\0';
+	strlcat(buf, "$((", sizeof(buf));
+	pos += 3;
+	while ((token = parser_peek(p))
+			&& token->type != TOK_ARITH_CLOSE
+			&& token->type != TOK_EOF)
+	{
+		token = parser_next(p);
+		if (pos > 0 && buf[pos - 1] != '(')
+		{
+			strlcat(buf, " ", sizeof(buf));
+			pos++;
+		}
+		strlcat(buf, token->value, sizeof(buf));
+		pos += strlen(token->value);
+	}
+	if (parser_accept(p, TOK_ARITH_CLOSE))
+	{
+		strlcat(buf, "))", sizeof(buf));
+		return (strdup(buf));
+	}
+	else
+	{
+		p->error = strdup("42sh: error syntax: arithmetic expression must be closed by '))'");
+		return (NULL);
+	}
+}
+
+/**
+ * @param p t_parser struct
  * @param command t_cmd struct
  * @brief fill the t_cmd struct
  * @return t_ast struct
@@ -121,11 +170,15 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 
 	i = 0;
 	while ((token = parser_peek(p))
-		&& (token->type == TOK_WORD || is_redir(token->type)))
+		&& (token->type == TOK_WORD
+			|| token->type == TOK_ARITH_OPEN
+			|| is_redir(token->type)))
 	{
 		token = parser_next(p);
 		if (token->type == TOK_WORD)
 			command->argv[i++] = strdup(token->value);
+		else if (token->type == TOK_ARITH_OPEN)
+			command->argv[i++] = collect_arith_token(p);
 		else
 		{
 			redir = malloc(sizeof(t_redir));
@@ -183,12 +236,26 @@ static int	is_assignment(char *str)
 static void	parse_assignment(t_parser *p, t_cmd *command)
 {
 	t_token	*token;
+	char	*var;
+	char	*value;
+	char	*expr;
+
 	while ((token = parser_peek(p))
 		&& token->type == TOK_WORD
 		&& is_assignment(token->value))
 	{
 		token = parser_next(p);
-		ft_lstappend(&command->assignments, ft_lstnew(strdup(token->value)));
+		var = token->value;
+		if (parser_peek(p) && parser_peek(p)->type == TOK_ARITH_OPEN)
+		{
+			parser_next(p);
+			value = collect_arith_token(p);
+			expr = ft_strjoin(var, value);
+			free(value);
+		}
+		else
+			expr = strdup(var);
+		ft_lstappend(&command->assignments, ft_lstnew(expr));
 	}
 }
 

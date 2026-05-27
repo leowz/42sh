@@ -85,6 +85,7 @@ static void	shell_cleanup(t_shell *shell)
 	cmd_hash_destroy(shell);
 	free_variables(shell);
 	free_env_cache(shell);
+	alias_clear(shell);
 }
 
 /**
@@ -150,16 +151,22 @@ static void _display(t_list *tokens, t_ast *ast, char *line)
 
 static void process_line(t_shell *shell, char *line)
 {
-	/* Tokenize, display, and convert to JSON */
-	t_list *tokens;
-	t_ast  *ast;
+	t_list		*tokens;
+	t_ast		*ast;
+	const char	*scan;
 
+	scan = line;
+	while (*scan == ' ' || *scan == '\t' || *scan == '\n')
+		scan++;
+	if (*scan == '\0')
+		return ;
 	tokens = lexer_tokenize(line);
 	if (!tokens)
 	{
-		fprintf(stderr, "Error: Failed to tokenize input.\n");
+		shell->last_exit_status = 1;
 		return;
 	}
+	alias_expand_tokens(shell, &tokens);
 
 	ast = parser_parse(tokens, shell);
 
@@ -169,10 +176,7 @@ static void process_line(t_shell *shell, char *line)
 
 	lexer_free_tokens(tokens);
 	if (!ast)
-	{
-		fprintf(stderr, "Error: Failed to parse tokens into AST.\n");
 		return;
-	}
 
 	executor_execute(shell, ast);
 

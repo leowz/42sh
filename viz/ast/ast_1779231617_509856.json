@@ -1,0 +1,5 @@
+{
+  "input": "echo $((1 + 2 * 3))",
+  "tok_file": "viz/tokenizations/tok_1779231617_507622.json",
+  "tree": null
+}

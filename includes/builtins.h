@@ -11,6 +11,22 @@
 
 #include "42sh.h"
 
+/**
+ * t_test_context - Context structure for test command execution
+ * @argc: Argument count for the test command
+ * @argv: Argument vector containing test command arguments
+ * @pos: Current position or index within the argument parsing
+ *
+ * This structure maintains the state and arguments needed to execute
+ * and parse test builtin commands in the shell.
+ */
+typedef struct s_test_context
+{
+    int		argc;
+    char	**argv;
+    int		pos;
+}	t_test_context;
+
 /** Forward declaration to avoid circular dependency with 42sh.h */
 typedef struct s_shell t_shell;
 
@@ -354,5 +370,41 @@ int	builtin_export(struct s_shell *shell, int argc, char **argv);
  * directory scan.
  */
 int	builtin_hash(struct s_shell *shell, int argc, char **argv);
+
+/**
+ * @brief The alias builtin command.
+ *
+ * **Usage**: `alias [name[=value] ...]`
+ *
+ * - With no arguments, lists every alias as `alias name='value'`, sorted
+ *   by name, with embedded single quotes escaped as `'\''`.
+ * - With `name=value`, defines or redefines an alias.
+ * - With `name`, prints that alias, or reports it as not found.
+ *
+ * @return 0 on success, 1 if a queried name is not an alias.
+ */
+int	builtin_alias(struct s_shell *shell, int argc, char **argv);
+
+/**
+ * @brief The unalias builtin command.
+ *
+ * **Usage**: `unalias [-a] name [name ...]`
+ *
+ * - `-a` removes every alias.
+ * - Each `name` removes one alias; an unknown name is reported on stderr.
+ *
+ * @return 0 on success, 1 if a name was not an alias or on usage error.
+ */
+int	builtin_unalias(struct s_shell *shell, int argc, char **argv);
+
+/**
+ * Execute the shell builtin `test`.
+ *
+ * @param shell Pointer to the current shell state.
+ * @param argc Number of arguments in argv.
+ * @param argv Array of argument strings.
+ * @return Exit status for the builtin command.
+ */
+int	builtin_test(struct s_shell *shell, int argc, char **argv);
 
 #endif
