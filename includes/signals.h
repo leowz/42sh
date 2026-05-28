@@ -22,7 +22,6 @@ extern volatile sig_atomic_t g_signal_received;
 void signals_setup_interactive(void);
 void signals_setup_executing(void);
 void signals_setup_child(void);
-void signals_setup_subshell(void);
 void signals_check(t_shell *shell);
 
 #endif

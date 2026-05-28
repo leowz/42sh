@@ -17,10 +17,10 @@ static void	subshell_child(t_shell *shell, t_ast *ast)
 	int	status;
 
 	setpgid(0, 0);
-	shell->shell_pgid = getpid();
 	if (shell->interactive)
-		tcsetpgrp(shell->terminal_fd, shell->shell_pgid);
-	signals_setup_subshell();
+		tcsetpgrp(shell->terminal_fd, getpid());
+	shell->interactive = 0;
+	signals_setup_child();
 	if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 		_exit(1);
 	status = executor_execute(shell, ast->data.group->child);
@@ -112,6 +112,7 @@ static void	bg_child(t_shell *shell, t_ast *ast)
 			close(devnull);
 		}
 	}
+	shell->interactive = 0;
 	if (setup_redirections(ast->data.group->redirs, NULL) == -1)
 		_exit(1);
 	status = executor_execute(shell, ast->data.group->child);
