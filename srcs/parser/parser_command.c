@@ -129,7 +129,7 @@ static char	*collect_arith_token(t_parser *p)
 	int		pos = 0;
 
 	buf[pos] = '\0';
-	strlcat(buf, "$((", sizeof(buf));
+	ft_strlcat(buf, "$((", sizeof(buf));
 	pos += 3;
 	while ((token = parser_peek(p))
 			&& token->type != TOK_ARITH_CLOSE
@@ -138,15 +138,15 @@ static char	*collect_arith_token(t_parser *p)
 		token = parser_next(p);
 		if (pos > 0 && buf[pos - 1] != '(')
 		{
-			strlcat(buf, " ", sizeof(buf));
+			ft_strlcat(buf, " ", sizeof(buf));
 			pos++;
 		}
-		strlcat(buf, token->value, sizeof(buf));
+		ft_strlcat(buf, token->value, sizeof(buf));
 		pos += strlen(token->value);
 	}
 	if (parser_accept(p, TOK_ARITH_CLOSE))
 	{
-		strlcat(buf, "))", sizeof(buf));
+		ft_strlcat(buf, "))", sizeof(buf));
 		return (strdup(buf));
 	}
 	else
