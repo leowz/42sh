@@ -64,11 +64,19 @@ jobs:
       - name: Generate HTML documentation
         run: make html
 
-      - name: Stage site (docs + viz)
+      - name: Stage site (docs + viz + wasm shim)
         run: |
           mkdir -p _site
           cp -r docs/_build/html _site/docs
           cp -r viz _site/viz
+          # Small c2w JS files (out.js, load.js, arg-module.js) live in git
+          # and need to be served alongside viz/. The two heavy binary blobs
+          # (qemu-system-x86_64.{data,wasm}) are NOT in git — live.html
+          # fetches them from the wasm-latest GitHub Release.
+          if [ -d wasm/dist ]; then
+            mkdir -p _site/wasm/dist
+            cp -r wasm/dist/* _site/wasm/dist/ || true
+          fi
 
       - name: Deploy to the `docs` branch
         uses: peaceiris/actions-gh-pages@v4
