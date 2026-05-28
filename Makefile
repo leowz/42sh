@@ -209,6 +209,59 @@ install-hooks:
 	@git config core.hooksPath .githooks
 	@printf $(GREEN)"Git hooks installed (core.hooksPath → .githooks)\n"$(EOC)
 
+# ---- WASM -----
+# Browser build pipeline:
+#   1. `make wasm-image`  → Docker image with 42sh + 42sh_debug
+#   2. `make wasm-c2w`    → downloads the container2wasm converter
+#   3. `make wasm`        → produces wasm/dist/ (browser-ready bundle)
+#
+# The full conversion takes 15-20 minutes the first time (compiles QEMU
+# to WebAssembly via emscripten). Re-runs are much faster thanks to
+# Docker layer caching.
+
+C2W_VERSION  = v0.8.4
+WASM_DIR     = wasm
+WASM_DIST    = $(WASM_DIR)/dist
+WASM_IMAGE   = 42sh-wasm:latest
+C2W_BIN      = $(WASM_DIR)/c2w
+
+# Build the Docker image (release + debug 42sh binaries)
+wasm-image:
+	@printf $(GREEN)"Building Docker image $(WASM_IMAGE)...\n"$(EOC)
+	@docker build -t $(WASM_IMAGE) -f $(WASM_DIR)/Dockerfile .
+
+# Download the container2wasm converter (idempotent)
+wasm-c2w: $(C2W_BIN)
+$(C2W_BIN):
+	@printf $(GREEN)"Downloading container2wasm $(C2W_VERSION)...\n"$(EOC)
+	@arch=$$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/'); \
+	tarball="container2wasm-$(C2W_VERSION)-linux-$$arch.tar.gz"; \
+	curl -fSL "https://github.com/container2wasm/container2wasm/releases/download/$(C2W_VERSION)/$$tarball" \
+	  -o /tmp/$$tarball
+	@arch=$$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/'); \
+	tar -xzf /tmp/container2wasm-$(C2W_VERSION)-linux-$$arch.tar.gz -C $(WASM_DIR)/
+	@chmod +x $(C2W_BIN)
+	@printf $(GREEN)"$(C2W_BIN) installed\n"$(EOC)
+
+# Produce the browser-ready bundle in $(WASM_DIST)
+wasm: wasm-image wasm-c2w
+	@printf $(GREEN)"Converting container to Wasm (~15-20 min on first run)...\n"$(EOC)
+	@mkdir -p $(WASM_DIST)
+	@./$(C2W_BIN) --to-js $(WASM_IMAGE) $(WASM_DIST)/
+	@printf $(GREEN)"\nwasm: bundle ready in $(WASM_DIST)/\n"$(EOC)
+	@printf "Serve with: $(CYAN)python3 viz/serve.py$(EOC)\n"
+
+# Remove the generated bundle + the c2w tools
+wasm-clean:
+	@printf $(RED)"Removing wasm artifacts...\n"$(EOC)
+	@rm -rf $(WASM_DIST)
+	@rm -f $(C2W_BIN) $(WASM_DIR)/c2w-net
+	@-docker rmi $(WASM_IMAGE) >/dev/null 2>&1 || true
+	@printf $(GREEN)"wasm clean\n"$(EOC)
+
+# Back-compat alias for the previous rule name
+build-image: wasm-image
+
 # ---- Help ----
 
 help:
@@ -222,6 +275,9 @@ help:
 	@printf "  "$(GREEN)"integration-quick"$(EOC)" - same, but skip the valgrind pass\n"
 	@printf "  "$(GREEN)"modules"$(EOC)"       - module scoreboard (per-feature status vs the subject)\n"
 	@printf "  "$(GREEN)"check"$(EOC)"         - full suite: unit tests first, then integration\n"
+	@printf "  "$(GREEN)"wasm"$(EOC)"          - build the browser-ready Wasm bundle (~15-20 min)\n"
+	@printf "  "$(GREEN)"wasm-image"$(EOC)"    - just the Docker image\n"
+	@printf "  "$(RED)"wasm-clean"$(EOC)"    - remove the bundle, c2w binaries, Docker image\n"
 	@printf "  "$(GREEN)"docs"$(EOC)"          - generate Doxygen XML + man pages\n"
 	@printf "  "$(GREEN)"html"$(EOC)"          - build Sphinx HTML docs (RTD theme)\n"
 	@printf "  "$(GREEN)"serve"$(EOC)"         - build and serve docs at localhost:8080\n"
@@ -241,4 +297,4 @@ help:
 
 -include $(DEPS)
 
-.PHONY: all debug test integration integration-quick modules stability correction signals check docs html dclean serve clean fclean re help install-hooks
+.PHONY: all debug test integration integration-quick modules stability correction signals check docs html dclean serve clean fclean re help install-hooks wasm wasm-image wasm-c2w wasm-clean build-image

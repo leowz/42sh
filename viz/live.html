@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>42sh Live Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css" />
+  <style>
+    body { overflow: hidden; }
+    main { flex-direction: row; }
+
+    /* Visualizer panes/buttons are hidden until body.has-viz is set */
+    .viz-only { display: none !important; }
+    body.has-viz .viz-only { display: inherit !important; }
+    body.has-viz #viz-pane { display: flex !important; }
+    body.has-viz .toolbar-btn.viz-only { display: inline-flex !important; }
+    /* .no-viz: opposite — hide when in viz mode */
+    body.has-viz .no-viz { display: none !important; }
+
+    /* Status indicator in the header */
+    .header-status {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-left: 1rem;
+      padding: .25rem .6rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    /* --- Left: Terminal --- */
+    #terminal-pane {
+      flex: 1;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: #000;
+    }
+    body.has-viz #terminal-pane {
+      flex: 0 0 45%;
+    }
+    #terminal-pane h2 {
+      padding: .5rem 1rem;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #terminal-container {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* --- Right: Visualizer --- */
+    #viz-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Session bar */
+    #session-bar {
+      display: flex;
+      gap: .3rem;
+      padding: .5rem .75rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    #session-bar .label {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-right: .3rem;
+      flex-shrink: 0;
+    }
+    .session-chip {
+      padding: .25rem .6rem;
+      border-radius: 5px;
+      font-size: .75rem;
+      font-family: 'Fira Code', monospace;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      white-space: nowrap;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background .15s, color .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .session-chip:hover { color: var(--text); border-color: #555; }
+    .session-chip.active {
+      background: rgba(88,166,255,.15);
+      color: var(--accent);
+      border-color: rgba(88,166,255,.5);
+    }
+
+    /* --- Split panels for tokens + AST --- */
+    #viz-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: .75rem;
+      gap: .75rem;
+    }
+
+    #viz-welcome {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: .9rem;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    /* Input display */
+    .live-input-display {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .5rem .75rem;
+      font-family: 'Fira Code', monospace;
+      font-size: .85rem;
+      color: var(--text);
+    }
+    .live-input-display::before {
+      content: '$ ';
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .panel-label {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: .2rem;
+    }
+
+    /* Token strip in live mode */
+    .live-token-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      padding: .5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      min-height: 40px;
+    }
+
+    /* AST in live mode */
+    .live-ast-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      min-height: 250px;
+      height: 350px;
+      resize: vertical;
+      overflow: hidden;
+      position: relative;
+    }
+    .live-ast-container svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    .live-ast-container svg:active { cursor: grabbing; }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #f85149;          /* red — error / disconnected */
+      flex-shrink: 0;
+      transition: background .2s, box-shadow .2s;
+    }
+    .status-dot.busy {
+      background: #ffa657;          /* amber — booting / connecting */
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+    .status-dot.connected {
+      background: #3fb950;          /* green — ready */
+      box-shadow: 0 0 8px rgba(63,185,80,.6);
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,166,87,.6); }
+      50%      { box-shadow: 0 0 0 5px rgba(255,166,87,0); }
+    }
+    #status-text {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    /* Execution events */
+    .exec-events {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .5rem;
+      font-size: .75rem;
+      font-family: 'Fira Code', monospace;
+      color: var(--muted);
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .exec-event {
+      padding: .15rem 0;
+      border-bottom: 1px solid rgba(48,54,61,.5);
+    }
+    .exec-event:last-child { border-bottom: none; }
+    .exec-event .ev-type {
+      display: inline-block;
+      padding: .1rem .35rem;
+      border-radius: 3px;
+      font-size: .65rem;
+      margin-right: .3rem;
+    }
+    .ev-pipe  { background: rgba(255,123,114,.2); color: #ff7b72; }
+    .ev-and   { background: rgba(255,166,87,.2);  color: #ffa657; }
+    .ev-or    { background: rgba(210,168,255,.2); color: #d2a8ff; }
+    .ev-cmd   { background: rgba(63,185,80,.2);   color: #3fb950; }
+    .ev-exit  { background: rgba(139,148,158,.2); color: #8b949e; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">42sh <span id="mode-label">live</span></div>
+    <p class="subtitle" id="header-subtitle">Interactive Shell</p>
+    <div class="header-status">
+      <div class="status-dot busy" id="status-dot"></div>
+      <span id="status-text">Initializing...</span>
+    </div>
+    <div style="flex:1"></div>
+    <button id="open-viz-btn" class="toolbar-btn no-viz" title="Connect to a debug shell and see live tokenization + AST">
+      <span class="btn-icon">&#x25C6;</span> Try Visualizer
+    </button>
+    <button id="export-btn" class="toolbar-btn viz-only" title="Export current session">
+      <span class="btn-icon">&#x2913;</span> Export
+    </button>
+    <label class="toolbar-btn viz-only" title="Import session JSON" style="cursor:pointer">
+      <span class="btn-icon">&#x2912;</span> Import
+      <input type="file" id="import-picker" accept=".json" hidden />
+    </label>
+  </header>
+
+  <!-- Modal: pick a port and open viz mode -->
+  <div id="viz-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Connect to debug shell</h2>
+        <button id="viz-modal-close" class="modal-close">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--muted);font-size:.85rem;line-height:1.5;margin-bottom:1rem">
+          The interactive visualizer connects to a local <code>42sh</code> debug build
+          via a WebSocket bridge. Start the bridge with:
+        </p>
+        <pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-size:.78rem;color:var(--accent);margin-bottom:1rem;overflow-x:auto">python3 viz/bridge.py --shell ./42sh --port <span id="port-echo">8765</span></pre>
+        <label class="setting-label" style="display:block;margin-bottom:.5rem">Bridge port</label>
+        <input type="number" id="viz-port" value="8765" min="1" max="65535"
+          style="width:100%;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Fira Code',monospace;font-size:.9rem"/>
+        <div style="display:flex;gap:.5rem;margin-top:1.2rem;justify-content:flex-end">
+          <button id="viz-cancel" class="toolbar-btn">Cancel</button>
+          <button id="viz-connect" class="toolbar-btn" style="background:rgba(88,166,255,.15);color:var(--accent);border-color:rgba(88,166,255,.5)">Open Visualizer →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Left: Terminal (always shown) -->
+    <div id="terminal-pane">
+      <h2>42sh Terminal</h2>
+      <div id="terminal-container"></div>
+    </div>
+
+    <!-- Right: Visualizer (only when ?ws= is given) -->
+    <div id="viz-pane" class="viz-only">
+      <div id="session-bar">
+        <span class="label">Sessions</span>
+      </div>
+
+      <div id="viz-content">
+        <div id="viz-welcome">
+          <p>Type a command in the terminal.<br/>Tokenization and AST will appear here in real-time.</p>
+        </div>
+        <div id="viz-active" style="display:none">
+          <div class="live-input-display" id="live-input"></div>
+
+          <div class="panel-label">Tokens</div>
+          <div class="live-token-strip" id="live-tokens"></div>
+
+          <div class="panel-label">AST</div>
+          <div class="live-ast-container" id="live-ast-wrap">
+            <svg id="live-ast-svg"></svg>
+          </div>
+
+          <div class="panel-label">Execution</div>
+          <div class="exec-events" id="live-exec"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://unpkg.com/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+  <script src="https://unpkg.com/xterm-pty@0.12.0/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+  <!-- c2w setup ─────────────────────────────────────────────────────
+       Small JS files (load.js, out.js, arg-module.js) are tracked in
+       git and served from ../wasm/dist/.
+       The two heavy blobs (qemu-system-x86_64.data, .wasm) are too big
+       for GitHub (>100MB rule), so they live on a GitHub Release.
+       Set WASM_BLOB_URL below if you want to override the default. -->
+  <script>
+    // Auto-detect: if served from github.io, fetch blobs from the Release.
+    // Otherwise (local dev), serve from ../wasm/dist/ alongside the JS.
+    const WASM_BLOB_URL =
+      location.hostname.endsWith('github.io')
+        ? 'https://github.com/leowz/42sh/releases/download/wasm-latest/'
+        : '../wasm/dist/';
+
+    const WASM_HEAVY_FILES = new Set([
+      'qemu-system-x86_64.data',
+      'qemu-system-x86_64.wasm',
+    ]);
+
+    window.Module = {
+      locateFile: (path) => {
+        // Heavy binary blobs → Release (or local override).
+        if (WASM_HEAVY_FILES.has(path)) return WASM_BLOB_URL + path;
+        // Everything else (small JS) → tracked next to live.html.
+        return '../wasm/dist/' + path;
+      },
+      preRun: [],
+    };
+  </script>
+  <script src="../wasm/dist/load.js"></script>
+
+  <script type="module">
+/* ═══════════════════════════════════════════════════════════════════
+   42sh Live Visualizer
+   ═══════════════════════════════════════════════════════════════════ */
+
+const TOKEN_COLORS = {
+  TOK_WORD:'#3fb950', TOK_PIPE:'#ff7b72', TOK_AND:'#ffa657',
+  TOK_OR:'#ffa657', TOK_SEMICOLON:'#d2a8ff', TOK_AMPERSAND:'#d2a8ff',
+  TOK_NEWLINE:'#79c0ff', TOK_REDIR_IN:'#56d364', TOK_REDIR_OUT:'#56d364',
+  TOK_REDIR_APPEND:'#56d364', TOK_HEREDOC:'#56d364', TOK_REDIR_DUP_IN:'#56d364',
+  TOK_REDIR_DUP_OUT:'#56d364', TOK_LPAREN:'#f778ba', TOK_RPAREN:'#f778ba',
+  TOK_EOF:'#6e7681', TOK_ERROR:'#f85149',
+};
+const NODE_COLORS = {
+  NODE_COMMAND:'#3fb950', NODE_PIPE:'#ff7b72', NODE_AND:'#ffa657',
+  NODE_OR:'#d2a8ff', NODE_SEQUENCE:'#79c0ff', NODE_SUBSHELL:'#f778ba',
+  NODE_BLOCK:'#56d364', NODE_BACKGROUND:'#ffd866',
+};
+const NODE_LABELS = {
+  NODE_COMMAND:'CMD', NODE_PIPE:'PIPE', NODE_AND:'AND', NODE_OR:'OR',
+  NODE_SEQUENCE:'SEQ', NODE_SUBSHELL:'SUBSH', NODE_BLOCK:'BLOCK',
+  NODE_BACKGROUND:'BG',
+};
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ─── State ─────────────────────────────────────────────────────── */
+const sessions = [];
+let activeIdx = -1;
+let pendingTok = null;
+
+/* ─── xterm.js setup ────────────────────────────────────────────── */
+const term = new window.Terminal({
+  theme: {
+    background: '#0d1117',
+    foreground: '#c9d1d9',
+    cursor: '#58a6ff',
+    selectionBackground: 'rgba(88,166,255,.3)',
+  },
+  fontFamily: "'Fira Code', 'Cascadia Code', monospace",
+  fontSize: 14,
+  cursorBlink: true,
+});
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
+term.open(document.getElementById('terminal-container'));
+fitAddon.fit();
+window.addEventListener('resize', () => fitAddon.fit());
+
+/* ─── OSC parser: intercept \033]1337;42sh;type;data\007 ───────── *
+ * 1337 is the iTerm2-style custom OSC code. xterm.js parses OSC ids
+ * as integers, so non-numeric prefixes like "42sh" silently fail —
+ * the leading 1337 ensures the handler is actually invoked. */
+term.parser.registerOscHandler(1337, (data) => {
+  if (!data.startsWith('42sh;')) return false;
+  const semi = data.indexOf(';', 5);
+  if (semi === -1) return true;
+  const type = data.substring(5, semi);
+  const json = data.substring(semi + 1);
+  try {
+    const parsed = JSON.parse(json);
+    handleShellData(type, parsed);
+  } catch (e) {
+    console.warn('42sh OSC parse error:', e, json.substring(0, 200));
+  }
+  return true;
+});
+
+function handleShellData(type, data) {
+  if (type === 'tok') {
+    pendingTok = data;
+  } else if (type === 'ast') {
+    const session = {
+      input: data.input,
+      tokens: pendingTok ? pendingTok.tokens : null,
+      tree: data.tree,
+      execEvents: [],
+    };
+    sessions.push(session);
+    pendingTok = null;
+    showSession(sessions.length - 1);
+    renderSessionBar();
+  } else if (type === 'exec') {
+    const target = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+    if (target) {
+      target.execEvents.push(data);
+      if (activeIdx === sessions.length - 1) {
+        renderExecEvents(target.execEvents);
+      }
+    }
+  }
+}
+
+/* ─── Transport layer ───────────────────────────────────────────── *
+ * Two modes (auto-selected from URL params):
+ *
+ *   1. Default — boot 42sh as Wasm in the browser (container2wasm).
+ *      Fully static, no server, works offline after first load.
+ *
+ *   2. ?ws=PORT — connect to a local WebSocket bridge that proxies
+ *      a native ./42sh process. Faster boot, useful for development.
+ *      Requires:  python3 viz/bridge.py --shell ./42sh
+ *
+ * The OSC handler above is identical for both modes — the shell sends
+ * `\033]42sh;...` sequences either way, and the visualizer updates live.
+ * ─────────────────────────────────────────────────────────────────── */
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const modeLabel = document.getElementById('mode-label');
+const headerSub = document.getElementById('header-subtitle');
+const wsPort = new URLSearchParams(location.search).get('ws');
+
+/* Visualizer is only shown when connecting through the bridge */
+if (wsPort) {
+  document.body.classList.add('has-viz');
+  modeLabel.textContent = 'live';
+  headerSub.textContent = 'Interactive Shell Visualizer';
+} else {
+  modeLabel.textContent = 'wasm';
+  headerSub.textContent = '42sh in WebAssembly';
+}
+
+/* ─── "Try Visualizer" modal ────────────────────────────────────── */
+const vizModal = document.getElementById('viz-modal');
+const vizPort = document.getElementById('viz-port');
+const portEcho = document.getElementById('port-echo');
+
+function openVizModal() {
+  vizModal.hidden = false;
+  vizPort.focus();
+  vizPort.select();
+}
+function closeVizModal() { vizModal.hidden = true; }
+
+document.getElementById('open-viz-btn').addEventListener('click', openVizModal);
+document.getElementById('viz-modal-close').addEventListener('click', closeVizModal);
+document.getElementById('viz-cancel').addEventListener('click', closeVizModal);
+vizModal.addEventListener('click', (e) => { if (e.target === vizModal) closeVizModal(); });
+
+/* Live-update the command snippet as the user types */
+vizPort.addEventListener('input', () => {
+  portEcho.textContent = vizPort.value || '8765';
+});
+
+function goToViz() {
+  const p = parseInt(vizPort.value, 10);
+  if (!p || p < 1 || p > 65535) {
+    vizPort.focus();
+    return;
+  }
+  location.search = '?ws=' + p;
+}
+document.getElementById('viz-connect').addEventListener('click', goToViz);
+vizPort.addEventListener('keydown', (e) => { if (e.key === 'Enter') goToViz(); });
+
+/* Esc closes the modal */
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !vizModal.hidden) closeVizModal();
+});
+
+/* Status indicator: 'busy' (amber, pulsing) | 'ready' (green) | 'error' (red) */
+function setStatus(state, text) {
+  statusDot.classList.remove('busy', 'connected');
+  if (state === 'busy')  statusDot.classList.add('busy');
+  if (state === 'ready') statusDot.classList.add('connected');
+  if (text != null) statusText.textContent = text;
+}
+
+let guideShown = false;
+function showBridgeGuide(msg) {
+  if (guideShown) return;
+  guideShown = true;
+  const lines = [
+    '',
+    '\x1b[1;31m✗ Could not connect to the bridge.\x1b[0m',
+    msg ? `   \x1b[2m${msg}\x1b[0m` : '',
+    '',
+    '\x1b[1;36mTo use WebSocket-bridge mode:\x1b[0m',
+    '',
+    '  \x1b[33m1.\x1b[0m  Start the bridge in another terminal:',
+    '       \x1b[32mpython3 viz/bridge.py --shell ./42sh --port ' + wsPort + '\x1b[0m',
+    '',
+    '  \x1b[33m2.\x1b[0m  Reload this page.',
+    '',
+    '\x1b[1;36mOr remove the \x1b[33m?ws=\x1b[1;36m param\x1b[0m to boot 42sh as Wasm in the browser.',
+    '',
+  ];
+  lines.forEach(l => term.writeln(l));
+}
+
+if (wsPort) {
+  /* ── WebSocket bridge mode ─────────────────────────────────────── */
+  const url = `ws://localhost:${wsPort}`;
+  setStatus('busy', `Connecting to ${url}...`);
+
+  let ws = new WebSocket(url);
+  ws.binaryType = 'arraybuffer';
+  let connectedOnce = false;
+
+  /* Force a failure if the handshake doesn't complete in 4s — usually
+   * caused by a zombie bridge process binding the port but not responding. */
+  const handshakeTimer = setTimeout(() => {
+    if (!connectedOnce && ws && ws.readyState !== WebSocket.OPEN) {
+      try { ws.close(); } catch (_) {}
+      setStatus('error', `Bridge at ${url} accepted but did not respond`);
+      showBridgeGuide(
+        'A process is bound to the port but the WebSocket handshake timed out. ' +
+        'Kill any stale bridge processes:  pkill -9 -f viz/bridge.py'
+      );
+    }
+  }, 4000);
+
+  ws.onopen = () => {
+    clearTimeout(handshakeTimer);
+    connectedOnce = true;
+    setStatus('ready', `Connected (bridge ${url})`);
+    term.focus();
+  };
+  ws.onmessage = (ev) => {
+    if (ev.data instanceof ArrayBuffer) term.write(new Uint8Array(ev.data));
+    else term.write(ev.data);
+  };
+  /* `error` always fires before `close` — let `close` be the single source
+   * of truth so the guide can't print twice. */
+  ws.onerror = () => { /* deliberately quiet; close handles UX */ };
+  ws.onclose = () => {
+    clearTimeout(handshakeTimer);
+    if (connectedOnce) {
+      setStatus('error', 'Bridge disconnected');
+      showBridgeGuide('The connection was closed.');
+    } else {
+      setStatus('error', `Could not reach ${url}`);
+      showBridgeGuide(`Nothing is listening on ${url}.`);
+    }
+    ws = null;
+  };
+
+  term.onData(data => {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(data);
+  });
+
+} else {
+  /* ── Wasm mode (container2wasm, default) ───────────────────────── */
+  setStatus('busy', 'Booting 42sh in WebAssembly... (downloading ~190MB on first load)');
+
+  const { master, slave } = openpty();
+  term.loadAddon(master);
+
+  Module.pty = slave;
+  Module.mainScriptUrlOrBlob = new URL('../wasm/dist/out.js', location.href).href;
+  /* c2w's load.js calls Module.setStatus while downloading the data file —
+   * keep dot amber, only update text. */
+  Module.setStatus = (text) => { if (text) statusText.textContent = text; };
+  Module.print = (t) => console.log('[qemu]', t);
+  Module.printErr = (t) => console.warn('[qemu]', t);
+
+  Module.preRun.push((mod) => {
+    try { mod.FS.mkdir('/pack'); } catch (_) {}
+    const info = 't:' + Math.round(Date.now() / 1000) + '\n';
+    mod.FS.writeFile('/pack/info', info);
+  });
+
+  let readableCallbacks = [];
+  Module.pty.onReadable(() => {
+    readableCallbacks.forEach(cb => cb());
+    readableCallbacks = [];
+  });
+  Module.preRun.push((mod) => {
+    mod.TTY.stream_ops.poll = (stream, timeout, notifyCallback) => {
+      if (mod.pty.readable) return 1;
+      if (notifyCallback) {
+        notifyCallback.registerCleanupFunc(() => {
+          const i = readableCallbacks.indexOf(notifyCallback);
+          if (i !== -1) readableCallbacks.splice(i, 1);
+        });
+        readableCallbacks.push(notifyCallback);
+      }
+      return 0;
+    };
+  });
+
+  /* The first byte QEMU emits to the PTY is the most reliable signal
+   * that the VM is alive — flip to green then. Monkey-patch slave.write
+   * because xterm-pty doesn't expose an output-side event. */
+  const origWrite = slave.write.bind(slave);
+  let firstByteSeen = false;
+  slave.write = function (data) {
+    if (!firstByteSeen && data && (data.length || data.byteLength)) {
+      firstByteSeen = true;
+      setStatus('ready', '42sh running (Wasm)');
+    }
+    return origWrite(data);
+  };
+
+  try {
+    await import('../wasm/dist/arg-module.js');
+    const { default: initEmscriptenModule } = await import('../wasm/dist/out.js');
+    setStatus('busy', 'Booting Linux kernel...');
+    await initEmscriptenModule(Module);
+    /* initEmscriptenModule resolves once the wasm runtime is up; the kernel
+     * is still booting from here. The firstByteSeen hook above will flip to
+     * 'ready' as soon as the VM produces output. */
+  } catch (err) {
+    setStatus('error', `Failed to boot Wasm: ${err.message}`);
+    console.error('[boot]', err);
+  }
+}
+
+/* ─── Session bar ───────────────────────────────────────────────── */
+function renderSessionBar() {
+  const bar = document.getElementById('session-bar');
+  bar.innerHTML = '<span class="label">Sessions</span>';
+  sessions.forEach((s, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'session-chip' + (i === activeIdx ? ' active' : '');
+    chip.textContent = s.input || '(empty)';
+    chip.title = s.input || '';
+    chip.addEventListener('click', () => showSession(i));
+    bar.appendChild(chip);
+  });
+}
+
+/* ─── Show session ──────────────────────────────────────────────── */
+function showSession(idx) {
+  activeIdx = idx;
+  const s = sessions[idx];
+  document.getElementById('viz-welcome').style.display = 'none';
+  document.getElementById('viz-active').style.display = 'block';
+  document.getElementById('live-input').textContent = s.input || '';
+  renderTokenStrip(s.tokens);
+  renderAST(s.tree);
+  renderExecEvents(s.execEvents || []);
+  renderSessionBar();
+}
+
+/* ─── Token rendering ───────────────────────────────────────────── */
+function renderTokenStrip(tokens) {
+  const el = document.getElementById('live-tokens');
+  el.innerHTML = '';
+  if (!tokens) { el.innerHTML = '<span style="color:var(--muted);font-size:.75rem">No token data</span>'; return; }
+  tokens.forEach(tok => {
+    const chip = document.createElement('div');
+    chip.className = 'token-chip';
+    const color = TOKEN_COLORS[tok.type] || '#8b949e';
+    chip.style.background = `color-mix(in srgb, ${color} 18%, transparent)`;
+    chip.style.color = color;
+    const val = document.createElement('span');
+    val.className = 'chip-value';
+    val.textContent = tok.value !== '' ? tok.value : '∅';
+    const type = document.createElement('span');
+    type.className = 'chip-type';
+    type.textContent = tok.type.replace('TOK_', '');
+    chip.appendChild(val);
+    chip.appendChild(type);
+    el.appendChild(chip);
+  });
+}
+
+/* ─── AST rendering (simplified from app.js) ────────────────────── */
+function astToHierarchy(node) {
+  if (!node) return null;
+  const h = { name: NODE_LABELS[node.type] || node.type, type: node.type, _raw: node, children: [] };
+  if (node.type === 'NODE_COMMAND') {
+    h.sublabel = (node.argv || []).join(' ');
+    if (h.sublabel.length > 30) h.sublabel = h.sublabel.slice(0,28) + '...';
+    if (node.redirs && node.redirs.length) {
+      node.redirs.forEach(r => h.children.push({ name: r.type+' '+(r.target||''), type:'_REDIR', _raw:r, children:[], isRedir:true }));
+    }
+  } else if (['NODE_PIPE','NODE_AND','NODE_OR','NODE_SEQUENCE'].includes(node.type)) {
+    const l = astToHierarchy(node.left), r = astToHierarchy(node.right);
+    if (l) h.children.push(l);
+    if (r) h.children.push(r);
+  } else {
+    const c = astToHierarchy(node.child);
+    if (c) h.children.push(c);
+    if (node.redirs && node.redirs.length) {
+      node.redirs.forEach(r => h.children.push({ name: r.type+' '+(r.target||''), type:'_REDIR', _raw:r, children:[], isRedir:true }));
+    }
+  }
+  return h;
+}
+
+function renderAST(tree) {
+  const svg = d3.select('#live-ast-svg');
+  svg.selectAll('*').remove();
+  if (!tree) return;
+
+  const hierData = astToHierarchy(tree);
+  if (!hierData) return;
+
+  const root = d3.hierarchy(hierData, d => d.children);
+  const container = document.getElementById('live-ast-wrap');
+  const W = container.clientWidth || 600;
+  const H = container.clientHeight || 350;
+  const nodeW = 100, nodeH = 44;
+
+  const leaves = root.leaves().length;
+  const depth = root.height;
+  const treeW = Math.max(leaves * (nodeW + 30), W - 40);
+  const treeH = Math.max((depth + 1) * (nodeH + 60), H - 40);
+
+  d3.tree().size([treeW, treeH])(root);
+
+  const nodes = root.descendants();
+  const links = root.links();
+  nodes.forEach(d => { d.x += 20; d.y += 40; });
+
+  const g = svg.append('g');
+
+  const zoom = d3.zoom().scaleExtent([0.2,4]).on('zoom', e => g.attr('transform', e.transform));
+  svg.call(zoom);
+
+  g.selectAll('.ast-link').data(links).enter().append('path')
+    .attr('class','ast-link')
+    .attr('d', d => {
+      const mx = (d.source.x+d.target.x)/2;
+      return `M ${d.source.x} ${d.source.y} C ${mx} ${d.source.y}, ${mx} ${d.target.y}, ${d.target.x} ${d.target.y}`;
+    });
+
+  const node = g.selectAll('.ast-node').data(nodes).enter().append('g')
+    .attr('class','ast-node')
+    .attr('transform', d => `translate(${d.x},${d.y})`);
+
+  node.append('rect')
+    .attr('class','ast-node-rect')
+    .attr('width', d => d.data.isRedir ? 80 : nodeW)
+    .attr('height', d => d.data.isRedir ? 28 : (d.data.sublabel ? nodeH+12 : nodeH))
+    .attr('x', d => -(d.data.isRedir ? 80 : nodeW)/2)
+    .attr('y', d => -(d.data.isRedir ? 28 : (d.data.sublabel ? nodeH+12 : nodeH))/2)
+    .attr('fill', d => d.data.isRedir ? '#30363d' : (NODE_COLORS[d.data.type]||'#8b949e'))
+    .attr('fill-opacity', 0.2)
+    .attr('stroke', d => d.data.isRedir ? '#56d364' : (NODE_COLORS[d.data.type]||'#8b949e'));
+
+  node.append('text').attr('class','ast-node-label')
+    .attr('dy', d => d.data.sublabel ? '-0.4em' : '0')
+    .text(d => d.data.name);
+
+  node.filter(d => d.data.sublabel).append('text')
+    .attr('class','ast-node-sublabel').attr('dy','1.1em')
+    .text(d => d.data.sublabel);
+
+  requestAnimationFrame(() => {
+    const bbox = g.node().getBBox();
+    if (!bbox.width || !bbox.height) return;
+    const pad = 30;
+    const sx = (W-pad*2)/bbox.width, sy = (H-pad*2)/bbox.height;
+    const s = Math.min(sx, sy, 1.2);
+    const tx = (W-bbox.width*s)/2 - bbox.x*s;
+    const ty = (H-bbox.height*s)/2 - bbox.y*s;
+    svg.call(zoom.transform, d3.zoomIdentity.translate(tx,ty).scale(s));
+  });
+}
+
+/* ─── Execution events ──────────────────────────────────────────── */
+function renderExecEvents(events) {
+  const el = document.getElementById('live-exec');
+  if (!events || !events.length) {
+    el.innerHTML = '<span style="color:var(--muted)">Execution events will appear here...</span>';
+    return;
+  }
+  el.innerHTML = events.map(ev => {
+    const nt = (ev.node_type || '').toLowerCase();
+    const cls = nt.includes('pipe') ? 'ev-pipe' :
+                nt.includes('and') ? 'ev-and' :
+                nt.includes('or') ? 'ev-or' :
+                nt.includes('command') ? 'ev-cmd' : 'ev-exit';
+    const arrow = ev.event === 'start' ? '>' : '<';
+    const status = ev.event === 'done' ? ` [exit=${ev.exit_status}]` : '';
+    return `<div class="exec-event"><span class="ev-type ${cls}">${arrow} ${esc(ev.node_type||'')}</span> ${esc(ev.detail||'')}${status}</div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ─── Export / Import ───────────────────────────────────────────── */
+document.getElementById('export-btn').addEventListener('click', () => {
+  if (activeIdx < 0) return;
+  const s = sessions[activeIdx];
+  const data = { input: s.input, tokens: s.tokens, tree: s.tree, execEvents: s.execEvents };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `42sh_session_${(s.input||'empty').replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)}.json`;
+  a.click();
+});
+
+document.getElementById('import-picker').addEventListener('change', async (e) => {
+  for (const file of e.target.files) {
+    try {
+      const data = JSON.parse(await file.text());
+      sessions.push({
+        input: data.input || '',
+        tokens: data.tokens || null,
+        tree: data.tree || null,
+        execEvents: data.execEvents || [],
+      });
+      showSession(sessions.length - 1);
+      renderSessionBar();
+    } catch (err) {
+      alert(`Could not parse ${file.name}: ${err.message}`);
+    }
+  }
+  e.target.value = '';
+});
+
+/* ─── Public API for container2wasm or external integration ─────── */
+window.sh42 = {
+  term,
+  pushSession(data) {
+    sessions.push({
+      input: data.input || '',
+      tokens: data.tokens || null,
+      tree: data.tree || null,
+      execEvents: data.execEvents || [],
+    });
+    showSession(sessions.length - 1);
+    renderSessionBar();
+  },
+};
+  </script>
+</body>
+</html>

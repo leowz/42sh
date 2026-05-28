@@ -9,6 +9,18 @@ obj/*
 .DS_Store
 tokenizations
 tokenizations/*
+viz/ast/
+viz/tokenizations/
+valgrind-out.txt
 42sh
 42sh_test
 Libft/libft.a
+
+# c2w bundle: only the heavy binary blobs are gitignored — they live on
+# GitHub Releases and live.html fetches them from there when deployed.
+# The small JS files (arg-module.js, load.js, out.js) stay tracked so
+# GitHub Pages can serve them directly.
+wasm/dist/qemu-system-x86_64.data
+wasm/dist/qemu-system-x86_64.wasm
+wasm/c2w
+wasm/c2w-net
