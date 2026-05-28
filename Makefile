@@ -106,6 +106,7 @@ integration: $(NAME)
 	@bash $(TEST_PATH)/integration/run.sh
 	@bash $(TEST_PATH)/integration/correction.sh
 	@bash $(TEST_PATH)/integration/signals.sh
+	@bash $(TEST_PATH)/integration/stability.sh
 	@bash $(TEST_PATH)/integration/modules.sh
 
 integration-quick: $(NAME)
@@ -113,6 +114,7 @@ integration-quick: $(NAME)
 	@VALGRIND=0 bash $(TEST_PATH)/integration/run.sh
 	@VALGRIND=0 bash $(TEST_PATH)/integration/correction.sh
 	@bash $(TEST_PATH)/integration/signals.sh
+	@VALGRIND=0 bash $(TEST_PATH)/integration/stability.sh
 	@bash $(TEST_PATH)/integration/modules.sh
 
 # Modular-feature scoreboard: per-module status against the subject's
