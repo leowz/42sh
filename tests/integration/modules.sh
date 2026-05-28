@@ -230,7 +230,8 @@ skip "6. Command substitution \$() \`\`" "not implemented (\$() causes a parser 
 # ============================================================================
 # MODULE 7 -- Arithmetic expansion  $(())
 # ============================================================================
-skip "7. Arithmetic expansion \$(())" "not implemented (\$(()) causes a parser error)"
+skip "7. Arithmetic expansion \$(())" \
+	"partial: + - * / % () and precedence work; comparison ops, variable refs, ** fail"
 # when implemented: echo $((1+2)) ; echo $((5>3)) ; x=5; echo $((x*2))
 
 # ============================================================================
@@ -290,13 +291,44 @@ m_alias "three-level alias chain" \
 # ============================================================================
 # MODULE 13 -- Hash table
 # ============================================================================
-skip "13. Hash table" "not implemented (no 'hash' builtin)"
-# when implemented: hash ; hash -r ; cached PATH lookups
+module "13. Hash table"
+m_case "hash -r on empty cache succeeds" \
+	'hash -r'
+m_case "hash <name> caches without stdout, exit 0" \
+	'hash ls 2>/dev/null'
+m_case "hash -p installs a manual entry; -t prints it back" \
+	'hash -p /usr/bin/foo myname; hash -t myname'
+m_case "hash -p multiple entries; -t reads each one" \
+	'hash -p /x/y test1; hash -p /a/b test2; hash -t test1; hash -t test2'
+m_case "hash -t on unknown name exits 1" \
+	'hash -t /nonexistent 2>/dev/null; echo "exit=$?"'
+m_case "hash <unknown> reports not found, exit 1" \
+	'hash invalid_command_xyz 2>/dev/null; echo "exit=$?"'
 
 # ============================================================================
 # MODULE 14 -- test / [ builtin
 # ============================================================================
-skip "14. test / [ builtin" "not implemented (uses external /usr/bin/test)"
+module "14. test / [ builtin"
+m_case "[ numeric -eq, true branch" \
+	'[ 1 -eq 1 ]; echo $?'
+m_case "[ numeric -eq, false branch" \
+	'[ 1 -eq 2 ]; echo $?'
+m_case "[ numeric -lt" \
+	'[ 5 -lt 10 ]; echo $?'
+m_case "[ string equality, true branch" \
+	'[ "abc" = "abc" ]; echo $?'
+m_case "[ string equality, false branch" \
+	'[ "a" = "b" ]; echo $?'
+m_case "[ -f on an existing file" \
+	'[ -f /etc/hostname ]; echo $?'
+m_case "[ -d on /tmp" \
+	'[ -d /tmp ]; echo $?'
+m_case "test (no brackets) numeric still works" \
+	'test 1 -eq 1; echo $?'
+m_case "test -n on non-empty string" \
+	'test -n "x"; echo $?'
+m_case "test -z on empty string" \
+	'test -z ""; echo $?' xfail
 # when implemented: test -f F ; [ -d /tmp ] ; [ 5 -gt 3 ] ; test -z "" ; ! test ...
 
 # ============================================================================

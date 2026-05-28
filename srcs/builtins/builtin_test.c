@@ -167,7 +167,19 @@ static int	evaluate_test(t_test_context *ctx)
 int	builtin_test(struct s_shell *shell, int argc, char **argv)
 {
     t_test_context	ctx;
+    int				as_bracket;
 
+    as_bracket = (argv[0] && argv[0][0] == '[' && argv[0][1] == '\0');
+    if (as_bracket)
+    {
+        if (argc < 2 || ft_strcmp(argv[argc - 1], "]") != 0)
+        {
+            ft_putstr_fd("42sh: [: missing `]'\n", 2);
+            shell->last_exit_status = 2;
+            return (2);
+        }
+        argc--;
+    }
     if (argc < 2)
     {
         shell->last_exit_status = 1;

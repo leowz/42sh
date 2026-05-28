@@ -34,6 +34,7 @@ static const t_builtin_entry	g_builtins[] = {
 	{"alias", builtin_alias},
 	{"unalias", builtin_unalias},
 	{"test", builtin_test},
+	{"[", builtin_test},
 	{NULL, NULL}
 };
 
