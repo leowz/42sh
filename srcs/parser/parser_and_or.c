@@ -42,7 +42,9 @@ t_ast	*parse_and_or(t_parser *p)
 		right = parse_pipeline(p);
 		if (!right)
 		{
-			p->error = strdup(errors[op - 1]);
+			ast_free(left);
+			if (!p->error)
+				p->error = strdup(errors[op - 1]);
 			return (NULL);
 		}
 		left = ast_new_binary(operator, left, right);

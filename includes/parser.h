@@ -52,4 +52,12 @@ t_ast *parse_pipeline(t_parser *p);
 t_ast *parse_and_or(t_parser *p);
 t_ast *parse_list(t_parser *p);
 
+/**
+ * @brief Free a partially-built t_cmd on a parse error.
+ * @details Releases argv (and every strdup'd entry), assignments list,
+ *          redirs list (via @c redir_free), and the struct itself.
+ */
+void cmd_free(t_cmd *cmd);
+void redir_free(t_redir *redir);
+
 #endif

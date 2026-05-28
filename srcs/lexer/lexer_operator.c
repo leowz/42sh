@@ -10,6 +10,22 @@
 #include "lexer.h"
 
 /**
+ * @brief Arithmetic nesting depth, tracked across calls to read_operator.
+ * @details Incremented on @c $((, decremented on @c )). When zero, @c ))
+ *          must NOT match as TOK_ARITH_CLOSE because it would steal the
+ *          two closing parens of plain nested subshells like @c (...))
+ *          and produce a spurious syntax error (regression introduced by
+ *          PR #28). Reset from @c lexer_tokenize via @c lexer_reset_state
+ *          so a malformed previous input cannot poison the next one.
+ */
+static int		g_arith_depth = 0;
+
+void	lexer_reset_state(void)
+{
+	g_arith_depth = 0;
+}
+
+/**
  * @brief array of struct s_operator struct
  * @details match literal representation and token type
  * @details important to keep long operators before short ones (e.g. && and &)
@@ -126,11 +142,22 @@ t_list	*read_operator(const char **line)
 	{
 		len = strlen(operators[i].literal);
 		if (strncmp(*line, operators[i].literal, len) == 0)
+		{
+			if (operators[i].type == TOK_ARITH_CLOSE && g_arith_depth == 0)
+			{
+				i++;
+				continue ;
+			}
+			if (operators[i].type == TOK_ARITH_OPEN)
+				g_arith_depth++;
+			else if (operators[i].type == TOK_ARITH_CLOSE)
+				g_arith_depth--;
 			return (create_operator_token(
 						line,
 						io_number,
 						operators[i].literal,
 						operators[i].type));
+		}
 		i++;
 	}
 	return (NULL);

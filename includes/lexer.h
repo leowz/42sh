@@ -95,6 +95,13 @@ typedef struct s_token {
 t_list *lexer_tokenize(const char *input);
 
 /**
+ * @brief Reset stateful counters in lexer helpers (e.g. arithmetic depth).
+ * @details Called from @c lexer_tokenize so a previous malformed input
+ *          cannot leak state into the next tokenization.
+ */
+void	lexer_reset_state(void);
+
+/**
  *  @brief Check for unclosed quotes.
  *
  *  @details Sets *unclosed_quote to the quote char ('\'', '"') or 0 if

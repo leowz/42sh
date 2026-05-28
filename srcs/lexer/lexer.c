@@ -19,6 +19,7 @@ t_list	*lexer_tokenize(const char *input)
 	t_list	*token;
 	char	*eof;
 
+	lexer_reset_state();
 	head = NULL;
 	token = NULL;
 	while (*input)

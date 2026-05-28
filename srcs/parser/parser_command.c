@@ -112,7 +112,7 @@ static char	**command_size(t_parser *p, t_cmd *command)
 	argv = malloc(sizeof(char *) * (command->argc + 1));
 	if (!argv)
 		return (NULL);
-	argv[command->argc] = NULL;
+	ft_bzero(argv, sizeof(char *) * (command->argc + 1));
 	p->current = start;
 	return (argv);
 }
@@ -183,16 +183,22 @@ static t_ast	*command_build(t_parser *p, t_cmd *command)
 		{
 			redir = malloc(sizeof(t_redir));
 			if (!redir)
+			{
+				cmd_free(command);
 				return (NULL);
+			}
+			redir->target = NULL;
 			redir->heredoc_delim = NULL;
 			redir->heredoc_fd = -1;
 			redir->heredoc_quoted = 0;
 			redir->type = token->type;
-			redir->fd = token->io_number; 
+			redir->fd = token->io_number;
 			token = parser_next(p);
 			if (!token || token->type != TOK_WORD)
 			{
 				parser_error_unexpected(p, token);
+				redir_free(redir);
+				cmd_free(command);
 				return (NULL);
 			}
 			redir->target = strdup(token->value);

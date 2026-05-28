@@ -36,7 +36,7 @@ static void	free_argv(char **argv)
 	}
 }
 
-static void	cmd_free(t_cmd	*cmd)
+void	cmd_free(t_cmd	*cmd)
 {
 	if (!cmd)
 		return;

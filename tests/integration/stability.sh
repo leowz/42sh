@@ -29,6 +29,12 @@ USE_VALGRIND="${VALGRIND:-1}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
+# Hostile inputs can spawn redirections that create files with arbitrary
+# names. Run every case from an isolated scratch dir so debris never lands
+# in the repo root (where it contaminates subsequent test runs).
+mkdir -p "$TMP/work"
+cd "$TMP/work" || { echo "stability.sh: cannot enter scratch dir" >&2; exit 2; }
+
 if [ -t 1 ]; then
 	G=$'\033[1;32m'; R=$'\033[1;31m'; Y=$'\033[1;33m'
 	C=$'\033[1;36m'; Z=$'\033[0m'

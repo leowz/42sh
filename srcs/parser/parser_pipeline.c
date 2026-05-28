@@ -19,7 +19,9 @@ t_ast	*parse_pipeline(t_parser *p)
 		right = parse_command(p);
 		if (!right)
 		{
-			p->error = strdup("syntax error near '|'");
+			ast_free(left);
+			if (!p->error)
+				p->error = strdup("syntax error near '|'");
 			return (NULL);
 		}
 		left = ast_new_binary(NODE_PIPE, left, right);
