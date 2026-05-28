@@ -27,6 +27,19 @@ t_ast	*ast_new_group(t_node_type type, t_ast *child, t_list *redirs)
 }
 
 /**
+ * @brief Free the @c child AST and any partially-built @c redirs list.
+ * @details Called from every error path in @c parse_group, @c parse_subshell
+ *          and @c parse_block so a half-built subshell/block cannot leak
+ *          its inner AST plus accumulated redirections on a syntax error
+ *          (e.g. random-binary input that parses partway then dies).
+ */
+static void	parse_group_cleanup(t_ast *child, t_list *redirs)
+{
+	ast_free(child);
+	ft_lstdel(&redirs, (void (*)(void *))&redir_free);
+}
+
+/**
  * @param p struct s_parser pointer
  * @param child struct s_ast pointer
  * @param node enum e_node_type
@@ -39,6 +52,7 @@ static t_ast	*parse_group(t_parser *p, t_ast *child, t_node_type node)
 	t_redir	*redir;
 	t_token	*token;
 	t_token	*target;
+	t_ast	*ast;
 
 	token = parser_peek(p);
 	while (token && is_redir(token->type))
@@ -47,12 +61,18 @@ static t_ast	*parse_group(t_parser *p, t_ast *child, t_node_type node)
 		target = parser_next(p);
 		if (!target || target->type != TOK_WORD)
 		{
-			p->error = strdup("Syntax error : expected filename");
+			if (!p->error)
+				p->error = strdup("Syntax error : expected filename");
+			parse_group_cleanup(child, redirs);
 			return (NULL);
 		}
 		redir = malloc(sizeof(t_redir));
 		if (!redir)
+		{
+			parse_group_cleanup(child, redirs);
 			return (NULL);
+		}
+		redir->target = NULL;
 		redir->heredoc_delim = NULL;
 		redir->heredoc_fd = -1;
 		redir->heredoc_quoted = 0;
@@ -63,7 +83,10 @@ static t_ast	*parse_group(t_parser *p, t_ast *child, t_node_type node)
 		ft_lstappend(&redirs, ft_lstnew(redir));
 		token = parser_peek(p);
 	}
-	return (ast_new_group(node, child, redirs));
+	ast = ast_new_group(node, child, redirs);
+	if (!ast)
+		parse_group_cleanup(child, redirs);
+	return (ast);
 }
 
 t_ast	*parse_subshell(t_parser *p)
@@ -77,7 +100,9 @@ t_ast	*parse_subshell(t_parser *p)
 		return (NULL);
 	if (!parser_accept(p, TOK_RPAREN))
 	{
-		p->error = strdup("Syntax error : expected ')'");
+		if (!p->error)
+			p->error = strdup("Syntax error : expected ')'");
+		ast_free(child);
 		return (NULL);
 	}
 	return (parse_group(p, child, NODE_SUBSHELL));
@@ -97,7 +122,9 @@ t_ast	*parse_block(t_parser *p)
 	token = parser_next(p);
 	if (!token || token->type != TOK_WORD || strcmp(token->value, "}"))
 	{
-		p->error = strdup("Syntax error : expected '}'");
+		if (!p->error)
+			p->error = strdup("Syntax error : expected '}'");
+		ast_free(child);
 		return (NULL);
 	}
 	return (parse_group(p, child, NODE_BLOCK));

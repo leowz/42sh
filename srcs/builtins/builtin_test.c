@@ -34,6 +34,14 @@ static int	test_file_exists(const char *file, int flag)
         return (S_ISDIR(buf.st_mode));
     if (flag == 'f')
         return (S_ISREG(buf.st_mode));
+    if (flag == 'p')
+        return (S_ISFIFO(buf.st_mode));
+    if (flag == 'S')
+        return (S_ISSOCK(buf.st_mode));
+    if (flag == 'g')
+        return ((buf.st_mode & S_ISGID) != 0);
+    if (flag == 'u')
+        return ((buf.st_mode & S_ISUID) != 0);
     if (flag == 'r')
         return (access(file, R_OK) == 0);
     if (flag == 'w')
@@ -102,8 +110,13 @@ static int	evaluate_test(t_test_context *ctx)
     if (ctx->pos >= ctx->argc)
         return (0);
     arg = ctx->argv[ctx->pos++];
-    
-    /* Handle unary flags: -e, -z, -n, -f, -d, -b, -c, -r, -w, -x, -s */
+
+    /* `!` negation: invert the value of the rest of the expression. */
+    if (arg[0] == '!' && arg[1] == '\0')
+        return (!evaluate_test(ctx));
+
+    /* Handle unary flags: -e, -z, -n, -f, -d, -b, -c, -p, -S, -g, -u,
+     * -r, -w, -x, -s. */
     if (arg[0] == '-' && arg[1] != '\0' && arg[1] != '-')
     {
         if (arg[1] == 'z' && arg[2] == '\0')
@@ -160,8 +173,9 @@ static int	evaluate_test(t_test_context *ctx)
             return (test_string_compare(arg, ctx->argv[ctx->pos - 1], op[0]));
         }
     }
-    
-    return (0);
+
+    /* Single-operand form: `test STRING` -- true iff STRING is non-empty. */
+    return (arg[0] != '\0');
 }
 
 int	builtin_test(struct s_shell *shell, int argc, char **argv)

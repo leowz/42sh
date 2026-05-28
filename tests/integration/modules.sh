@@ -309,6 +309,12 @@ m_alias "alias redefinition takes effect" \
 	$'alias r=\'echo first\'\nalias r=\'echo second\'\nr\n' "second"
 m_alias "three-level alias chain" \
 	$'alias a=b\nalias b=c\nalias c=echo\na deep3\n' "deep3"
+m_case "alias / (just a slash) is rejected" \
+	'alias /=val; echo $?'
+m_case "alias a/b (slash in name) is rejected" \
+	'alias a/b=val; echo $?'
+m_case "alias =val (empty name) is rejected" \
+	'alias =val; echo $?'
 
 # ============================================================================
 # MODULE 13 -- Hash table
@@ -350,8 +356,15 @@ m_case "test (no brackets) numeric still works" \
 m_case "test -n on non-empty string" \
 	'test -n "x"; echo $?'
 m_case "test -z on empty string" \
-	'test -z ""; echo $?' xfail
-# when implemented: test -f F ; [ -d /tmp ] ; [ 5 -gt 3 ] ; test -z "" ; ! test ...
+	'test -z ""; echo $?'
+m_case "test STRING (single non-empty operand)" \
+	'test foo; echo $?'
+m_case "test STRING (single empty operand)" \
+	'test ""; echo $?'
+m_case "test ! -f /nope (negation, true)" \
+	'test ! -f /nope_xyz_42sh; echo $?'
+m_case "test ! 1 -eq 1 (negation, false)" \
+	'test ! 1 -eq 1; echo $?'
 
 # ============================================================================
 # Valgrind sweep -- representative commands for each implemented module must

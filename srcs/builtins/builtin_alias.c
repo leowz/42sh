@@ -72,6 +72,53 @@ static int	print_all_aliases(t_shell *shell)
 }
 
 /**
+ * @brief True if @p name is a valid alias name.
+ * @details Accepts non-empty names whose first character is a letter or
+ *          `_`, and whose remaining characters are letters, digits, `_`,
+ *          or one of the POSIX-allowed punctuation marks (`!`, `%`, `,`,
+ *          `@`). Rejects empty, leading-digit, and anything containing
+ *          `/`, `-`, `=`, whitespace or other shell metacharacters --
+ *          which is exactly the set the correction PDF flags as invalid
+ *          (`=`, `-`, `/`).
+ */
+static int	is_valid_alias_name(const char *name)
+{
+	size_t	i;
+
+	if (!name || !*name)
+		return (0);
+	if (!ft_isalpha((unsigned char)name[0]) && name[0] != '_')
+		return (0);
+	i = 1;
+	while (name[i])
+	{
+		if (ft_isalnum((unsigned char)name[i]) || name[i] == '_')
+		{
+			i++;
+			continue ;
+		}
+		if (name[i] == '!' || name[i] == '%'
+			|| name[i] == ',' || name[i] == '@')
+		{
+			i++;
+			continue ;
+		}
+		return (0);
+	}
+	return (1);
+}
+
+/**
+ * @brief Print `42sh: alias: NAME: invalid alias name` on stderr.
+ */
+static void	report_invalid_name(const char *name)
+{
+	ft_putstr_fd("42sh: alias: `", 2);
+	ft_putstr_fd((char *)name, 2);
+	ft_putendl_fd("': invalid alias name", 2);
+}
+
+/**
  * @brief Handle one `alias` argument: a NAME=VALUE definition or a NAME
  *        query. The split is at the first `=`; a leading `=` is treated
  *        as a (failing) query, not an empty-name definition.
@@ -90,9 +137,20 @@ static int	alias_arg(t_shell *shell, char *arg)
 		name = ft_strsub(arg, 0, eq - arg);
 		if (!name)
 			return (1);
+		if (!is_valid_alias_name(name))
+		{
+			report_invalid_name(name);
+			free(name);
+			return (1);
+		}
 		rc = alias_set(shell, name, eq + 1);
 		free(name);
 		return (rc);
+	}
+	if (!is_valid_alias_name(arg))
+	{
+		report_invalid_name(arg);
+		return (1);
 	}
 	value = alias_get_value(shell, arg);
 	if (value)

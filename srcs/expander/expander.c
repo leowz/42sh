@@ -35,6 +35,47 @@ char	*expand_word(t_shell *shell, const char *word)
 	return (result);
 }
 
+/**
+ * @brief True if the raw token @p word contains at least one quote (` or " ),
+ *        skipping past backslash-escapes so `\"` doesn't count.
+ * @details Used to detect words like `""` or `"$X"` (X unset): their
+ *          expansion is empty bytes-wise, yet POSIX 2.6.5 requires one
+ *          empty argv field to be emitted (so `printf "[%s]" "$X" foo`
+ *          prints `[][foo]`, not `[foo]`).
+ */
+static int	word_has_quote(const char *word)
+{
+	while (*word)
+	{
+		if (*word == '\\' && word[1])
+		{
+			word += 2;
+			continue ;
+		}
+		if (*word == '\'' || *word == '"')
+			return (1);
+		word++;
+	}
+	return (0);
+}
+
+/**
+ * @brief Produce an argv array of exactly one empty string (`{"", NULL}`).
+ */
+static char	**one_empty_field(void)
+{
+	char	**out;
+
+	out = malloc(sizeof(char *) * 2);
+	if (!out)
+		return (NULL);
+	out[0] = ft_strdup("");
+	if (!out[0])
+		return (free(out), NULL);
+	out[1] = NULL;
+	return (out);
+}
+
 char	**expand_word_to_fields(t_shell *shell, const char *word)
 {
 	t_xbuf	buf;
@@ -51,6 +92,11 @@ char	**expand_word_to_fields(t_shell *shell, const char *word)
 	}
 	fields = field_split(shell, &buf);
 	xbuf_free(&buf);
+	if (fields && fields[0] == NULL && word_has_quote(word))
+	{
+		free(fields);
+		return (one_empty_field());
+	}
 	return (fields);
 }
 
