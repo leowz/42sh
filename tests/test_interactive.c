@@ -70,6 +70,69 @@ static void	run_pty(const char *input, char *out, size_t outsz)
 	waitpid(pid, &st, 0);
 }
 
+/**
+ * @brief Multi-step variant of @c run_pty: each chunk is written, then we
+ *        sleep so the shell can process it (fork a child, transfer the
+ *        foreground pgrp, etc.) before the next chunk lands. Critical for
+ *        job-control tests where a Ctrl-Z (sent as `\x1A`) must reach the
+ *        foreground child's pgrp -- never the shell's.
+ * @details Output is drained between chunks (best-effort) and a longer
+ *          drain happens at the end. The shell must reach @c exit or EOF
+ *          in the final chunk or the suite will spend the full timeout
+ *          waiting on the read.
+ */
+static void	run_pty_steps(const char **chunks, size_t n_chunks,
+		char *out, size_t outsz)
+{
+	int				master;
+	pid_t			pid;
+	struct pollfd	pfd;
+	ssize_t			n;
+	size_t			total;
+	size_t			i;
+	int				st;
+
+	out[0] = '\0';
+	fflush(stdout);
+	pid = forkpty(&master, NULL, NULL, NULL);
+	if (pid == -1)
+		return ;
+	if (pid == 0)
+	{
+		execl("./42sh", "42sh", (char *)NULL);
+		_exit(127);
+	}
+	usleep(150000);
+	pfd.fd = master;
+	pfd.events = POLLIN;
+	total = 0;
+	i = 0;
+	while (i < n_chunks)
+	{
+		write(master, chunks[i], strlen(chunks[i]));
+		usleep(250000);
+		while (total + 1 < outsz && poll(&pfd, 1, 300) > 0)
+		{
+			n = read(master, out + total, outsz - 1 - total);
+			if (n <= 0)
+				break ;
+			total += (size_t)n;
+		}
+		i++;
+	}
+	while (total + 1 < outsz && poll(&pfd, 1, 3000) > 0)
+	{
+		n = read(master, out + total, outsz - 1 - total);
+		if (n <= 0)
+			break ;
+		total += (size_t)n;
+	}
+	out[total] = '\0';
+	close(master);
+	kill(pid, SIGKILL);
+	waitpid(pid, &st, 0);
+}
+
 /** @brief True if @p needle occurs anywhere in @p hay. */
 static int	has(const char *hay, const char *needle)
 {
@@ -157,6 +220,119 @@ static void	test_interactive_line_editing(void)
 		has(out, "aabb"));
 }
 
+/* ---- heredoc patterns from the correction (§4 interactive heredocs) ---- */
+
+/**
+ * @brief `cat > FILE << DELIM` -- heredoc body lands in the redirected file
+ *        rather than on stdout. The correction PDF tests this exact form
+ *        (cat > /tmp/heredoc-append << FIN).
+ */
+static void	test_interactive_heredoc_with_file_redir(void)
+{
+	char	out[8192];
+
+	run_pty(
+		"cat > /tmp/ftsh_hd_file << FIN\n"
+		"HDFILE_ALPHA\n"
+		"HDFILE_BETA\n"
+		"FIN\n"
+		"cat /tmp/ftsh_hd_file\n"
+		"rm -f /tmp/ftsh_hd_file\n"
+		"exit\n",
+		out, sizeof(out));
+	MU_ASSERT("heredoc redirected to file: first body line written",
+		has(out, "HDFILE_ALPHA"));
+	MU_ASSERT("heredoc redirected to file: second body line written",
+		has(out, "HDFILE_BETA"));
+}
+
+/**
+ * @brief Heredoc INSIDE a subshell: `(cat << EOF ... EOF)`. The correction
+ *        section "Grouped controls and sub-shells" specifically exercises
+ *        heredocs combined with subshell parsing.
+ */
+static void	test_interactive_heredoc_in_subshell(void)
+{
+	char	out[8192];
+
+	run_pty(
+		"(cat << EOF\n"
+		"HDSUB_LINE1\n"
+		"HDSUB_LINE2\n"
+		"EOF\n"
+		")\n"
+		"exit\n",
+		out, sizeof(out));
+	MU_ASSERT("heredoc inside subshell delivers first line",
+		has(out, "HDSUB_LINE1"));
+	MU_ASSERT("heredoc inside subshell delivers second line",
+		has(out, "HDSUB_LINE2"));
+}
+
+/* ---- job control patterns from the correction (§8 job control) --------- */
+
+/**
+ * @brief A backgrounded command (`sleep 100 &`) must appear in `jobs`
+ *        output. The correction PDF runs `ls -lR /usr >fifo 2>&1 &; jobs`
+ *        and asserts the listing names the running command.
+ */
+static void	test_interactive_jobs_lists_background(void)
+{
+	char			out[8192];
+	const char		*steps[] = {
+		"sleep 100 &\n",
+		"jobs\n",
+		"kill %1 2>/dev/null\n",
+		"exit\n"
+	};
+
+	run_pty_steps(steps, 4, out, sizeof(out));
+	MU_ASSERT("jobs lists the backgrounded sleep command",
+		has(out, "sleep"));
+}
+
+/**
+ * @brief Ctrl-Z (`\x1A`) on a foreground job sends SIGTSTP through the
+ *        terminal driver to the job's process group, NOT to the shell.
+ *        After suspension, `jobs` must show "Stopped".
+ */
+static void	test_interactive_ctrlz_suspends_job(void)
+{
+	char			out[8192];
+	const char		*steps[] = {
+		"sleep 100\n",       /* foreground job */
+		"\032",              /* Ctrl-Z -> SIGTSTP */
+		"jobs\n",            /* should list it Stopped */
+		"kill %1 2>/dev/null\n",
+		"exit\n"
+	};
+
+	run_pty_steps(steps, 5, out, sizeof(out));
+	MU_ASSERT("Ctrl-Z on a fg job: jobs shows Stopped",
+		has(out, "Stopped"));
+}
+
+/**
+ * @brief `fg %1` resumes a backgrounded job in the foreground; Ctrl-C
+ *        (`\x03`) then interrupts it and returns control to the shell.
+ *        The combined flow exercises both `fg` and SIGINT-to-fg-pgrp.
+ */
+static void	test_interactive_fg_then_ctrlc(void)
+{
+	char			out[8192];
+	const char		*steps[] = {
+		"sleep 100 &\n",
+		"fg %1\n",
+		"\003",              /* Ctrl-C */
+		"echo FG_RESUMED\n",
+		"exit\n"
+	};
+
+	run_pty_steps(steps, 5, out, sizeof(out));
+	MU_ASSERT("shell regains control after fg + Ctrl-C",
+		has(out, "FG_RESUMED"));
+}
+
 /* ---- known interactive gaps versus the correction (xfail) -------------- */
 
 static void	test_interactive_quote_continuation(void)
@@ -177,17 +353,44 @@ static void	test_interactive_backslash_continuation(void)
 		!has(out, "command not found"));
 }
 
+/**
+ * @brief Heredoc delimiter split by a backslash-newline. The correction
+ *        types `cat << EO\` then `> F`, and the delimiter is `EOF`. The
+ *        plain backslash-continuation outside heredocs still XFAILs, but
+ *        the heredoc-delim path uses the heredoc collector's own reader,
+ *        which handles it correctly -- so this is a real assertion.
+ */
+static void	test_interactive_heredoc_delim_continuation(void)
+{
+	char	out[8192];
+
+	run_pty(
+		"cat << EO\\\nF\n"
+		"HDDELIM_BODY\n"
+		"EOF\n"
+		"exit\n",
+		out, sizeof(out));
+	MU_ASSERT("heredoc delimiter spans a backslash-newline",
+		has(out, "HDDELIM_BODY"));
+}
+
 void	test_interactive_suite(void)
 {
 	test_interactive_prompt();
 	test_interactive_runs_command();
 	test_interactive_heredoc();
 	test_interactive_heredoc_multiline();
+	test_interactive_heredoc_with_file_redir();
+	test_interactive_heredoc_in_subshell();
+	test_interactive_jobs_lists_background();
+	test_interactive_ctrlz_suspends_job();
+	test_interactive_fg_then_ctrlc();
 	test_interactive_ctrl_d_exits();
 	test_interactive_ctrl_c_survives();
 	test_interactive_line_editing();
 	test_interactive_quote_continuation();
 	test_interactive_backslash_continuation();
+	test_interactive_heredoc_delim_continuation();
 }
 
 #else

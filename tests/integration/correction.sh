@@ -107,6 +107,8 @@ c_case "non-existent option -> non-zero" \
 	'ls --zzz-bogus-option; echo rc=$?'
 c_case "command not found -> 127" \
 	'doesnotexist_xyz; echo rc=$?'
+c_case "absolute path that does not exist -> 127" \
+	'/sbin/yubikey_shell_42sh_xyz; echo rc=$?'
 c_case "permission denied -> 126" \
 	'printf x > cf; chmod 000 cf; ./cf; echo rc=$?'
 c_case "absolute path command" \
@@ -139,6 +141,14 @@ c_case "close stdout with &&" \
 	'echo out >&- && echo out2'
 c_case "close stdout with ||" \
 	'echo out >&- || echo out2'
+c_case "read from an invalid fd (<&4) -> error" \
+	'cat <&4'
+c_case "close stdin (<&-) then try to read a missing file" \
+	'cat <&- abc_nope_xyz'
+c_case "user-numbered fd: write to file, then cat multi-arg with leading digit" \
+	'echo non-standard fd > dup_fd; cat 4 non-standard fd'
+c_case "write to file, then cat a missing file starting with a digit" \
+	'echo abc > redir_one_to_all; cat 9 abc'
 
 printf "%s== correction: built-ins (exit / echo / cd / type) ==%s\n" "$C" "$Z"
 c_case "exit stops the sequence" \
