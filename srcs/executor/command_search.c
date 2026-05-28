@@ -74,12 +74,35 @@ static char	*search_path(const char *path_var, const char *name)
 }
 
 /**
+ * @brief Consult the command-path cache before walking PATH.
+ * @details A cached path that no longer exists (file deleted, PATH
+ *          changed, etc.) falls through to a fresh PATH walk. The hit
+ *          counter is bumped only when the cache actually satisfies the
+ *          lookup, so `hash` reflects real usage rather than just
+ *          insertions.
+ */
+static char	*lookup_cached(t_shell *shell, const char *name)
+{
+	t_cmd_hash_value	*v;
+
+	v = cmd_hash_get(shell, name);
+	if (!v || !v->path)
+		return (NULL);
+	if (access(v->path, X_OK) != 0)
+		return (NULL);
+	v->hits++;
+	return (ft_strdup(v->path));
+}
+
+/**
  * @details - If name contains '/', treat it as a path directly.
- * @details - Otherwise search each directory in $PATH.
+ * @details - Otherwise consult the hash cache, then search $PATH and
+ *           remember the result on hit so the next lookup is O(1).
  */
 char	*find_command(t_shell *shell, const char *name)
 {
 	const char	*path_var;
+	char		*found;
 
 	if (!name || !*name)
 		return (NULL);
@@ -89,10 +112,19 @@ char	*find_command(t_shell *shell, const char *name)
 			return (ft_strdup(name));
 		return (NULL);
 	}
+	found = lookup_cached(shell, name);
+	if (found)
+		return (found);
 	path_var = var_get_value(shell, "PATH");
 	if (!path_var)
 		return (NULL);
-	return (search_path(path_var, name));
+	found = search_path(path_var, name);
+	if (found)
+	{
+		cmd_hash_set(shell, name, found);
+		cmd_hash_get(shell, name)->hits = 1;
+	}
+	return (found);
 }
 
 /**

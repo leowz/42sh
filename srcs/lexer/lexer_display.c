@@ -13,7 +13,17 @@
 #include <sys/stat.h>
 #include "lexer.h"
 
-#define TOKENIZATION_DIR "viz/tokenizations"
+#define TOKENIZATION_DIR_DEFAULT "viz/tokenizations"
+
+static const char	*get_tokenization_dir(void)
+{
+	const char	*env;
+
+	env = getenv("SH42_VIZ_DIR");
+	if (env)
+		return (env);
+	return (TOKENIZATION_DIR_DEFAULT);
+}
 
 static const char	*tok_type_str(t_token_type type)
 {
@@ -34,6 +44,8 @@ static const char	*tok_type_str(t_token_type type)
 		"TOK_REDIR_DUP_OUT",
 		"TOK_LPAREN",
 		"TOK_RPAREN",
+		"TOK_ARITH_OPEN",
+		"TOK_ARITH_CLOSE",
 		"TOK_EOF",
 		"TOK_ERROR"
 	};
@@ -106,14 +118,16 @@ static void	write_json_str(FILE *fp, const char *s)
 static void	update_manifest(const char *json_filename)
 {
 	FILE		*fp;
-	const char	*manifest_path;
-	const char	*tmp_path;
+	char		manifest_path[256];
+	char		tmp_path[256];
 	char		line[512];
 	char		*p;
 	size_t		len;
 
-	manifest_path = TOKENIZATION_DIR "/manifest.json";
-	tmp_path = TOKENIZATION_DIR "/manifest.json.tmp";
+	snprintf(manifest_path, sizeof(manifest_path), "%s/manifest.json",
+		get_tokenization_dir());
+	snprintf(tmp_path, sizeof(tmp_path), "%s/manifest.json.tmp",
+		get_tokenization_dir());
 
 	fp = fopen(manifest_path, "r");
 	FILE *tmp = fopen(tmp_path, "w");
@@ -175,11 +189,11 @@ char	*lexer_to_json(t_list *tokens, const char *input)
 	int			first;
 	struct timespec ts;
 
-	mkdir(TOKENIZATION_DIR, 0755);
+	mkdir(get_tokenization_dir(), 0755);
 	clock_gettime(CLOCK_REALTIME, &ts);
 	snprintf(filename, sizeof(filename), "tok_%ld_%06ld.json",
 		(long)ts.tv_sec, ts.tv_nsec / 1000);
-	snprintf(filepath, sizeof(filepath), "%s/%s", TOKENIZATION_DIR, filename);
+	snprintf(filepath, sizeof(filepath), "%s/%s", get_tokenization_dir(), filename);
 
 	fp = fopen(filepath, "w");
 	if (!fp)
@@ -214,6 +228,29 @@ char	*lexer_to_json(t_list *tokens, const char *input)
 	fclose(fp);
 
 	update_manifest(filename);
+
+	if (isatty(STDOUT_FILENO))
+	{
+		fprintf(stdout, "\033]1337;42sh;tok;{\"input\":");
+		write_json_str(stdout, input);
+		fprintf(stdout, ",\"tokens\":[");
+		node = tokens;
+		first = 1;
+		while (node)
+		{
+			tok = TOK(node);
+			if (!first)
+				fprintf(stdout, ",");
+			first = 0;
+			fprintf(stdout, "{\"type\":\"%s\",\"value\":", tok_type_str(tok->type));
+			write_json_str(stdout, tok->value);
+			fprintf(stdout, ",\"io_number\":%d}", tok->io_number);
+			node = node->next;
+		}
+		fprintf(stdout, "]}\007");
+		fflush(stdout);
+	}
+
 	return (strdup(filepath));
 }
 

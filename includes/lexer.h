@@ -50,6 +50,8 @@ typedef enum e_token_type {
   TOK_REDIR_DUP_OUT, /**< A duplicate redirect output token ex: ">&" */
   TOK_LPAREN,        /**< A left parenthesis token ex: "(" */
   TOK_RPAREN,        /**< A right parenthesis token ex: ")" */
+  TOK_ARITH_OPEN,    /**< A open arithmetic sequence ex: "$((" */
+  TOK_ARITH_CLOSE,   /**< A close arithmetic sequence ex: "))" */
   TOK_EOF,           /**< An end-of-file token */
   TOK_ERROR          /**< An error token (invalid syntax) */
 } t_token_type;

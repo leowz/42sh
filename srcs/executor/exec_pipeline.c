@@ -175,6 +175,37 @@ static int	spawn_pipeline(t_shell *shell, t_ast **cmds, int n,
 }
 
 /**
+ * @brief Warm the command-path cache in the parent for each pipeline
+ *        stage so cache hits survive the fork.
+ * @details Mirrors prewarm_cmd_cache() in exec_command.c: skip builtins,
+ *          absolute / relative paths, and stages with prefix assignments
+ *          (the latter may shadow `PATH` for that stage only).
+ */
+static void	prewarm_pipeline_cache(t_shell *shell, t_ast **cmds, int n)
+{
+	int		i;
+	t_cmd	*c;
+	char	*p;
+
+	i = 0;
+	while (i < n)
+	{
+		if (cmds[i]->type == NODE_COMMAND)
+		{
+			c = cmds[i]->data.cmd;
+			if (c->argv && c->argv[0] && !c->assignments
+				&& !ft_strchr(c->argv[0], '/')
+				&& !builtin_get(c->argv[0]))
+			{
+				p = find_command(shell, c->argv[0]);
+				free(p);
+			}
+		}
+		i++;
+	}
+}
+
+/**
  * @brief Expand every NODE_COMMAND stage in the parent before forking.
  * @details Runs the same expand_command pass that execute_simple_command
  *          uses, so each child inherits a fully-expanded argv. Compound
@@ -221,6 +252,7 @@ int	execute_pipeline(t_shell *shell, t_ast *ast)
 
 	n = collect_pipeline(ast, cmds, MAX_PIPELINE);
 	expand_pipeline_stages(shell, cmds, n);
+	prewarm_pipeline_cache(shell, cmds, n);
 	if (open_pipes(pipes, n) == -1)
 		return (1);
 	cmd_line = ast_to_string(ast);

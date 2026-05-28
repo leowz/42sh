@@ -156,9 +156,11 @@ static void	exec_child(t_shell *shell, t_cmd *cmd)
 {
 	char	*path;
 
-	setpgid(0, 0);
 	if (shell->interactive)
+	{
+		setpgid(0, 0);
 		tcsetpgrp(shell->terminal_fd, getpid());
+	}
 	signals_setup_child();
 	apply_assignments(shell, cmd->assignments, 1);
 	if (setup_redirections(cmd->redirs, NULL) == -1)
@@ -181,6 +183,11 @@ static int	launch_simple_job(t_shell *shell, t_cmd *cmd, pid_t pid)
 	char	*cmd_line;
 	int		status;
 
+	if (!shell->interactive)
+	{
+		waitpid(pid, &status, 0);
+		return (get_exit_status(status));
+	}
 	setpgid(pid, pid);
 	cmd_line = cmd_to_string(cmd);
 	job = job_create(shell, cmd_line);
@@ -224,6 +231,30 @@ static int	debug_status(const char *kind, const char *name, int status)
 }
 #endif
 
+/**
+ * @brief Resolve and cache the external command in the parent before
+ *        forking, so the cache survives in the shell process.
+ * @details Skipped when the command has prefix assignments - those may
+ *          change `PATH` for this invocation only, so resolution must
+ *          happen in the child after apply_assignments. The result is
+ *          freed immediately; we're only here to warm `shell->cmd_hash`.
+ */
+static void	prewarm_cmd_cache(t_shell *shell, t_cmd *cmd)
+{
+	char	*path;
+
+	if (cmd->assignments)
+		return ;
+	if (!cmd->argv || !cmd->argv[0])
+		return ;
+	if (ft_strchr(cmd->argv[0], '/'))
+		return ;
+	if (builtin_get(cmd->argv[0]))
+		return ;
+	path = find_command(shell, cmd->argv[0]);
+	free(path);
+}
+
 int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 {
 	t_builtin_fn	fn;
@@ -233,7 +264,8 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 #ifdef FT_EXTRA_VERBOSE
 	debug_cmd("Pre-expand", cmd);
 #endif
-	expand_command(shell, cmd);
+	if (expand_command(shell, cmd) < 0)
+		return (1);
 #ifdef FT_EXTRA_VERBOSE
 	debug_cmd("Post-expand", cmd);
 #endif
@@ -262,6 +294,7 @@ int	execute_simple_command(t_shell *shell, t_cmd *cmd)
 #ifdef FT_EXTRA_VERBOSE
 	debug_dispatch("external", cmd->argv[0]);
 #endif
+	prewarm_cmd_cache(shell, cmd);
 	fflush(NULL);
 	pid = fork();
 	if (pid == -1)

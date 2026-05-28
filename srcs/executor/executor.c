@@ -45,6 +45,48 @@ static void	debug_dispatch(t_ast *ast)
 		node_label(ast->type), rendered ? rendered : "");
 	free(rendered);
 }
+
+/* Emit a JSON-escaped string (including surrounding quotes) to `fp`. */
+static void	osc_json_str(FILE *fp, const char *s)
+{
+	fputc('"', fp);
+	if (s)
+	{
+		while (*s)
+		{
+			unsigned char c = (unsigned char)*s++;
+			if (c == '"' || c == '\\')
+			{
+				fputc('\\', fp);
+				fputc(c, fp);
+			}
+			else if (c == '\n') fputs("\\n", fp);
+			else if (c == '\r') fputs("\\r", fp);
+			else if (c == '\t') fputs("\\t", fp);
+			else if (c < 0x20) fprintf(fp, "\\u%04x", c);
+			else fputc(c, fp);
+		}
+	}
+	fputc('"', fp);
+}
+
+static void	osc_exec_event(const char *event, t_ast *ast, int status)
+{
+	char	*rendered;
+
+	if (!isatty(STDOUT_FILENO))
+		return ;
+	rendered = ast_to_string(ast);
+	fputs("\033]1337;42sh;exec;{\"event\":", stdout);
+	osc_json_str(stdout, event);
+	fputs(",\"node_type\":", stdout);
+	osc_json_str(stdout, node_label(ast->type));
+	fputs(",\"detail\":", stdout);
+	osc_json_str(stdout, rendered ? rendered : "");
+	fprintf(stdout, ",\"exit_status\":%d}\007", status);
+	fflush(stdout);
+	free(rendered);
+}
 #endif
 
 static int	dispatch_node(t_shell *shell, t_ast *ast)
@@ -79,7 +121,13 @@ int	executor_execute(t_shell *shell, t_ast *ast)
 		return (0);
 	if (!shell->running)
 		return (shell->last_exit_status);
+#ifdef FT_EXTRA_VERBOSE
+	osc_exec_event("start", ast, 0);
+#endif
 	status = dispatch_node(shell, ast);
+#ifdef FT_EXTRA_VERBOSE
+	osc_exec_event("done", ast, status);
+#endif
 	shell->last_exit_status = status;
 	return (status);
 }

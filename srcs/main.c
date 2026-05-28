@@ -27,6 +27,7 @@ static int	shell_init(t_shell *shell, char **envp, int force_interactive)
 	shell->shell_pgid = getpid();
 	shell->env_dirty = 1;
 	var_init_from_environ(shell, envp);
+	cmd_hash_init(shell);
 	if (shell->interactive)
 	{
 		history_init(shell);
@@ -81,6 +82,7 @@ static void	shell_cleanup(t_shell *shell)
 		shell->history_file = NULL;
 	}
 	job_control_cleanup(shell);
+	cmd_hash_destroy(shell);
 	free_variables(shell);
 	free_env_cache(shell);
 	alias_clear(shell);
@@ -161,7 +163,7 @@ static void process_line(t_shell *shell, char *line)
 	tokens = lexer_tokenize(line);
 	if (!tokens)
 	{
-		fprintf(stderr, "Error: Failed to tokenize input.\n");
+		shell->last_exit_status = 1;
 		return;
 	}
 	alias_expand_tokens(shell, &tokens);

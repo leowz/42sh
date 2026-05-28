@@ -13,7 +13,17 @@
 #include <sys/stat.h>
 #include "parser.h"
 
-#define AST_DIR "viz/ast"
+#define AST_DIR_DEFAULT "viz/ast"
+
+static const char	*get_ast_dir(void)
+{
+	const char	*env;
+
+	env = getenv("SH42_VIZ_DIR");
+	if (env)
+		return (env);
+	return (AST_DIR_DEFAULT);
+}
 
 static const char	*node_type_str(t_node_type type)
 {
@@ -305,14 +315,16 @@ static void	ast_to_json_node(FILE *fp, t_ast *node, int depth)
 static void	update_manifest(const char *json_filename)
 {
 	FILE		*fp;
-	const char	*manifest_path;
-	const char	*tmp_path;
+	char		manifest_path[256];
+	char		tmp_path[256];
 	char		line[512];
 	char		*p;
 	size_t		len;
 
-	manifest_path = AST_DIR "/manifest.json";
-	tmp_path = AST_DIR "/manifest.json.tmp";
+	snprintf(manifest_path, sizeof(manifest_path), "%s/manifest.json",
+		get_ast_dir());
+	snprintf(tmp_path, sizeof(tmp_path), "%s/manifest.json.tmp",
+		get_ast_dir());
 	fp = fopen(manifest_path, "r");
 	FILE *tmp = fopen(tmp_path, "w");
 	if (!tmp)
@@ -366,11 +378,11 @@ char	*ast_to_json(t_ast *ast, const char *input, const char *tok_file)
 	FILE			*fp;
 	struct timespec	ts;
 
-	mkdir(AST_DIR, 0755);
+	mkdir(get_ast_dir(), 0755);
 	clock_gettime(CLOCK_REALTIME, &ts);
 	snprintf(filename, sizeof(filename), "ast_%ld_%06ld.json",
 		(long)ts.tv_sec, ts.tv_nsec / 1000);
-	snprintf(filepath, sizeof(filepath), "%s/%s", AST_DIR, filename);
+	snprintf(filepath, sizeof(filepath), "%s/%s", get_ast_dir(), filename);
 	fp = fopen(filepath, "w");
 	if (!fp)
 	{
@@ -389,6 +401,17 @@ char	*ast_to_json(t_ast *ast, const char *input, const char *tok_file)
 	fprintf(fp, "\n}\n");
 	fclose(fp);
 	update_manifest(filename);
+
+	if (isatty(STDOUT_FILENO))
+	{
+		fprintf(stdout, "\033]1337;42sh;ast;{\"input\":");
+		json_str(stdout, input);
+		fprintf(stdout, ",\"tree\":");
+		ast_to_json_node(stdout, ast, 0);
+		fprintf(stdout, "}\007");
+		fflush(stdout);
+	}
+
 	return (strdup(filepath));
 }
 

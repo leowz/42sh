@@ -50,6 +50,19 @@ typedef struct s_btree
 	void			*item;
 }	t_btree;
 
+typedef struct s_hash_entry
+{
+	char	*key;
+	void	*value;
+}	t_hash_entry;
+
+typedef struct s_hash
+{
+	t_list	**buckets;
+	size_t	bucket_count;
+	size_t	size;
+}	t_hash;
+
 typedef struct s_fd
 {
 	int				open_flag;
@@ -108,6 +121,7 @@ char				*ft_strtrim(char const *s);
 char				**ft_strsplit(char const *s, char c);
 char				*ft_itoa_base(long long int n, int base);
 char				*ft_itoa(int n);
+char				*ft_lltoa(long long int n);
 void				ft_putchar(char c);
 void				ft_putstr(char const *s);
 void				ft_putendl(char const *s);
@@ -144,4 +158,18 @@ t_btree				*btree_create_node(void *item);
 void				btree_insert_data(t_btree **root, void *item,
 						int (*cmpf)(void *, void *));
 void				btree_clear(t_btree **root, void (*del)(void *));
+unsigned long		ft_strhash(const char *s);
+t_hash				*ft_hash_new(size_t bucket_count);
+void				ft_hash_destroy(t_hash *h, void (*del)(void *));
+void				ft_hash_clear(t_hash *h, void (*del)(void *));
+size_t				ft_hash_size(const t_hash *h);
+void				*ft_hash_get(const t_hash *h, const char *key);
+int					ft_hash_set(t_hash *h, const char *key, void *value,
+						void **old_out);
+int					ft_hash_delete(t_hash *h, const char *key, void **old_out);
+void				ft_hash_iter(const t_hash *h,
+						void (*f)(const char *, void *, void *),
+						void *userdata);
+t_list				*hash_lookup_node(const t_hash *h, const char *key,
+						size_t *bucket_idx, t_list **prev_out);
 #endif

@@ -166,6 +166,7 @@ static void	test_find_command(void)
 	MU_ASSERT("bad relative path returns NULL", path == NULL);
 
 	/* No PATH set */
+	cmd_hash_clear(&shell);
 	var_unset(&shell, "PATH");
 	path = find_command(&shell, "ls");
 	MU_ASSERT("no PATH returns NULL", path == NULL);

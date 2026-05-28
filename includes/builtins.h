@@ -349,6 +349,29 @@ int	builtin_unset(struct s_shell *shell, int argc, char **argv);
 int	builtin_export(struct s_shell *shell, int argc, char **argv);
 
 /**
+ * @brief Manage the shell's PATH-lookup cache.
+ * @return 0 on success, 1 on lookup failure (unknown name to resolve,
+ *         delete, or print), 2 on usage error (unknown flag, missing
+ *         operand, mutually-exclusive flags).
+ *
+ * **Usage**: `hash [-r] [-p path] [-dt] [name ...]`
+ *
+ * | Form                 | Effect                                            |
+ * |----------------------|---------------------------------------------------|
+ * | (no args)            | Print cached entries (`hits<TAB>command`).        |
+ * | `name [name ...]`    | Resolve each name through `$PATH` and cache it.   |
+ * | `-r`                 | Forget every cached entry.                        |
+ * | `-d name [name ...]` | Forget specific entries.                          |
+ * | `-p path name`       | Cache `name -> path` without consulting `$PATH`.  |
+ * | `-t name [name ...]` | Print the cached path for each name.              |
+ *
+ * The cache powers `find_command`, which consults this table before
+ * walking `$PATH` - so a frequent command costs one strcmp instead of a
+ * directory scan.
+ */
+int	builtin_hash(struct s_shell *shell, int argc, char **argv);
+
+/**
  * @brief The alias builtin command.
  *
  * **Usage**: `alias [name[=value] ...]`

@@ -14,6 +14,49 @@
 #define MAX_PIPELINE 256
 #define MAX_SAVED_FDS 3
 
+/** Default bucket count for the command-path hash table (prime, small). */
+#define CMD_HASH_BUCKETS 61
+
+/**
+ * @brief Cached PATH lookup, indexed by command name in `shell->cmd_hash`.
+ * @details `path` is heap-allocated and owned by the value. `hits` tracks
+ *          how many times the cache satisfied a lookup (read by `hash`).
+ */
+typedef struct s_cmd_hash_value
+{
+	char	*path;
+	size_t	hits;
+}	t_cmd_hash_value;
+
+/** Allocate `shell->cmd_hash` if not already present. */
+void				cmd_hash_init(struct s_shell *shell);
+
+/** Drop every entry and free the table itself. Safe to call repeatedly. */
+void				cmd_hash_destroy(struct s_shell *shell);
+
+/** Drop every entry but keep the table allocated (for `hash -r`). */
+void				cmd_hash_clear(struct s_shell *shell);
+
+/** Look up `name` without bumping the hit counter. */
+t_cmd_hash_value	*cmd_hash_get(struct s_shell *shell, const char *name);
+
+/**
+ * @brief Insert or replace `name -> path` (path is duplicated internally).
+ * @details Preserves the hit counter when `name` already exists, so
+ *          `hash -p` doesn't reset history. Returns 1 on success, 0 on
+ *          allocation failure (table left unchanged).
+ */
+int					cmd_hash_set(struct s_shell *shell,
+						const char *name, const char *path);
+
+/** Remove `name`. Returns 1 if an entry was removed, 0 otherwise. */
+int					cmd_hash_delete(struct s_shell *shell, const char *name);
+
+/** Iterate every (name, value) pair in insertion-agnostic order. */
+void				cmd_hash_iter(struct s_shell *shell,
+						void (*f)(const char *, t_cmd_hash_value *, void *),
+						void *userdata);
+
 /**
  * @brief Main dispatch function for executing AST nodes
  * @param shell Pointer to the central shell state

@@ -52,6 +52,12 @@ echo one | cat | cat
 printf '%s\n' a b c | cat
 echo abc | tr a-z A-Z
 
+# --- hash builtin --------------------------------------------------------
+hash ls; hash -t ls
+hash -p /usr/bin/cat mycat; hash -t mycat
+hash nonexistent_cmd_42sh_xyz
+hash ls cat; hash -d ls; hash -t cat
+
 # --- subshells / groups --------------------------------------------------
 (echo inside)
 (true && echo ok)

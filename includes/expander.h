@@ -27,6 +27,15 @@
 struct s_shell;
 
 /**
+ * @brief Helper structure to handle arithmetic expression
+ */
+typedef struct s_arith {
+	const char	*s;
+	int			i;
+	int			error;
+}	t_arith;
+
+/**
  * @brief Expansion buffer with a parallel "splittable" mask.
  * @details Phase 1 of expansion writes into a t_xbuf instead of a plain
  *          C string so that field splitting can later distinguish IFS
@@ -148,4 +157,35 @@ int expand_tilde_at(struct s_shell *shell, const char *input, size_t *pos,
  */
 char **field_split(struct s_shell *shell, const t_xbuf *expanded);
 
+/**
+ * @brief expand arithmetic expression $((expr))
+ * @details check the depth of double parenthesis and call arith_eval
+ * @return if OK 0 - else -1
+ */
+int	expand_arithmetic(struct s_shell *shell, const char *input,
+		size_t *pos, int dq, t_xbuf *out);
+
+/**
+ * @brief Evaluate a plain arithmetic expression string to a long long int.
+ * @details Implements a recursive descent parser for the following grammar:
+ *				expr   -> term   (('+' | '-') term)*
+ *				term   -> factor (('*' | '/' | '%') factor)*
+ *				factor -> '(' expr ')' | ['-'] NUMBER
+ *			Operator precedence and left-associativity are handled naturally
+ *			by the call chain. Whitespace between tokens is ignored.
+ * @return 0 on success or -1
+ */
+int	arith_eval(const char *expr, long long int *result);
+
+/**
+ * @brief Parse and evaluate the top-level arithmetic expression.
+ * @details Handles additive operators ('+' and '-') with left-to-right
+ *			associativity by repeatedly calling parse_term() for each
+ *			operand. Stops as soon as a non-additive token is encountered
+ *			or the end of the string is reached. Short-circuits immediately
+ *			if a->error is set by a deeper call, leaving the position
+ *			unchanged so arith_eval() can detect and report trailing garbage.
+ * @return The computed value of the expression parsed
+ */
+long long int	parse_expr(t_arith *a);
 #endif
