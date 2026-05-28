@@ -224,8 +224,30 @@ m_case "nested empty () is a syntax error"   '(echo c; ())'
 # ============================================================================
 # MODULE 6 -- Command substitution  $()  ``
 # ============================================================================
-skip "6. Command substitution \$() \`\`" "not implemented (\$() causes a parser error)"
-# when implemented: echo $(echo hi) ; echo `whoami` ; echo $(echo $(echo nest))
+module "6. Command substitution \$()"
+m_case "simple substitution: \$(echo hi)" \
+	'echo $(echo hi)'
+m_case "double-quoted substitution preserves spaces" \
+	'echo "$(printf %s world)"'
+m_case "nested substitution: \$(... \$(...) ...)" \
+	'echo $(echo nested-$(echo inner))'
+m_case "substitution concatenates with surrounding word" \
+	'echo before$(echo mid)after'
+m_case "captured value lands in a variable" \
+	'X=$(echo captured); echo $X'
+m_case "unquoted result is subject to field splitting" \
+	'echo $(echo a b c)'
+m_case "quoted result keeps internal whitespace" \
+	'echo "$(echo a b c)"'
+m_case "operators inside \$() belong to the inner script" \
+	'echo $(echo "a; b" "c|d")'
+m_case "multi-command inner: ;-separated" \
+	'echo $(echo line; echo line2)'
+m_case "exit status of substitution propagates to \$?" \
+	'echo $(true); echo $?'
+m_case "false inside substitution still sets \$?" \
+	'echo $(false); echo $?'
+# Backtick form (``) is NOT implemented -- 42sh accepts $() only.
 
 # ============================================================================
 # MODULE 7 -- Arithmetic expansion  $(())

@@ -166,6 +166,18 @@ int	expand_arithmetic(struct s_shell *shell, const char *input,
 		size_t *pos, int dq, t_xbuf *out);
 
 /**
+ * @brief Expand a `$( ... )` command substitution.
+ * @details Forks a child whose stdout is captured via a pipe; the inner
+ *          script runs through the same lexer/parser/executor as a
+ *          normal command line. Trailing newlines are stripped per
+ *          POSIX 2.6.3. Unquoted (@p dq == 0) output is pushed with
+ *          split=1 so field splitting still runs.
+ * @return 0 on success, -1 on allocation / unmatched-paren errors.
+ */
+int	expand_cmdsub(struct s_shell *shell, const char *input,
+		size_t *pos, int dq, t_xbuf *out);
+
+/**
  * @brief Evaluate a plain arithmetic expression string to a long long int.
  * @details Implements a recursive descent parser for the following grammar:
  *				expr   -> term   (('+' | '-') term)*

@@ -156,6 +156,8 @@ int	expand_dollar(t_shell *shell, const char *input,
 
 	if (input[*pos + 1] == '(' && input[*pos + 2] == '(')
 		return (expand_arithmetic(shell, input, pos, dq, out));
+	if (input[*pos + 1] == '(' && input[*pos + 2] != '(')
+		return (expand_cmdsub(shell, input, pos, dq, out));
 
 	*pos += 1;
 	c = input[*pos];
