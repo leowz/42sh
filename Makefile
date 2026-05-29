@@ -105,6 +105,7 @@ integration: $(NAME)
 	@printf $(GREEN)"running integration tests...\n"$(EOC)
 	@bash $(TEST_PATH)/integration/run.sh
 	@bash $(TEST_PATH)/integration/correction.sh
+	@bash $(TEST_PATH)/integration/posix_baseline.sh
 	@bash $(TEST_PATH)/integration/signals.sh
 	@bash $(TEST_PATH)/integration/stability.sh
 	@bash $(TEST_PATH)/integration/modules.sh

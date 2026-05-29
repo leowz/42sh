@@ -239,7 +239,11 @@ static int	change_directory(t_shell *shell, char *target, int argc, int physical
 			fprintf(stderr, "42sh: cd: OLDPWD not set\n");
 			return (1);
 		}
-		printf("%s\n", directory);
+		/* Write directly to fd 1, not via printf -- other builtins
+		 * (pwd, echo) use ft_putendl_fd / write, and mixing the two
+		 * streams interleaves `cd -; cd -; pwd` out of order on the
+		 * final flush. */
+		ft_putendl_fd(directory, 1);
 	}
 	else
 		directory = target;
