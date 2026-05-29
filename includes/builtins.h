@@ -260,6 +260,21 @@ int builtin_fg(struct s_shell *shell, int argc, char **argv);
 int builtin_bg(struct s_shell *shell, int argc, char **argv);
 
 /**
+ * @brief Send a signal to processes or `%jobspec` jobs.
+ * @return 0 if every target was signalled, 1 if any failed (no such job,
+ *         invalid signal, unreachable pid).
+ *
+ * **Usage**: `kill [-l] [-s sig | -sig | -signum] pid|%jobspec ...`
+ *
+ * `-l` with no further argument lists every recognised signal name.
+ * Without `-s`/`-signal`/`-signum`, the default signal is `SIGTERM` (15).
+ * `%jobspec` resolves through `job_find_by_spec` and signals the whole
+ * process group (`-pgid`). Numeric arguments are passed verbatim to
+ * `kill(2)`.
+ */
+int builtin_kill(struct s_shell *shell, int argc, char **argv);
+
+/**
  * @brief Print the command history.
  * @return Always 0.
  *

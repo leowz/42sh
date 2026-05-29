@@ -72,7 +72,7 @@ static void	check_test(t_shell *shell, char *indication, char *str_std, int ret_
  */
 static void	test_cd_root(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -88,7 +88,7 @@ static void	test_cd_root(void)
  */
 static void	test_cd_absolute(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -165,7 +165,7 @@ static void	test_cd_absolute(void)
 static void	test_cd_relative(void)
 {
 	{
-		t_shell	shell;
+		t_shell	shell = {0};
 		int		ret;
 
 		cd_test_init(&shell);
@@ -255,7 +255,7 @@ static void	test_cd_relative(void)
  */
 static void	test_cd_wrong_path(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -296,7 +296,7 @@ static void	test_cd_wrong_path(void)
  */
 static void	test_cd_wrong_option(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -333,7 +333,7 @@ static void	test_cd_wrong_option(void)
  */
 static void	test_cd_too_many_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -356,7 +356,7 @@ static void	test_cd_too_many_args(void)
  */
 static void	test_cd_forbidden(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int	ret;
@@ -379,7 +379,7 @@ static void	test_cd_forbidden(void)
  */
 static void	test_cd_oldpasswd(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -427,7 +427,7 @@ static void	test_cd_oldpasswd(void)
  */
 static void	test_cd_beyond_the_root(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -452,7 +452,7 @@ static void	test_cd_beyond_the_root(void)
  */
 static void	test_cd_many_slash(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;
@@ -484,7 +484,7 @@ static void	test_cd_many_slash(void)
  */
 static void	test_cd_too_long(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	cd_test_init(&shell);
 	int		ret;

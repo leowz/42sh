@@ -27,7 +27,11 @@ t_ast	*parser_parse(t_list *tokens, t_shell *shell)
 	p.tokens = tokens;
 	p.current = tokens;
 	p.error = NULL;
+	while (parser_accept(&p, TOK_NEWLINE))
+		;
 	ast = parse_list(&p);
+	while (parser_accept(&p, TOK_NEWLINE))
+		;
 	if (p.error)
 	{
 		fprintf(stderr, "%s\n", p.error);

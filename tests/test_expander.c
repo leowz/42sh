@@ -133,7 +133,7 @@ static void	test_xbuf_puts(void)
 
 static void	test_expand_plain(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -145,7 +145,7 @@ static void	test_expand_plain(void)
 
 static void	test_expand_single_quotes(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -157,7 +157,7 @@ static void	test_expand_single_quotes(void)
 
 static void	test_expand_double_quotes(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -170,7 +170,7 @@ static void	test_expand_double_quotes(void)
 
 static void	test_expand_mixed_quotes(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -183,7 +183,7 @@ static void	test_expand_mixed_quotes(void)
 
 static void	test_expand_backslash_unquoted(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -198,7 +198,7 @@ static void	test_expand_backslash_unquoted(void)
 
 static void	test_expand_backslash_dq(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -215,7 +215,7 @@ static void	test_expand_backslash_dq(void)
 
 static void	test_expand_simple_var(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -231,7 +231,7 @@ static void	test_expand_simple_var(void)
 
 static void	test_expand_braced_var(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -247,7 +247,7 @@ static void	test_expand_braced_var(void)
 
 static void	test_expand_unset_var(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -259,7 +259,7 @@ static void	test_expand_unset_var(void)
 
 static void	test_expand_question(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -275,7 +275,7 @@ static void	test_expand_question(void)
 
 static void	test_expand_dollar_dollar(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 	char	*expected;
 
@@ -290,7 +290,7 @@ static void	test_expand_dollar_dollar(void)
 
 static void	test_expand_dollar_zero(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -302,7 +302,7 @@ static void	test_expand_dollar_zero(void)
 
 static void	test_expand_lone_dollar(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -319,7 +319,7 @@ static void	test_expand_lone_dollar(void)
 
 static void	test_expand_tilde(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -341,7 +341,7 @@ static void	test_expand_tilde(void)
 
 static void	test_expand_tilde_user(void)
 {
-	t_shell			shell;
+	t_shell			shell = {0};
 	char			*out;
 	struct passwd	*pw;
 	char			*expected;
@@ -367,7 +367,7 @@ static void	test_expand_tilde_user(void)
 
 static void	test_expand_tilde_no_home(void)
 {
-	t_shell			shell;
+	t_shell			shell = {0};
 	char			*out;
 	struct passwd	*pw;
 
@@ -411,7 +411,7 @@ static void	free_fields(char **fields)
 
 static void	test_split_default_ifs(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -427,7 +427,7 @@ static void	test_split_default_ifs(void)
 
 static void	test_split_quoted_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -441,7 +441,7 @@ static void	test_split_quoted_value(void)
 
 static void	test_split_literal_spaces_protected(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -454,7 +454,7 @@ static void	test_split_literal_spaces_protected(void)
 
 static void	test_split_custom_ifs(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -471,7 +471,7 @@ static void	test_split_custom_ifs(void)
 
 static void	test_split_adjacent_delims(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -488,7 +488,7 @@ static void	test_split_adjacent_delims(void)
 
 static void	test_split_mixed_ws_nonws(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -505,7 +505,7 @@ static void	test_split_mixed_ws_nonws(void)
 
 static void	test_split_leading_trailing_ws(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -520,7 +520,7 @@ static void	test_split_leading_trailing_ws(void)
 
 static void	test_split_empty_ifs_disables(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -535,7 +535,7 @@ static void	test_split_empty_ifs_disables(void)
 
 static void	test_split_unset_var_zero_fields(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**f;
 
 	stub_shell_init(&shell);
@@ -549,7 +549,7 @@ static void	test_split_unset_var_zero_fields(void)
 
 static void	test_expand_command_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 
 	stub_shell_init(&shell);
@@ -575,7 +575,7 @@ static void	test_expand_command_argv(void)
 
 static void	test_expand_command_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 
 	stub_shell_init(&shell);
@@ -595,7 +595,7 @@ static void	test_expand_command_assignment(void)
 
 static void	test_expand_command_redir_target(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 	t_redir	*redir;
 
@@ -615,7 +615,7 @@ static void	test_expand_command_redir_target(void)
 
 static void	test_expand_command_ambiguous_redir(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 	t_redir	*redir;
 	int		ret;
@@ -636,7 +636,7 @@ static void	test_expand_command_ambiguous_redir(void)
 
 static void	test_expand_command_heredoc_target_skipped(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 	t_redir	*redir;
 

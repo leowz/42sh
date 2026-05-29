@@ -24,7 +24,7 @@
 static void	test_simple_command(void)
 {
 	t_ast	*ast;
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	ast = parser_parse(lexer_tokenize("ls"), &shell);
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -36,7 +36,7 @@ static void	test_simple_command(void)
 static void	test_command_args(void)
 {
 	t_ast	*ast;
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	ast = parser_parse(lexer_tokenize("ls -la"), &shell);
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -49,7 +49,7 @@ static void	test_command_args(void)
 static void	test_pipe(void)
 {
 	t_ast	*ast;
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	ast = parser_parse(lexer_tokenize("ls | grep foo"), &shell);
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -63,7 +63,7 @@ static void	test_pipe(void)
 static void	test_and(void)
 {
 	t_ast	*ast;
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	ast = parser_parse(lexer_tokenize("ls && echo ok"), &shell);
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -77,7 +77,7 @@ static void	test_and(void)
 static void	test_or(void)
 {
 	t_ast	*ast;
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	ast = parser_parse(lexer_tokenize("ls || echo fail"), &shell);
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -90,7 +90,7 @@ static void	test_or(void)
 
 static void test_sequence(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("ls ; pwd"), &shell);
 
 	MU_ASSERT_INT(NODE_SEQUENCE, ast->type);
@@ -102,7 +102,7 @@ static void test_sequence(void)
 
 static void test_subshell_pipe(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("(ls ; pwd) | grep foo"), &shell);
 	t_ast	*left = ast->data.binary->left;
 	t_ast	*child = left->data.group->child;
@@ -118,7 +118,7 @@ static void test_subshell_pipe(void)
 
 static void test_subshell_redir(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("(ls) > file"), &shell);
 
 	MU_ASSERT_INT(NODE_SUBSHELL, ast->type);
@@ -131,7 +131,7 @@ static void test_subshell_redir(void)
 
 static void test_redirection(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("ls > file"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -144,7 +144,7 @@ static void test_redirection(void)
 
 static void test_complex_redir(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("ls >> file 2>&1"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -159,7 +159,7 @@ static void test_complex_redir(void)
 
 static void test_multiple_redirs(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("< input cmd > output"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -176,7 +176,7 @@ static void test_multiple_redirs(void)
 
 static void test_background_separator(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("sleep 10 & echo done"), &shell);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -197,7 +197,7 @@ static void test_background_separator(void)
 
 static void test_multiple_background_chain(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("cmd1 & cmd2 & cmd3"), &shell);
 
 	MU_ASSERT_INT(NODE_SEQUENCE, ast->type);
@@ -223,7 +223,7 @@ static void test_multiple_background_chain(void)
 
 static void test_trailing_background(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("cmd1 & cmd2 &"), &shell);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -244,7 +244,7 @@ static void test_trailing_background(void)
 }
 static void test_pipe_newline(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("ls |\n grep foo"), &shell);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -261,7 +261,7 @@ static void test_pipe_newline(void)
 
 static void test_and_newline(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("true &&\n echo ok"), &shell);
 
 	MU_ASSERT("ast not NULL", ast != NULL);
@@ -279,7 +279,7 @@ static void test_and_newline(void)
 
 static void	test_only_pipe(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("|"), &shell);
 
 	MU_ASSERT("ast NULL", !ast);
@@ -289,7 +289,7 @@ static void	test_only_pipe(void)
 
 static void test_only_and(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("&&"), &shell);
 
 	MU_ASSERT("ast NULL", !ast);
@@ -299,7 +299,7 @@ static void test_only_and(void)
 
 static void	test_only_or_and(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("|| &&"), &shell);
 
 	MU_ASSERT("ast NULL", !ast);
@@ -309,7 +309,7 @@ static void	test_only_or_and(void)
 
 static void	test_unclose_parenthesis(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("(ls"), &shell);
 
 	MU_ASSERT("ast NULL", !ast);
@@ -319,7 +319,7 @@ static void	test_unclose_parenthesis(void)
 
 static void	test_unopen_parenthesis(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize(")"), &shell);
 
 	MU_ASSERT("ast NULL", !ast);
@@ -329,7 +329,7 @@ static void	test_unopen_parenthesis(void)
 
 static void	test_redirs_in_a_row(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("> < file"), &shell);
 
 	MU_ASSERT("ast NULL", !ast);
@@ -339,7 +339,7 @@ static void	test_redirs_in_a_row(void)
 
 static t_ast	*write_to_pipe(char *content, char *cmd)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		pipefd[2];
 
 	t_ast	*ast;
@@ -352,6 +352,11 @@ static t_ast	*write_to_pipe(char *content, char *cmd)
 	int saved_stdin = dup(STDIN_FILENO);
 	dup2(pipefd[0], STDIN_FILENO);
 	close(pipefd[0]);
+	/* Reopen stdin via the new fd to flush stdio's buffer + EOF flag
+	 * left over from the previous test's pipe. clearerr() alone isn't
+	 * enough -- glibc keeps the FILE buffer position past EOF, so
+	 * getline returns -1 immediately on the next call. */
+	freopen("/dev/stdin", "r", stdin);
 
 	ast = parser_parse(lexer_tokenize(cmd), &shell);
 
@@ -698,7 +703,7 @@ static void	test_no_heredoc(void)
 {
 	t_ast	*ast;
 	t_redir	*redir;
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	ast	= parser_parse(lexer_tokenize("no heredoc > out"), &shell);
 	redir = REDIR(ast->data.cmd->redirs);
@@ -712,7 +717,7 @@ static void	test_no_heredoc(void)
 
 static void	test_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR=value cmd"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -724,7 +729,7 @@ static void	test_assignment(void)
 
 static void test_multiple_assignments(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 B=2 C=3 cmd"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -740,7 +745,7 @@ static void test_multiple_assignments(void)
 
 static void test_assignment_only(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR=value"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -756,7 +761,7 @@ static void test_assignment_only(void)
 
 static void test_assignment_after_command(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("echo VAR=value"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -771,7 +776,7 @@ static void test_assignment_after_command(void)
 
 static void test_assignment_and_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 cmd arg1 arg2"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -788,7 +793,7 @@ static void test_assignment_and_args(void)
 
 static void test_assignment_with_redir(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 cmd > file"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -807,7 +812,7 @@ static void test_assignment_with_redir(void)
 
 static void test_assignment_in_pipeline(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 cmd1 | B=2 cmd2"), &shell);
 
 	MU_ASSERT_INT(NODE_PIPE, ast->type);
@@ -828,7 +833,7 @@ static void test_assignment_in_pipeline(void)
 
 static void test_invalid_assignment_digit(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("1A=foo cmd"), &shell);
 
 	MU_ASSERT("ast NULL or treated as arg",
@@ -839,7 +844,7 @@ static void test_invalid_assignment_digit(void)
 
 static void test_empty_value_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR= cmd"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -853,7 +858,7 @@ static void test_empty_value_assignment(void)
 
 static void test_plus_equals_not_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR+=value cmd"), &shell);
 
 	MU_ASSERT_INT(NODE_COMMAND, ast->type);
@@ -866,7 +871,7 @@ static void test_plus_equals_not_assignment(void)
 
 static void test_assignment_before_subshell(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 (echo hi)"), &shell);
 
 	MU_ASSERT_INT(NODE_SUBSHELL, ast->type);
@@ -945,7 +950,7 @@ static int	assert_assignment_at(t_list *a, int i, const char *expected, const ch
 
 static void test_assignment_underscore_name(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("_VAR=value cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -957,7 +962,7 @@ static void test_assignment_underscore_name(void)
 
 static void test_assignment_underscore_inside_name(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("MY_VAR=val cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -969,7 +974,7 @@ static void test_assignment_underscore_inside_name(void)
 
 static void test_assignment_alnum_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR1=val123 cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -981,7 +986,7 @@ static void test_assignment_alnum_value(void)
 
 static void test_assignment_value_with_extra_equals(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR=a=b=c cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -993,7 +998,7 @@ static void test_assignment_value_with_extra_equals(void)
 
 static void test_assignment_double_quoted(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR=\"value\" cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1005,7 +1010,7 @@ static void test_assignment_double_quoted(void)
 
 static void test_assignment_single_quoted(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR='value' cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1017,7 +1022,7 @@ static void test_assignment_single_quoted(void)
 
 static void test_assignment_double_quoted_with_space(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("VAR=\"hello world\" cmd"), &shell);
 
@@ -1031,7 +1036,7 @@ static void test_assignment_double_quoted_with_space(void)
 
 static void test_assignment_double_quoted_empty(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR=\"\" cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1043,7 +1048,7 @@ static void test_assignment_double_quoted_empty(void)
 
 static void test_assignment_double_quoted_with_hash_and_equals(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("HELLO=\"#WORLD=\" cmd"), &shell);
 
@@ -1057,7 +1062,7 @@ static void test_assignment_double_quoted_with_hash_and_equals(void)
 
 static void test_assignment_dollar_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR=$HOME cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1069,7 +1074,7 @@ static void test_assignment_dollar_value(void)
 
 static void test_assignment_double_quoted_dollar(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("VAR=\"$HOME/bin\" cmd"), &shell);
 
@@ -1083,7 +1088,7 @@ static void test_assignment_double_quoted_dollar(void)
 
 static void test_assignment_mixed_quoted_and_bare(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("A=1 B=\"2 3\" C='x' cmd"), &shell);
 
@@ -1098,7 +1103,7 @@ static void test_assignment_mixed_quoted_and_bare(void)
 
 static void test_assignment_many_bare_then_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("K1=v1 K2=v2 K3=v3 cmd arg1 arg2"), &shell);
 
@@ -1124,7 +1129,7 @@ static void test_assignment_many_bare_then_args(void)
 
 static void test_assignment_after_argv_is_arg(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 cmd B=2 C=3"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1142,7 +1147,7 @@ static void test_assignment_after_argv_is_arg(void)
 
 static void test_assignment_only_empty_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("VAR="), &shell);
 
 	if (!assert_command_node(ast))
@@ -1155,7 +1160,7 @@ static void test_assignment_only_empty_value(void)
 
 static void test_assignment_only_multiple(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("A=1 B=2 C=3"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1170,7 +1175,7 @@ static void test_assignment_only_multiple(void)
 
 static void test_assignment_leading_equals_falls_to_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("=value cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1183,7 +1188,7 @@ static void test_assignment_leading_equals_falls_to_argv(void)
 
 static void test_assignment_dash_in_name_falls_to_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(lexer_tokenize("MY-VAR=val cmd"), &shell);
 
 	if (!assert_command_node(ast))
@@ -1196,7 +1201,7 @@ static void test_assignment_dash_in_name_falls_to_argv(void)
 
 static void test_assignment_pipeline_quoted_both_sides(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("A=\"1 2\" cmd1 | B='x y' cmd2 arg"), &shell);
 
@@ -1233,7 +1238,7 @@ static void test_assignment_pipeline_quoted_both_sides(void)
 
 static void test_assignment_with_two_redirs(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	*ast = parser_parse(
 			lexer_tokenize("A=1 B=\"2 3\" cmd < in > out"), &shell);
 

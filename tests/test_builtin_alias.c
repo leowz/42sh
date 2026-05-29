@@ -55,7 +55,7 @@ static int	capture_alias(t_shell *shell, int argc, char **argv,
 
 static void	test_alias_builtin_sets(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"alias", "ll=ls -la", NULL};
 
 	alias_b_init(&shell);
@@ -67,7 +67,7 @@ static void	test_alias_builtin_sets(void)
 
 static void	test_alias_builtin_equals_in_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"alias", "cfg=a=b=c", NULL};
 
 	alias_b_init(&shell);
@@ -79,7 +79,7 @@ static void	test_alias_builtin_equals_in_value(void)
 
 static void	test_alias_builtin_query_missing(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"alias", "ghost", NULL};
 
 	alias_b_init(&shell);
@@ -89,7 +89,7 @@ static void	test_alias_builtin_query_missing(void)
 
 static void	test_alias_builtin_query_existing(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[256];
 	char	*set[] = {"alias", "ll=ls -la", NULL};
 	char	*get[] = {"alias", "ll", NULL};
@@ -103,7 +103,7 @@ static void	test_alias_builtin_query_existing(void)
 
 static void	test_alias_builtin_list_sorted(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[256];
 	char	*argv[] = {"alias", NULL};
 
@@ -119,7 +119,7 @@ static void	test_alias_builtin_list_sorted(void)
 
 static void	test_alias_builtin_quote_escaping(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[256];
 	char	*get[] = {"alias", "x", NULL};
 
@@ -133,7 +133,7 @@ static void	test_alias_builtin_quote_escaping(void)
 
 static void	test_unalias_removes(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"unalias", "ll", NULL};
 
 	alias_b_init(&shell);
@@ -146,7 +146,7 @@ static void	test_unalias_removes(void)
 
 static void	test_unalias_missing(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"unalias", "ghost", NULL};
 
 	alias_b_init(&shell);
@@ -156,7 +156,7 @@ static void	test_unalias_missing(void)
 
 static void	test_unalias_all(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"unalias", "-a", NULL};
 
 	alias_b_init(&shell);
@@ -170,7 +170,7 @@ static void	test_unalias_all(void)
 
 static void	test_unalias_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*argv[] = {"unalias", NULL};
 
 	alias_b_init(&shell);

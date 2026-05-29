@@ -249,10 +249,19 @@ static void	test_interactive_heredoc_in_subshell(void)
 		")\n"
 		"exit\n",
 		out, sizeof(out));
+	/* Until the heredoc body queue was wired in, this `)` syntax-errored
+	 * and each body line ran as its own command (printing
+	 * `command not found: HDSUB_LINE1` etc., which made the body-line
+	 * assertions silently pass). The negative checks below catch that
+	 * regression class. */
 	MU_ASSERT("heredoc inside subshell delivers first line",
 		has(out, "HDSUB_LINE1"));
 	MU_ASSERT("heredoc inside subshell delivers second line",
 		has(out, "HDSUB_LINE2"));
+	MU_ASSERT("subshell parses without `expected )` error",
+		!has(out, "Syntax error : expected"));
+	MU_ASSERT("body lines were not run as commands",
+		!has(out, "command not found"));
 }
 
 /* ---- job control patterns from the correction (§8 job control) --------- */

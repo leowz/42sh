@@ -23,7 +23,7 @@ static void	set_test_init(t_shell *shell)
  */
 static void	test_set_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", NULL};
 
@@ -40,7 +40,7 @@ static void	test_set_no_args(void)
  */
 static void	test_set_single_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", "MYVAR=hello", NULL};
 	char	*value;
@@ -59,7 +59,7 @@ static void	test_set_single_assignment(void)
  */
 static void	test_set_multiple_assignments(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", "VAR1=value1", "VAR2=value2", "VAR3=value3", NULL};
 
@@ -77,7 +77,7 @@ static void	test_set_multiple_assignments(void)
  */
 static void	test_set_empty_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", "EMPTY_VAR=", NULL};
 	char	*value;
@@ -95,7 +95,7 @@ static void	test_set_empty_value(void)
  */
 static void	test_set_overwrite(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", "VAR=newvalue", NULL};
 	char	*value;
@@ -114,7 +114,7 @@ static void	test_set_overwrite(void)
  */
 static void	test_set_special_chars(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", "PATH=/usr/bin:/bin", "DESC=hello world!", NULL};
 
@@ -131,7 +131,7 @@ static void	test_set_special_chars(void)
  */
 static void	test_set_invalid_name(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"set", "2INVALID=value", NULL};
 
@@ -159,7 +159,7 @@ static void	test_set_null_shell(void)
  */
 static void	test_set_null_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 
 	set_test_init(&shell);

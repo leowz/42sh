@@ -33,7 +33,7 @@ extern void	stub_shell_cleanup(t_shell *shell);
 
 static void	test_job_create_basic(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j;
 
 	stub_shell_init(&shell);
@@ -53,7 +53,7 @@ static void	test_job_create_basic(void)
 
 static void	test_job_create_incremental_ids(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*a;
 	t_job	*b;
 	t_job	*c;
@@ -72,7 +72,7 @@ static void	test_job_create_incremental_ids(void)
 
 static void	test_job_add_process(void)
 {
-	t_shell		shell;
+	t_shell		shell = {0};
 	t_job		*j;
 	t_process	*p;
 
@@ -91,7 +91,7 @@ static void	test_job_add_process(void)
 
 static void	test_job_find_by_id_and_pid(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 
@@ -140,7 +140,7 @@ static pid_t	fork_quick_child(void)
 
 static void	test_update_and_notify_completes_job(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*job;
 	pid_t	pid;
 	int		fd;
@@ -258,7 +258,7 @@ static void	setup_three_jobs(t_shell *shell, t_job **j1, t_job **j2, t_job **j3)
 
 static void	test_find_by_spec_current(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;
@@ -276,7 +276,7 @@ static void	test_find_by_spec_current(void)
 
 static void	test_find_by_spec_previous(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;
@@ -293,7 +293,7 @@ static void	test_find_by_spec_previous(void)
 
 static void	test_find_by_spec_by_id(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;
@@ -310,7 +310,7 @@ static void	test_find_by_spec_by_id(void)
 
 static void	test_find_by_spec_by_prefix(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;
@@ -326,7 +326,7 @@ static void	test_find_by_spec_by_prefix(void)
 
 static void	test_find_by_spec_malformed(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;
@@ -345,7 +345,7 @@ static void	test_find_by_spec_malformed(void)
 
 static void	test_job_remove_middle(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;
@@ -363,7 +363,7 @@ static void	test_job_remove_middle(void)
 
 static void	test_job_remove_clears_current(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_job	*j1;
 	t_job	*j2;
 	t_job	*j3;

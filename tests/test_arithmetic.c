@@ -240,7 +240,7 @@ static void	test_arith_trailing_garbage(void)
 
 static void	test_expand_arith_simple(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -252,7 +252,7 @@ static void	test_expand_arith_simple(void)
 
 static void	test_expand_arith_precedence(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -264,7 +264,7 @@ static void	test_expand_arith_precedence(void)
 
 static void	test_expand_arith_negative_result(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -276,7 +276,7 @@ static void	test_expand_arith_negative_result(void)
 
 static void	test_expand_arith_with_variable(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -289,7 +289,7 @@ static void	test_expand_arith_with_variable(void)
 
 static void	test_expand_arith_two_variables(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -303,7 +303,7 @@ static void	test_expand_arith_two_variables(void)
 
 static void	test_expand_arith_in_double_quotes(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -315,7 +315,7 @@ static void	test_expand_arith_in_double_quotes(void)
 
 static void	test_expand_arith_concatenated(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -327,7 +327,7 @@ static void	test_expand_arith_concatenated(void)
 
 static void	test_expand_arith_two_expansions_in_one_word(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -339,7 +339,7 @@ static void	test_expand_arith_two_expansions_in_one_word(void)
 
 static void	test_expand_arith_zero_result(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -351,7 +351,7 @@ static void	test_expand_arith_zero_result(void)
 
 static void	test_expand_arith_parentheses(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*out;
 
 	stub_shell_init(&shell);
@@ -365,7 +365,7 @@ static void	test_expand_arith_parentheses(void)
 
 static void	test_expand_command_arith_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 
 	stub_shell_init(&shell);
@@ -384,7 +384,7 @@ static void	test_expand_command_arith_assignment(void)
 
 static void	test_expand_command_arith_assignment_with_var(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 
 	stub_shell_init(&shell);
@@ -406,7 +406,7 @@ static void	test_expand_command_arith_assignment_with_var(void)
 
 static void	test_expand_command_arith_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_cmd	*cmd;
 
 	stub_shell_init(&shell);

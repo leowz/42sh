@@ -65,7 +65,7 @@ static char	*expand_line(t_shell *shell, const char *line)
 
 static void	test_alias_set_and_get(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	MU_ASSERT_INT(0, alias_set(&shell, "ll", "ls -la"));
@@ -77,7 +77,7 @@ static void	test_alias_set_and_get(void)
 
 static void	test_alias_get_missing(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	MU_ASSERT("missing alias value is NULL",
@@ -89,7 +89,7 @@ static void	test_alias_get_missing(void)
 
 static void	test_alias_update_overwrites(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	alias_set(&shell, "g", "git");
@@ -103,7 +103,7 @@ static void	test_alias_update_overwrites(void)
 
 static void	test_alias_unset(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	alias_set(&shell, "ll", "ls -la");
@@ -115,7 +115,7 @@ static void	test_alias_unset(void)
 
 static void	test_alias_unset_missing(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	MU_ASSERT_INT(1, alias_unset(&shell, "ghost"));
@@ -124,7 +124,7 @@ static void	test_alias_unset_missing(void)
 
 static void	test_alias_unset_middle(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	alias_set(&shell, "a", "1");
@@ -139,7 +139,7 @@ static void	test_alias_unset_middle(void)
 
 static void	test_alias_clear(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	alias_test_init(&shell);
 	alias_set(&shell, "a", "1");
@@ -160,7 +160,7 @@ static void	test_alias_null_safety(void)
 
 static void	test_expand_basic(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -173,7 +173,7 @@ static void	test_expand_basic(void)
 
 static void	test_expand_keeps_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -186,7 +186,7 @@ static void	test_expand_keeps_args(void)
 
 static void	test_expand_not_in_argument(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -199,7 +199,7 @@ static void	test_expand_not_in_argument(void)
 
 static void	test_expand_after_operators(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -215,7 +215,7 @@ static void	test_expand_after_operators(void)
 
 static void	test_expand_chain(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -229,7 +229,7 @@ static void	test_expand_chain(void)
 
 static void	test_expand_recursion_guard(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -243,7 +243,7 @@ static void	test_expand_recursion_guard(void)
 
 static void	test_expand_quoted_not_expanded(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);
@@ -257,7 +257,7 @@ static void	test_expand_quoted_not_expanded(void)
 
 static void	test_expand_no_alias(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*r;
 
 	alias_test_init(&shell);

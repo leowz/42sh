@@ -44,7 +44,7 @@ static int	bash_test(const char *cmd)
 // 
 static void	test_compare_bash_file_exists(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-e", NULL, NULL};
     char	bash_cmd[256];
@@ -66,7 +66,7 @@ static void	test_compare_bash_file_exists(void)
 // 
 static void	test_compare_bash_file_regular(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-f", NULL, NULL};
     char	bash_cmd[256];
@@ -88,7 +88,7 @@ static void	test_compare_bash_file_regular(void)
 // 
 static void	test_compare_bash_file_directory(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*dir;
     char	*argv[] = {"test", "-d", NULL, NULL};
     char	bash_cmd[256];
@@ -110,7 +110,7 @@ static void	test_compare_bash_file_directory(void)
 // 
 static void	test_compare_bash_string_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "hello", "=", "hello", NULL};
     char	bash_cmd[256];
     int		shell_result;
@@ -126,7 +126,7 @@ static void	test_compare_bash_string_equal(void)
 // 
 static void	test_compare_bash_numeric_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "42", "-eq", "42", NULL};
     int		shell_result;
     int		bash_result;
@@ -140,7 +140,7 @@ static void	test_compare_bash_numeric_equal(void)
 // 
 static void	test_compare_bash_numeric_less_than(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "10", "-lt", "20", NULL};
     int		shell_result;
     int		bash_result;
@@ -154,7 +154,7 @@ static void	test_compare_bash_numeric_less_than(void)
 // 
 static void	test_compare_bash_string_not_empty(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-n", "hello", NULL};
     int		shell_result;
     int		bash_result;
@@ -168,7 +168,7 @@ static void	test_compare_bash_string_not_empty(void)
 // 
 static void	test_compare_bash_string_empty(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-z", "", NULL};
     int		shell_result;
     int		bash_result;
@@ -238,7 +238,7 @@ static void	cleanup_temp_dir(char *path)
 
 static void	test_file_exists_true(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-e", NULL, NULL};
     int		result;
@@ -257,7 +257,7 @@ static void	test_file_exists_true(void)
 
 static void	test_file_exists_false(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-e", "/nonexistent/path/file", NULL};
     int		result;
 
@@ -272,7 +272,7 @@ static void	test_file_exists_false(void)
 
 static void	test_file_is_regular(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-f", NULL, NULL};
     int		result;
@@ -290,7 +290,7 @@ static void	test_file_is_regular(void)
 
 static void	test_file_is_directory(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*dir;
     char	*argv[] = {"test", "-d", NULL, NULL};
     int		result;
@@ -308,7 +308,7 @@ static void	test_file_is_directory(void)
 
 static void	test_directory_is_not_regular(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*dir;
     char	*argv[] = {"test", "-f", NULL, NULL};
     int		result;
@@ -328,7 +328,7 @@ static void	test_directory_is_not_regular(void)
 
 static void	test_file_readable(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-r", NULL, NULL};
     int		result;
@@ -347,7 +347,7 @@ static void	test_file_readable(void)
 
 static void	test_file_writable(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-w", NULL, NULL};
     int		result;
@@ -368,7 +368,7 @@ static void	test_file_writable(void)
 
 static void	test_file_has_size(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-s", NULL, NULL};
     int		result;
@@ -386,7 +386,7 @@ static void	test_file_has_size(void)
 
 static void	test_empty_file_no_size(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*file;
     char	*argv[] = {"test", "-s", NULL, NULL};
     int		result;
@@ -406,7 +406,7 @@ static void	test_empty_file_no_size(void)
 
 static void	test_string_zero_empty(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-z", "", NULL};
     int		result;
 
@@ -418,7 +418,7 @@ static void	test_string_zero_empty(void)
 
 static void	test_string_zero_nonempty(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-z", "hello", NULL};
     int		result;
 
@@ -430,7 +430,7 @@ static void	test_string_zero_nonempty(void)
 
 static void	test_string_n_nonempty(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-n", "hello", NULL};
     int		result;
 
@@ -442,7 +442,7 @@ static void	test_string_n_nonempty(void)
 
 static void	test_string_n_empty(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-n", "", NULL};
     int		result;
 
@@ -456,7 +456,7 @@ static void	test_string_n_empty(void)
 
 static void	test_string_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "hello", "=", "hello", NULL};
     int		result;
 
@@ -468,7 +468,7 @@ static void	test_string_equal(void)
 
 static void	test_string_not_equal_op(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "hello", "!=", "world", NULL};
     int		result;
 
@@ -480,7 +480,7 @@ static void	test_string_not_equal_op(void)
 
 static void	test_string_equal_fails(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "hello", "=", "world", NULL};
     int		result;
 
@@ -494,7 +494,7 @@ static void	test_string_equal_fails(void)
 
 static void	test_string_less_than(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "abc", "<", "def", NULL};
     int		result;
 
@@ -506,7 +506,7 @@ static void	test_string_less_than(void)
 
 static void	test_string_greater_than(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "xyz", ">", "abc", NULL};
     int		result;
 
@@ -518,7 +518,7 @@ static void	test_string_greater_than(void)
 
 static void	test_string_not_less_than(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "xyz", "<", "abc", NULL};
     int		result;
 
@@ -532,7 +532,7 @@ static void	test_string_not_less_than(void)
 
 static void	test_numeric_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "42", "-eq", "42", NULL};
     int		result;
 
@@ -544,7 +544,7 @@ static void	test_numeric_equal(void)
 
 static void	test_numeric_not_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "42", "-ne", "13", NULL};
     int		result;
 
@@ -556,7 +556,7 @@ static void	test_numeric_not_equal(void)
 
 static void	test_numeric_less_than(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "10", "-lt", "20", NULL};
     int		result;
 
@@ -568,7 +568,7 @@ static void	test_numeric_less_than(void)
 
 static void	test_numeric_less_or_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "20", "-le", "20", NULL};
     int		result;
 
@@ -580,7 +580,7 @@ static void	test_numeric_less_or_equal(void)
 
 static void	test_numeric_greater_than(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "30", "-gt", "20", NULL};
     int		result;
 
@@ -592,7 +592,7 @@ static void	test_numeric_greater_than(void)
 
 static void	test_numeric_greater_or_equal(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "20", "-ge", "20", NULL};
     int		result;
 
@@ -604,7 +604,7 @@ static void	test_numeric_greater_or_equal(void)
 
 static void	test_numeric_invalid_argument(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "abc", "-eq", "42", NULL};
     int		result;
 
@@ -618,7 +618,7 @@ static void	test_numeric_invalid_argument(void)
 
 static void	test_no_arguments(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", NULL};
     int		result;
 
@@ -631,7 +631,7 @@ static void	test_no_arguments(void)
 
 static void	test_missing_argument_for_flag(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "-f", NULL};
     int		result;
 
@@ -643,7 +643,7 @@ static void	test_missing_argument_for_flag(void)
 
 static void	test_missing_right_operand(void)
 {
-    t_shell	shell;
+    t_shell	shell = {0};
     char	*argv[] = {"test", "string", "=", NULL};
     int		result;
 

@@ -44,12 +44,48 @@ static int	write_line(int fd, char *line, size_t len)
 }
 
 /**
+ * @brief Pop the next pre-collected heredoc body from
+ *        @c shell->heredoc_body_queue and write it to @p fd.
+ * @details The REPL's @c shell_read_logical_line scans command lines for
+ *          `<<DELIM` operators and pushes one body per heredoc onto the
+ *          queue, in declaration order. The parser's AST walk visits
+ *          heredocs in the same order, so a plain FIFO pop is correct.
+ *          Bodies are already tab-stripped per `<<-` rules and contain
+ *          newline-terminated lines (or "" for empty bodies).
+ * @return 0 on success, -1 on write failure.
+ */
+static int	pop_queued_heredoc(t_shell *shell, int fd)
+{
+	t_list	*head;
+	char	*body;
+	size_t	blen;
+
+	head = shell->heredoc_body_queue;
+	body = (char *)head->content;
+	shell->heredoc_body_queue = head->next;
+	free(head);
+	blen = strlen(body);
+	if (blen > 0 && write_line(fd, body, blen) == -1)
+	{
+		free(body);
+		return (-1);
+	}
+	free(body);
+	return (0);
+}
+
+/**
  * @param redir : a pointer on struct s_redir
  * @param shell : shell state, used to reach the shared input reader
  * @param fd : the backing-store fd the heredoc body is written to
- * @brief read input line by line through the shell's single input reader
- *        (shell_read_line) so the heredoc body and the surrounding command
- *        stream stay synchronised on one stdin cursor.
+ * @brief Read or recover the heredoc body. If the REPL already pre-collected
+ *        the body into @c shell->heredoc_body_queue (the case for any input
+ *        that came through @c shell_read_logical_line, i.e. both interactive
+ *        and piped stdin), we pop it. Otherwise we fall back to reading
+ *        line-by-line via @c shell_read_line (used when @c parser_parse is
+ *        called outside the REPL, e.g. unit tests or `-c` mode -- though
+ *        `-c` mode doesn't yet handle heredocs since the lexer doesn't
+ *        recognise body lines inline).
  * @return 0 (success) | -1 (failure or SIGINT)
  */
 static int	read_heredoc(t_redir *redir, t_shell *shell, int fd)
@@ -57,6 +93,8 @@ static int	read_heredoc(t_redir *redir, t_shell *shell, int fd)
 	char	*line;
 	char	*convert_line;
 
+	if (shell->heredoc_body_queue)
+		return (pop_queued_heredoc(shell, fd));
 	convert_line = NULL;
 	while (!g_sigint_heredoc)
 	{

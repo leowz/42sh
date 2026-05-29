@@ -112,7 +112,7 @@ static void	teardown_shell(t_shell *shell)
 
 static void	test_hash_empty_table(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -129,7 +129,7 @@ static void	test_hash_empty_table(void)
 
 static void	test_hash_clear_empty(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -145,7 +145,7 @@ static void	test_hash_clear_empty(void)
 
 static void	test_hash_preset(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -166,7 +166,7 @@ static void	test_hash_preset(void)
 
 static void	test_hash_type_single(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -184,7 +184,7 @@ static void	test_hash_type_single(void)
 
 static void	test_hash_type_multi(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -205,7 +205,7 @@ static void	test_hash_type_multi(void)
 
 static void	test_hash_type_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -222,7 +222,7 @@ static void	test_hash_type_not_found(void)
 
 static void	test_hash_type_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -239,7 +239,7 @@ static void	test_hash_type_no_args(void)
 
 static void	test_hash_delete(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -259,7 +259,7 @@ static void	test_hash_delete(void)
 
 static void	test_hash_delete_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -276,7 +276,7 @@ static void	test_hash_delete_not_found(void)
 
 static void	test_hash_delete_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -293,7 +293,7 @@ static void	test_hash_delete_no_args(void)
 
 static void	test_hash_clear_populated(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -314,7 +314,7 @@ static void	test_hash_clear_populated(void)
 
 static void	test_hash_list_entries(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -334,7 +334,7 @@ static void	test_hash_list_entries(void)
 
 static void	test_hash_invalid_option(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -351,7 +351,7 @@ static void	test_hash_invalid_option(void)
 
 static void	test_hash_mutual_exclusion(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -368,7 +368,7 @@ static void	test_hash_mutual_exclusion(void)
 
 static void	test_hash_preset_wrong_argc(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -385,7 +385,7 @@ static void	test_hash_preset_wrong_argc(void)
 
 static void	test_hash_preset_preserves_hits(void)
 {
-	t_shell			shell;
+	t_shell			shell = {0};
 	char			buf[BUFSIZE];
 	int				ret;
 	t_cmd_hash_value	*v;
@@ -408,7 +408,7 @@ static void	test_hash_preset_preserves_hits(void)
 
 static void	test_hash_resolve_name(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -427,7 +427,7 @@ static void	test_hash_resolve_name(void)
 
 static void	test_hash_resolve_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -445,7 +445,7 @@ static void	test_hash_resolve_not_found(void)
 
 static void	test_hash_double_dash(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -463,7 +463,7 @@ static void	test_hash_double_dash(void)
 
 static void	test_hash_delete_multiple(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -485,7 +485,7 @@ static void	test_hash_delete_multiple(void)
 
 static void	test_hash_clear_then_resolve(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -506,7 +506,7 @@ static void	test_hash_clear_then_resolve(void)
 
 static void	test_hash_combined_flags_rejected(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 

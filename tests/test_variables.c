@@ -29,7 +29,7 @@ extern void	stub_shell_cleanup(t_shell *shell);
 
 static void	test_var_set_and_get(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	stub_shell_init(&shell);
 	MU_ASSERT_INT(0, var_set(&shell, "FOO", "bar"));
@@ -42,7 +42,7 @@ static void	test_var_set_and_get(void)
 
 static void	test_var_overwrite(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	stub_shell_init(&shell);
 	var_set(&shell, "X", "first");
@@ -56,7 +56,7 @@ static void	test_var_overwrite(void)
 
 static void	test_var_invalid_identifier(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	stub_shell_init(&shell);
 	MU_ASSERT_INT(1, var_set(&shell, "1BAD", "x"));
@@ -75,7 +75,7 @@ static void	test_var_invalid_identifier(void)
 
 static void	test_var_unset_head(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	stub_shell_init(&shell);
 	var_set(&shell, "A", "1");
@@ -88,7 +88,7 @@ static void	test_var_unset_head(void)
 
 static void	test_var_unset_missing(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	stub_shell_init(&shell);
 	MU_ASSERT_INT(0, var_unset(&shell, "NOPE"));
@@ -97,7 +97,7 @@ static void	test_var_unset_missing(void)
 
 static void	test_var_unset_middle(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 
 	stub_shell_init(&shell);
 	var_set(&shell, "A", "1");
@@ -130,7 +130,7 @@ static int	env_contains(char **env, const char *entry)
 
 static void	test_var_export(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**env;
 
 	stub_shell_init(&shell);
@@ -146,7 +146,7 @@ static void	test_var_export(void)
 
 static void	test_var_export_creates(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**env;
 
 	stub_shell_init(&shell);
@@ -160,7 +160,7 @@ static void	test_var_export_creates(void)
 
 static void	test_env_dirty_rebuild(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	**env_a;
 	char	**env_b;
 
@@ -182,7 +182,7 @@ static void	test_env_dirty_rebuild(void)
 
 static void	test_var_init_from_environ(void)
 {
-	t_shell		shell;
+	t_shell		shell = {0};
 	char		*envp[3];
 	char		**env;
 	t_var		*var;
@@ -210,7 +210,7 @@ static void	test_var_init_from_environ(void)
 
 static void	test_var_init_skips_malformed(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*envp[3];
 
 	stub_shell_init(&shell);

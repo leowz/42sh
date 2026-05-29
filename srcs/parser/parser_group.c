@@ -95,9 +95,13 @@ t_ast	*parse_subshell(t_parser *p)
 
 	if (!parser_accept(p, TOK_LPAREN))
 		return (NULL);
+	while (parser_accept(p, TOK_NEWLINE))
+		;
 	child = parse_list(p);
 	if (!child)
 		return (NULL);
+	while (parser_accept(p, TOK_NEWLINE))
+		;
 	if (!parser_accept(p, TOK_RPAREN))
 	{
 		if (!p->error)
@@ -116,9 +120,13 @@ t_ast	*parse_block(t_parser *p)
 	token = parser_next(p);
 	if (!token || token->type != TOK_WORD || strcmp(token->value, "{"))
 		return (NULL);
+	while (parser_accept(p, TOK_NEWLINE))
+		;
 	child = parse_list(p);
 	if (!child)
 		return (NULL);
+	while (parser_accept(p, TOK_NEWLINE))
+		;
 	token = parser_next(p);
 	if (!token || token->type != TOK_WORD || strcmp(token->value, "}"))
 	{

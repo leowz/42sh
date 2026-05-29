@@ -119,7 +119,7 @@ static void	test_split_assignment(void)
  * ================================================================ */
 static void	test_find_command(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	*path;
 
 	stub_shell_init(&shell);
@@ -471,7 +471,7 @@ static void	free_echo_ast(t_ast *ast)
 
 static void	test_execute_and(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	and_node;
 	int		status;
 	t_ast	*left;
@@ -531,7 +531,7 @@ static void	test_execute_and(void)
 
 static void	test_execute_or(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	or_node;
 	int		status;
 	t_ast	*left;
@@ -592,7 +592,7 @@ static void	test_execute_or(void)
 
 static void	test_execute_sequence(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	seq_node;
 	int		status;
 	t_ast	*left;
@@ -647,7 +647,7 @@ static void	test_execute_sequence(void)
 
 static void	test_execute_external_command(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		status;
 	t_ast	*ast;
 	char	buf[256];
@@ -687,7 +687,7 @@ static void	test_execute_external_command(void)
 
 static void	test_execute_builtin_command(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	ast;
 	int		status;
 	char	buf[256];
@@ -744,7 +744,7 @@ static void	test_execute_builtin_command(void)
  * ================================================================ */
 static void	test_execute_assignment_only(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	ast;
 	int		status;
 	char	*assign_str;
@@ -782,7 +782,7 @@ static void	test_execute_assignment_only(void)
 
 static void	test_execute_pipeline(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	pipe_node;
 	t_ast	*left;
 	t_ast	*right;
@@ -852,7 +852,7 @@ static void	test_execute_pipeline(void)
 
 static void	test_execute_pipeline_three(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	pipe_outer;
 	t_ast	pipe_inner;
 	t_ast	*cmd1;
@@ -946,7 +946,7 @@ static void	test_execute_pipeline_three(void)
 
 static void	test_pipeline_exit_status(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	pipe_node;
 	t_ast	*left;
 	t_ast	*right;
@@ -989,7 +989,7 @@ static void	test_pipeline_exit_status(void)
 
 static void	test_execute_subshell(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	subshell;
 	t_ast	*child;
 	int		status;
@@ -1021,7 +1021,7 @@ static void	test_execute_subshell(void)
 
 static void	test_execute_subshell_isolation(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	subshell;
 	t_ast	*child;
 	int		status;
@@ -1076,7 +1076,7 @@ static void	test_execute_subshell_isolation(void)
 
 static void	test_execute_block(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	block;
 	t_ast	*child;
 	int		status;
@@ -1138,7 +1138,7 @@ static void	test_execute_block(void)
 
 static void	test_execute_background(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	bg;
 	t_ast	*child;
 	int		status;
@@ -1186,7 +1186,7 @@ static void	test_execute_background(void)
 
 static void	test_executor_dispatch(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		status;
 
 	stub_shell_init(&shell);
@@ -1219,7 +1219,7 @@ static void	test_executor_dispatch(void)
 
 static void	test_complex_logical_chains(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	outer;
 	t_ast	inner;
 	t_ast	*cmd1;
@@ -1304,7 +1304,7 @@ static void	test_complex_logical_chains(void)
  */
 static void	test_builtin_temp_assignments(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	ast;
 	int		status;
 	char	*assign_str;
@@ -1354,7 +1354,7 @@ static void	test_builtin_temp_assignments(void)
 
 static void	test_pipeline_with_heredoc(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	pipe_node;
 	t_ast	*left;
 	t_ast	*right;
@@ -1446,7 +1446,7 @@ static void	test_pipeline_with_heredoc(void)
 
 static void	test_sequence_mixed(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	t_ast	seq;
 	t_ast	and_node;
 	t_ast	*cmd1;

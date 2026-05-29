@@ -23,7 +23,7 @@ static void	unset_test_init(t_shell *shell)
  */
 static void	test_unset_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", NULL};
 
@@ -39,7 +39,7 @@ static void	test_unset_no_args(void)
  */
 static void	test_unset_single_var(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "MYVAR", NULL};
 	char	*value;
@@ -58,7 +58,7 @@ static void	test_unset_single_var(void)
  */
 static void	test_unset_multiple_vars(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "VAR1", "VAR2", "VAR3", NULL};
 
@@ -80,7 +80,7 @@ static void	test_unset_multiple_vars(void)
  */
 static void	test_unset_nonexistent(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "DOES_NOT_EXIST", NULL};
 
@@ -96,7 +96,7 @@ static void	test_unset_nonexistent(void)
  */
 static void	test_unset_invalid_digit(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "2INVALID", NULL};
 
@@ -112,7 +112,7 @@ static void	test_unset_invalid_digit(void)
  */
 static void	test_unset_invalid_special(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "VAR-NAME", NULL};
 
@@ -127,7 +127,7 @@ static void	test_unset_invalid_special(void)
  */
 static void	test_unset_mixed_valid_invalid(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "VALID_VAR", "2INVALID", NULL};
 
@@ -143,7 +143,7 @@ static void	test_unset_mixed_valid_invalid(void)
  */
 static void	test_unset_empty_identifier(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "", NULL};
 
@@ -158,7 +158,7 @@ static void	test_unset_empty_identifier(void)
  */
 static void	test_unset_underscore(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"unset", "_VAR", NULL};
 
@@ -187,7 +187,7 @@ static void	test_unset_null_shell(void)
  */
 static void	test_unset_null_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 
 	unset_test_init(&shell);

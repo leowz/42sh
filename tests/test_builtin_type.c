@@ -91,7 +91,7 @@ static int	capture_type_stderr(t_shell *shell, int argc, char **argv,
 
 static void	test_type_builtin_echo(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -105,7 +105,7 @@ static void	test_type_builtin_echo(void)
 
 static void	test_type_builtin_exit(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -118,7 +118,7 @@ static void	test_type_builtin_exit(void)
 
 static void	test_type_builtin_type(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -131,7 +131,7 @@ static void	test_type_builtin_type(void)
 
 static void	test_type_builtin_history(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -147,7 +147,7 @@ static void	test_type_builtin_history(void)
 
 static void	test_type_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -164,7 +164,7 @@ static void	test_type_not_found(void)
 
 static void	test_type_multiple_builtins(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -180,7 +180,7 @@ static void	test_type_multiple_builtins(void)
 
 static void	test_type_mixed_returns_failure(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	stdout_buf[BUFSIZE];
 	char	stderr_buf[BUFSIZE];
 	int		pipeout[2];
@@ -234,7 +234,7 @@ static void	test_type_mixed_returns_failure(void)
 
 static void	test_type_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -272,7 +272,7 @@ static void	free_shell_vars(t_shell *shell)
 
 static void	test_type_t_builtin(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -285,7 +285,7 @@ static void	test_type_t_builtin(void)
 
 static void	test_type_t_file(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -298,7 +298,7 @@ static void	test_type_t_file(void)
 
 static void	test_type_t_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -313,7 +313,7 @@ static void	test_type_t_not_found(void)
 
 static void	test_type_p_builtin(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -326,7 +326,7 @@ static void	test_type_p_builtin(void)
 
 static void	test_type_p_file(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -339,7 +339,7 @@ static void	test_type_p_file(void)
 
 static void	test_type_p_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -354,7 +354,7 @@ static void	test_type_p_not_found(void)
 
 static void	test_type_a_builtin(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -368,7 +368,7 @@ static void	test_type_a_builtin(void)
 
 static void	test_type_a_path_matches(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 	int		fd;
@@ -399,7 +399,7 @@ static void	test_type_a_path_matches(void)
 
 static void	test_type_a_not_found(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -415,7 +415,7 @@ static void	test_type_a_not_found(void)
 
 static void	test_type_invalid_option(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 

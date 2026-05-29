@@ -48,7 +48,7 @@ static int	capture_echo(t_shell *shell, int argc, char **argv,
 
 static void test_echo_return_and_status(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "hello"};
 
@@ -68,7 +68,7 @@ static void test_echo_return_and_status(void)
 
 static void test_echo_single_word(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "hello"};
 
@@ -78,7 +78,7 @@ static void test_echo_single_word(void)
 
 static void test_echo_multiple_words(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "shi", "fu", "mi"};
 
@@ -88,7 +88,7 @@ static void test_echo_multiple_words(void)
 
 static void test_echo_empty_string_arg(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", ""};
 
@@ -98,7 +98,7 @@ static void test_echo_empty_string_arg(void)
 
 static void test_echo_n_suppresses_newline(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-n", "hello"};
 
@@ -118,7 +118,7 @@ static void test_echo_n_suppresses_newline(void)
 
 static void test_echo_n_multiple_words(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-n", "foo", "bar", "baz"};
 
@@ -128,7 +128,7 @@ static void test_echo_n_multiple_words(void)
 
 static void test_echo_e_newline(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "foo\\nbar"};
 
@@ -138,7 +138,7 @@ static void test_echo_e_newline(void)
 
 static void test_echo_e_tab(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "foo\\tbar"};
 
@@ -148,7 +148,7 @@ static void test_echo_e_tab(void)
 
 static void test_echo_e_backslash(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "foo\\\\bar"};
 
@@ -158,7 +158,7 @@ static void test_echo_e_backslash(void)
 
 static void test_echo_e_carriage_return(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "foo\\rbar"};
 
@@ -168,7 +168,7 @@ static void test_echo_e_carriage_return(void)
 
 static void test_echo_e_alert(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "\\a"};
 
@@ -178,7 +178,7 @@ static void test_echo_e_alert(void)
 
 static void test_echo_e_backspace(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "\\b"};
 
@@ -188,7 +188,7 @@ static void test_echo_e_backspace(void)
 
 static void test_echo_e_vertical_tab(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "\\v"};
 
@@ -198,7 +198,7 @@ static void test_echo_e_vertical_tab(void)
 
 static void test_echo_e_formfeed(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "\\f"};
 
@@ -208,7 +208,7 @@ static void test_echo_e_formfeed(void)
 
 static void test_echo_e_c_stops_output(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "hel\\clo"};
 
@@ -218,7 +218,7 @@ static void test_echo_e_c_stops_output(void)
 
 static void test_echo_e_c_at_start(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "\\chello"};
 
@@ -228,7 +228,7 @@ static void test_echo_e_c_at_start(void)
 
 static void test_echo_e_octal(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "B.\\0101.BA\\09"};
 
@@ -238,7 +238,7 @@ static void test_echo_e_octal(void)
 
 static void	test_echo_e_octal_empty(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "hello\\0"};
 
@@ -248,7 +248,7 @@ static void	test_echo_e_octal_empty(void)
 
 static void	test_echo_e_octal_too_long(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "B.A.B\\01014"};
 
@@ -258,7 +258,7 @@ static void	test_echo_e_octal_too_long(void)
 
 static void test_echo_e_hex(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "B.\\x41.BA\\xG"};
 
@@ -268,7 +268,7 @@ static void test_echo_e_hex(void)
 
 static void	test_echo_e_hex_empty(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "hello\\x"};
 
@@ -278,7 +278,7 @@ static void	test_echo_e_hex_empty(void)
 
 static void	test_echo_e_hex_too_long(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "B.A.B\\x414"};
 
@@ -288,7 +288,7 @@ static void	test_echo_e_hex_too_long(void)
 
 static void test_echo_e_unknown_escape(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "\\q"};
 
@@ -298,7 +298,7 @@ static void test_echo_e_unknown_escape(void)
 
 static void test_echo_E_no_interpretation(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-E", "foo\\nbar"};
 
@@ -308,7 +308,7 @@ static void test_echo_E_no_interpretation(void)
 
 static void test_echo_E_overrides_e(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "-E", "foo\\nbar"};
 
@@ -318,7 +318,7 @@ static void test_echo_E_overrides_e(void)
 
 static void test_echo_e_overrides_E(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-E", "-e", "foo\\nbar"};
 
@@ -328,7 +328,7 @@ static void test_echo_e_overrides_E(void)
 
 static void test_echo_e_n_combined(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-e", "-n", "foo\\tbar"};
 
@@ -338,7 +338,7 @@ static void test_echo_e_n_combined(void)
 
 static void test_echo_n_e_combined(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-n", "-e", "foo\\tbar"};
@@ -349,7 +349,7 @@ static void test_echo_n_e_combined(void)
 
 static void test_echo_dash_alone(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "-"};
@@ -360,7 +360,7 @@ static void test_echo_dash_alone(void)
 
 static void test_echo_double_dash(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "--", "hello"};
@@ -371,7 +371,7 @@ static void test_echo_double_dash(void)
 
 static void test_echo_no_escape_without_e(void)
 {
-	t_shell shell;
+	t_shell shell = {0};
 
 	char	buf[BUFSIZE];
 	char	*argv[] = {"echo", "foo\\nbar"};

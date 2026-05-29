@@ -57,7 +57,7 @@ static int	capture_exit_stderr(t_shell *shell, int argc, char **argv,
 
 static void	test_exit_no_args_status_zero(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -73,7 +73,7 @@ static void	test_exit_no_args_status_zero(void)
 
 static void	test_exit_no_args_preserves_last_status(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -91,7 +91,7 @@ static void	test_exit_no_args_preserves_last_status(void)
 
 static void	test_exit_numeric_zero(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -106,7 +106,7 @@ static void	test_exit_numeric_zero(void)
 
 static void	test_exit_numeric_42(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -121,7 +121,7 @@ static void	test_exit_numeric_42(void)
 
 static void	test_exit_numeric_255(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -136,7 +136,7 @@ static void	test_exit_numeric_255(void)
 
 static void	test_exit_numeric_256_wraps(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -151,7 +151,7 @@ static void	test_exit_numeric_256_wraps(void)
 
 static void	test_exit_numeric_negative(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -166,7 +166,7 @@ static void	test_exit_numeric_negative(void)
 
 static void	test_exit_numeric_positive_sign(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -183,7 +183,7 @@ static void	test_exit_numeric_positive_sign(void)
 
 static void	test_exit_non_numeric_alpha(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -200,7 +200,7 @@ static void	test_exit_non_numeric_alpha(void)
 
 static void	test_exit_non_numeric_mixed(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -216,7 +216,7 @@ static void	test_exit_non_numeric_mixed(void)
 
 static void	test_exit_non_numeric_empty(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -232,7 +232,7 @@ static void	test_exit_non_numeric_empty(void)
 
 static void	test_exit_non_numeric_bare_sign(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -250,7 +250,7 @@ static void	test_exit_non_numeric_bare_sign(void)
 
 static void	test_exit_too_many_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -267,7 +267,7 @@ static void	test_exit_too_many_args(void)
 
 static void	test_exit_too_many_args_three(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -283,7 +283,7 @@ static void	test_exit_too_many_args_three(void)
 
 static void	test_exit_non_numeric_takes_priority(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 	int		ret;
 
@@ -301,7 +301,7 @@ static void	test_exit_non_numeric_takes_priority(void)
 
 static void	test_exit_interactive_prints_exit(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 
 	memset(&shell, 0, sizeof(shell));
@@ -314,7 +314,7 @@ static void	test_exit_interactive_prints_exit(void)
 
 static void	test_exit_non_interactive_silent(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[BUFSIZE];
 
 	memset(&shell, 0, sizeof(shell));

@@ -1,29 +1,47 @@
 /**
  * @file input.c
- * @brief The shell's single stdin reader plus logical-line assembly.
+ * @brief Logical-line input reader plus heredoc pre-collection.
  * @author wengzhang
  *
- * `shell_read_line` is the one place the shell consumes a *physical* line
- * of input. The REPL and the heredoc collector both call it, so command
- * lines and heredoc bodies travel through a single stdin cursor and can
- * never desynchronise.
+ * `shell_read_line` is the single physical-line reader (readline interactively,
+ * getline on shared stdin otherwise).
  *
- * `shell_read_logical_line` is the REPL's wrapper: it calls
- * `shell_read_line` repeatedly to assemble a *logical* line that spans
- * physical lines across unclosed quotes and trailing-backslash line
- * continuation. The heredoc collector does NOT use it (heredoc bodies are
- * read verbatim, line by line).
+ * `shell_read_logical_line` is the REPL's wrapper. It spans physical lines on
+ * four kinds of incompleteness:
+ *
+ *   1. Open single/double quote — continues with the newline kept inside the
+ *      quoted string (`> ` prompt).
+ *   2. Trailing unescaped `\` — continues with the `\<NL>` pair consumed
+ *      (`> ` prompt).
+ *   3. Unbalanced `(` (subshell or arithmetic-looking group) — continues with
+ *      a newline between lines.
+ *   4. Pending `<<DELIM` / `<<-DELIM` heredocs — IMMEDIATELY consumes the
+ *      heredoc body lines from stdin (NOT joining them into the command line)
+ *      and pushes each body onto `shell->heredoc_body_queue`.
+ *
+ * The heredoc collector in `parser_heredoc.c` pops bodies from that queue
+ * before falling back to its line-by-line reader. Net effect: constructs
+ * like `(cat <<EOF ... EOF) | sort` (correction-PDF §21sh test #20) parse
+ * and execute correctly.
  */
 #include "42sh.h"
 #include <stdlib.h>
+#include <string.h>
 
-typedef enum e_lcont_state
+typedef struct s_pending_hd
 {
-	LCONT_DONE,
-	LCONT_SQUOTE,
-	LCONT_DQUOTE,
-	LCONT_BACKSLASH,
-}	t_lcont_state;
+	char	*delim;
+	int		strip;
+}	t_pending_hd;
+
+typedef struct s_lcont_ctx
+{
+	int		in_sq;
+	int		in_dq;
+	int		paren_depth;
+	int		trailing_bs;
+	t_list	*pending_hd;
+}	t_lcont_ctx;
 
 char	*shell_read_line(t_shell *shell, const char *prompt)
 {
@@ -47,49 +65,240 @@ char	*shell_read_line(t_shell *shell, const char *prompt)
 }
 
 /**
- * @brief Scan @p line for an open quote or trailing backslash that would
- *        require another physical line to complete.
- * @details Inside single quotes, backslash is literal (no escaping); inside
- *          double quotes, backslash escapes the next byte; outside both,
- *          a backslash at end-of-line is the line-continuation marker.
- *          Quote state at end-of-line is what selects SQUOTE/DQUOTE.
+ * @brief Skip ASCII blanks at @p *cur in place.
  */
-static t_lcont_state	scan_lcont(const char *line)
+static void	skip_blanks(const char **cur)
 {
-	int		in_sq;
-	int		in_dq;
-	size_t	i;
-
-	in_sq = 0;
-	in_dq = 0;
-	i = 0;
-	while (line[i])
-	{
-		if (!in_sq && line[i] == '\\')
-		{
-			if (line[i + 1] == '\0')
-				return (LCONT_BACKSLASH);
-			i += 2;
-			continue ;
-		}
-		if (!in_dq && line[i] == '\'')
-			in_sq = !in_sq;
-		else if (!in_sq && line[i] == '"')
-			in_dq = !in_dq;
-		i++;
-	}
-	if (in_sq)
-		return (LCONT_SQUOTE);
-	if (in_dq)
-		return (LCONT_DQUOTE);
-	return (LCONT_DONE);
+	while (**cur == ' ' || **cur == '\t')
+		(*cur)++;
 }
 
 /**
- * @brief Strip a single trailing `\` from @p line (the line-continuation
- *        marker is consumed and discarded along with its newline).
+ * @brief Read a heredoc delimiter word starting at @p *cur, handling
+ *        an optional single/double-quoted form. Advances @p *cur past
+ *        the closing quote (if any) or past the unquoted word.
+ * @return Newly-allocated unquoted delim string, or NULL on no word.
  */
-static void	strip_trailing_backslash(char *line)
+static char	*read_hd_delim(const char **cur)
+{
+	const char	*start;
+	char		quote;
+
+	skip_blanks(cur);
+	if (**cur == '\'' || **cur == '"')
+	{
+		quote = **cur;
+		(*cur)++;
+		start = *cur;
+		while (**cur && **cur != quote)
+			(*cur)++;
+		if (**cur == quote)
+		{
+			char *delim = strndup(start, *cur - start);
+			(*cur)++;
+			return (delim);
+		}
+		return (strndup(start, *cur - start));
+	}
+	start = *cur;
+	while (**cur && **cur != ' ' && **cur != '\t'
+		&& **cur != ';' && **cur != '|' && **cur != '&'
+		&& **cur != '(' && **cur != ')' && **cur != '<' && **cur != '>')
+		(*cur)++;
+	if (*cur == start)
+		return (NULL);
+	return (strndup(start, *cur - start));
+}
+
+/**
+ * @brief Free a t_pending_hd*.
+ */
+static void	pending_hd_free(void *p)
+{
+	t_pending_hd	*h;
+
+	h = (t_pending_hd *)p;
+	if (!h)
+		return ;
+	free(h->delim);
+	free(h);
+}
+
+/**
+ * @brief Detect `<<` or `<<-`, read the delim word, push a t_pending_hd
+ *        onto @p ctx->pending_hd. Advances @p *p past the delim.
+ *        Called with @p *p pointing at the first `<`.
+ */
+static void	scan_heredoc_op(const char **p, t_lcont_ctx *ctx)
+{
+	int				strip;
+	char			*delim;
+	t_pending_hd	*h;
+
+	*p += 2;
+	strip = 0;
+	if (**p == '-')
+	{
+		strip = 1;
+		(*p)++;
+	}
+	delim = read_hd_delim(p);
+	if (!delim)
+		return ;
+	h = (t_pending_hd *)malloc(sizeof(*h));
+	if (!h)
+	{
+		free(delim);
+		return ;
+	}
+	h->delim = delim;
+	h->strip = strip;
+	ft_lstappend(&ctx->pending_hd, ft_lstnew(h));
+}
+
+/**
+ * @brief One step of the line scanner: handle quotes, escapes, parens,
+ *        heredoc operators, and detect a trailing unescaped backslash.
+ * @return 1 if scanning consumed something and the caller should re-check
+ *         the trailing-backslash flag; 0 to keep scanning.
+ */
+static void	scan_line_into(const char *line, t_lcont_ctx *ctx)
+{
+	const char	*p;
+
+	p = line;
+	ctx->trailing_bs = 0;
+	while (*p)
+	{
+		if (!ctx->in_sq && *p == '\\')
+		{
+			if (p[1] == '\0')
+			{
+				ctx->trailing_bs = 1;
+				return ;
+			}
+			p += 2;
+			continue ;
+		}
+		if (!ctx->in_dq && *p == '\'')
+			ctx->in_sq = !ctx->in_sq;
+		else if (!ctx->in_sq && *p == '"')
+			ctx->in_dq = !ctx->in_dq;
+		else if (!ctx->in_sq && !ctx->in_dq)
+		{
+			if (*p == '#')
+				return ;
+			if (*p == '(')
+				ctx->paren_depth++;
+			else if (*p == ')' && ctx->paren_depth > 0)
+				ctx->paren_depth--;
+			else if (*p == '<' && p[1] == '<')
+			{
+				scan_heredoc_op(&p, ctx);
+				continue ;
+			}
+		}
+		p++;
+	}
+}
+
+/**
+ * @brief Read heredoc body lines from stdin via @c shell_read_line until
+ *        a line equals @p delim (after optional tab-stripping for `<<-`).
+ *        Returns the joined body as a single newline-terminated string,
+ *        or "" if no body lines. NULL on allocation failure.
+ */
+static char	*collect_hd_body(t_shell *shell, t_pending_hd *h)
+{
+	char	*body;
+	char	*line;
+	char	*cmp;
+	char	*grown;
+	size_t	blen;
+	size_t	llen;
+
+	body = strdup("");
+	if (!body)
+		return (NULL);
+	while (1)
+	{
+		line = shell_read_line(shell, "> ");
+		if (!line)
+		{
+			fprintf(stderr,
+				"\nwarning: here-document delimited by end-of-file (wanted `%s')\n",
+				h->delim);
+			return (body);
+		}
+		cmp = line;
+		if (h->strip)
+			while (*cmp == '\t')
+				cmp++;
+		if (strcmp(cmp, h->delim) == 0)
+		{
+			free(line);
+			return (body);
+		}
+		blen = strlen(body);
+		llen = strlen(cmp);
+		grown = (char *)malloc(blen + llen + 2);
+		if (!grown)
+		{
+			free(body);
+			free(line);
+			return (NULL);
+		}
+		memcpy(grown, body, blen);
+		memcpy(grown + blen, cmp, llen);
+		grown[blen + llen] = '\n';
+		grown[blen + llen + 1] = '\0';
+		free(body);
+		free(line);
+		body = grown;
+	}
+}
+
+/**
+ * @brief Drain every pending heredoc captured during line scanning. Each
+ *        body is read from stdin and pushed onto @c shell->heredoc_body_queue
+ *        in declaration order (matches the parser's AST walk order).
+ * @return 0 on success, -1 on allocation failure.
+ */
+static int	drain_pending_heredocs(t_shell *shell, t_lcont_ctx *ctx)
+{
+	t_list			*node;
+	t_pending_hd	*h;
+	char			*body;
+
+	node = ctx->pending_hd;
+	while (node)
+	{
+		h = (t_pending_hd *)node->content;
+		body = collect_hd_body(shell, h);
+		if (!body)
+			return (-1);
+		ft_lstappend(&shell->heredoc_body_queue, ft_lstnew(body));
+		node = node->next;
+	}
+	ft_lstdel(&ctx->pending_hd, pending_hd_free);
+	ctx->pending_hd = NULL;
+	return (0);
+}
+
+/**
+ * @brief True if any incompleteness state is set: open quote, trailing
+ *        backslash, pending heredoc, or unbalanced paren.
+ */
+static int	needs_continuation(const t_lcont_ctx *ctx)
+{
+	return (ctx->in_sq || ctx->in_dq || ctx->trailing_bs
+		|| ctx->paren_depth > 0 || ctx->pending_hd != NULL);
+}
+
+/**
+ * @brief Strip the final `\` from @p line (the line-continuation marker).
+ */
+static void	strip_trailing_bs(char *line)
 {
 	size_t	len;
 
@@ -99,10 +308,10 @@ static void	strip_trailing_backslash(char *line)
 }
 
 /**
- * @brief Replace @p *head with `*head + sep + tail`; frees both inputs.
- * @return 0 on success, -1 on allocation failure (head/tail are freed).
+ * @brief Replace @p *head with `*head + sep + tail`; takes ownership of
+ *        @p tail and frees the old head. Returns 0 on success.
  */
-static int	lcont_append(char **head, char *tail, const char *sep)
+static int	join_in_place(char **head, char *tail, const char *sep)
 {
 	char	*mid;
 	char	*out;
@@ -121,45 +330,59 @@ static int	lcont_append(char **head, char *tail, const char *sep)
 }
 
 /**
- * @brief Read a logical line, joining physical lines across unclosed
- *        quotes and trailing-backslash continuation.
- * @details Implements the Inhibitors-module continuation prompt:
- *
- *              $> echo foo\<ENTER>
- *              > bar<ENTER>
- *
- *          returns one buffer "echo foobar" -- the `\<NL>` pair is
- *          consumed. For an open quote (`'a<ENTER>` or `"a<ENTER>`),
- *          the newline IS kept inside the string and `> ` is reprinted
- *          until the matching quote is typed. Returns NULL on EOF before
- *          the first physical line; on EOF mid-continuation returns the
- *          partial line so the lexer reports the unterminated state.
+ * @brief Read one continuation physical line, choose the right join
+ *        separator, and update scanning state.
+ * @return 0 on success, -1 on alloc failure, 1 on EOF mid-continuation
+ *         (caller should return @p *line as-is).
  */
+static int	read_and_join_one(t_shell *shell, char **line, t_lcont_ctx *ctx)
+{
+	char		*cont;
+	const char	*sep;
+
+	if (ctx->trailing_bs)
+	{
+		strip_trailing_bs(*line);
+		sep = "";
+	}
+	else
+		sep = "\n";
+	cont = shell_read_line(shell, "> ");
+	if (!cont)
+		return (1);
+	scan_line_into(cont, ctx);
+	if (join_in_place(line, cont, sep) == -1)
+		return (-1);
+	return (0);
+}
+
 char	*shell_read_logical_line(t_shell *shell, const char *primary)
 {
 	char			*line;
-	char			*cont;
-	t_lcont_state	state;
+	t_lcont_ctx		ctx;
+	int				rc;
 
 	line = shell_read_line(shell, primary);
 	if (!line)
 		return (NULL);
-	state = scan_lcont(line);
-	while (state != LCONT_DONE)
+	ft_bzero(&ctx, sizeof(ctx));
+	scan_line_into(line, &ctx);
+	while (needs_continuation(&ctx))
 	{
-		cont = shell_read_line(shell, "> ");
-		if (!cont)
+		if (ctx.pending_hd)
 		{
-			if (state == LCONT_BACKSLASH)
-				strip_trailing_backslash(line);
-			return (line);
+			if (drain_pending_heredocs(shell, &ctx) == -1)
+			{
+				free(line);
+				return (NULL);
+			}
+			continue ;
 		}
-		if (state == LCONT_BACKSLASH)
-			strip_trailing_backslash(line);
-		if (lcont_append(&line, cont, (state == LCONT_BACKSLASH) ? "" : "\n")
-			== -1)
+		rc = read_and_join_one(shell, &line, &ctx);
+		if (rc == 1)
+			return (line);
+		if (rc == -1)
 			return (NULL);
-		state = scan_lcont(line);
 	}
 	return (line);
 }

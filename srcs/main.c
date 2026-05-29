@@ -81,6 +81,7 @@ static void	shell_cleanup(t_shell *shell)
 		free(shell->history_file);
 		shell->history_file = NULL;
 	}
+	ft_lstdel(&shell->heredoc_body_queue, &free);
 	job_control_cleanup(shell);
 	cmd_hash_destroy(shell);
 	free_variables(shell);

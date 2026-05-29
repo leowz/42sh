@@ -54,7 +54,7 @@ static int	capture_export_fd(t_shell *shell, int argc, char **argv,
  */
 static void	test_export_no_args(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", NULL};
 
@@ -72,7 +72,7 @@ static void	test_export_no_args(void)
  */
 static void	test_export_existing_var(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "MYVAR", NULL};
 	t_var	*var;
@@ -91,7 +91,7 @@ static void	test_export_existing_var(void)
  */
 static void	test_export_assignment(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "NEWVAR=newvalue", NULL};
 	t_var	*var;
@@ -112,7 +112,7 @@ static void	test_export_assignment(void)
  */
 static void	test_export_multiple_assignments(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "VAR1=val1", "VAR2=val2", "VAR3=val3", NULL};
 
@@ -130,7 +130,7 @@ static void	test_export_multiple_assignments(void)
  */
 static void	test_export_mixed(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "EXISTING=newval", "PATH", NULL};
 
@@ -148,7 +148,7 @@ static void	test_export_mixed(void)
  */
 static void	test_export_empty_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "EMPTY_VAR=", NULL};
 	t_var	*var;
@@ -167,7 +167,7 @@ static void	test_export_empty_value(void)
  */
 static void	test_export_invalid_digit(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "2INVALID", NULL};
 
@@ -182,7 +182,7 @@ static void	test_export_invalid_digit(void)
  */
 static void	test_export_invalid_assign(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "2INVALID=value", NULL};
 
@@ -197,7 +197,7 @@ static void	test_export_invalid_assign(void)
  */
 static void	test_export_equals_in_value(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "CONFIG=key=value", NULL};
 
@@ -213,7 +213,7 @@ static void	test_export_equals_in_value(void)
  */
 static void	test_export_special_chars(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "PATH=/usr/bin:/bin", "_PRIVATE=secret", NULL};
 
@@ -230,7 +230,7 @@ static void	test_export_special_chars(void)
  */
 static void	test_export_marks_as_exported(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 	char	*argv[] = {"export", "UNEXPORTED", NULL};
 	t_var	*var;
@@ -263,7 +263,7 @@ static void	test_export_null_shell(void)
  */
 static void	test_export_null_argv(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	int		ret;
 
 	export_test_init(&shell);
@@ -276,7 +276,7 @@ static void	test_export_null_argv(void)
  */
 static void	test_export_p_lists_exported(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[1024];
 	int		ret;
 	char	*argv[] = {"export", "-p", NULL};
@@ -295,7 +295,7 @@ static void	test_export_p_lists_exported(void)
  */
 static void	test_export_invalid_name_echoes_token(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[256];
 	char	*argv[] = {"export", "2BADNAME", NULL};
 
@@ -310,7 +310,7 @@ static void	test_export_invalid_name_echoes_token(void)
  */
 static void	test_export_invalid_assign_echoes_token(void)
 {
-	t_shell	shell;
+	t_shell	shell = {0};
 	char	buf[256];
 	char	*argv[] = {"export", "1BAD=value", NULL};
 
