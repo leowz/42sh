@@ -150,25 +150,37 @@ static int	evaluate_test(t_test_context *ctx)
             ft_strncmp(op, "-gt", 3) == 0 || ft_strncmp(op, "-ge", 3) == 0)
         {
             if (ctx->pos + 1 >= ctx->argc)
+            {
+                ft_putstr_fd("42sh: test: argument expected\n", 2);
+                ctx->syntax_error = 1;
                 return (0);
+            }
             ctx->pos += 2;
             return (test_numeric(arg, ctx->argv[ctx->pos - 1], op));
         }
-        
+
         /* String equality comparisons */
         if (ft_strcmp(op, "=") == 0 || ft_strcmp(op, "!=") == 0)
         {
             if (ctx->pos + 1 >= ctx->argc)
+            {
+                ft_putstr_fd("42sh: test: argument expected\n", 2);
+                ctx->syntax_error = 1;
                 return (0);
+            }
             ctx->pos += 2;
             return (test_string_compare(arg, ctx->argv[ctx->pos - 1], op[0]));
         }
-        
+
         /* String lexicographic comparisons */
         if (ft_strcmp(op, "<") == 0 || ft_strcmp(op, ">") == 0)
         {
             if (ctx->pos + 1 >= ctx->argc)
+            {
+                ft_putstr_fd("42sh: test: argument expected\n", 2);
+                ctx->syntax_error = 1;
                 return (0);
+            }
             ctx->pos += 2;
             return (test_string_compare(arg, ctx->argv[ctx->pos - 1], op[0]));
         }
@@ -202,6 +214,11 @@ int	builtin_test(struct s_shell *shell, int argc, char **argv)
     ctx.argc = argc;
     ctx.argv = argv;
     ctx.pos = 1;
+    ctx.syntax_error = 0;
     shell->last_exit_status = !evaluate_test(&ctx) ? 1 : 0;
+    /* POSIX: an internal/syntax error (missing operand after binary op,
+     * etc.) MUST return a status greater than 1. Plain false stays at 1. */
+    if (ctx.syntax_error)
+        shell->last_exit_status = 2;
     return (shell->last_exit_status);
 }

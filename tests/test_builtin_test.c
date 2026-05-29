@@ -649,7 +649,11 @@ static void	test_missing_right_operand(void)
 
     stub_shell_init(&shell);
     result = builtin_test(&shell, 3, argv);
-    MU_ASSERT("missing right operand returns 1", result == 1);
+    /* POSIX: an internal error (missing operand after a binary op) must
+     * yield a status STRICTLY greater than 1, distinguishing it from a
+     * plain "expression is false" result. */
+    MU_ASSERT("missing right operand returns >1 (syntax error)",
+		result == 2);
     stub_shell_cleanup(&shell);
 }
 

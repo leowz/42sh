@@ -377,8 +377,18 @@ static void	test_interactive_heredoc_delim_continuation(void)
 		"EOF\n"
 		"exit\n",
 		out, sizeof(out));
-	MU_ASSERT("heredoc delimiter spans a backslash-newline",
+	/* The body string also appears in the `> ` continuation prompt echo,
+	 * so `has(out, "HDDELIM_BODY")` alone false-passes even when the
+	 * shell hangs waiting for an incomplete delim. The negative checks
+	 * below catch that regression: a hung shell would write the
+	 * end-of-file warning AND echo "exit" as a literal command rather
+	 * than exiting cleanly. */
+	MU_ASSERT("heredoc body line printed by cat",
 		has(out, "HDDELIM_BODY"));
+	MU_ASSERT("no end-of-file heredoc warning",
+		!has(out, "delimited by end-of-file"));
+	MU_ASSERT("no command-not-found leak from body lines",
+		!has(out, "command not found"));
 }
 
 void	test_interactive_suite(void)

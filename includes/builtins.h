@@ -25,6 +25,7 @@ typedef struct s_test_context
     int		argc;
     char	**argv;
     int		pos;
+    int		syntax_error;
 }	t_test_context;
 
 /** Forward declaration to avoid circular dependency with 42sh.h */

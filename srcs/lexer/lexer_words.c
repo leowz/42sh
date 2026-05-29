@@ -78,8 +78,14 @@ t_list	*read_word(const char **line)
 			if (*(scout + 1))
 				scout++;
 		}
-		else if (sub_depth > 0 && !in_squote && !in_dquote)
+		else if (sub_depth > 0 && !in_squote)
 		{
+			/* Track paren balance even inside double quotes -- the cmd
+			 * substitution `$(...)` is valid inside `"..."` (POSIX
+			 * 2.6.3) and its closing `)` must still close the sub. The
+			 * outer in_dquote check is intentionally NOT required: the
+			 * `)` belongs to the substitution, not to the enclosing
+			 * dquoted string. */
 			if (*scout == '(')
 				sub_depth++;
 			else if (*scout == ')')

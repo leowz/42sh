@@ -104,7 +104,15 @@ static char	*read_hd_delim(const char **cur)
 	while (**cur && **cur != ' ' && **cur != '\t'
 		&& **cur != ';' && **cur != '|' && **cur != '&'
 		&& **cur != '(' && **cur != ')' && **cur != '<' && **cur != '>')
+	{
+		/* A backslash at end-of-line is a line-continuation marker, not
+		 * part of the delim word. Leave it for the outer scanner to
+		 * detect as trailing_bs so the next physical line can complete
+		 * the delim (`cat << EO\<NL>F` -> delim "EOF"). */
+		if (**cur == '\\' && (*cur)[1] == '\0')
+			break ;
 		(*cur)++;
+	}
 	if (*cur == start)
 		return (NULL);
 	return (strndup(start, *cur - start));
@@ -356,6 +364,33 @@ static int	read_and_join_one(t_shell *shell, char **line, t_lcont_ctx *ctx)
 	return (0);
 }
 
+/**
+ * @brief Handle trailing-backslash continuation by reading another
+ *        physical line, joining without separator, and re-scanning the
+ *        result FROM SCRATCH. The re-scan is necessary because a `<<`
+ *        delim word can be split across the backslash-newline (e.g.
+ *        `cat << EO\` + `F`); any pending heredoc captured from the
+ *        partial first line had an incomplete delim and must be rebuilt
+ *        from the joined buffer.
+ * @return 0 on success, -1 on alloc failure, 1 on EOF mid-continuation.
+ */
+static int	handle_trailing_bs(t_shell *shell, char **line, t_lcont_ctx *ctx)
+{
+	char	*cont;
+
+	ft_lstdel(&ctx->pending_hd, pending_hd_free);
+	ctx->pending_hd = NULL;
+	strip_trailing_bs(*line);
+	cont = shell_read_line(shell, "> ");
+	if (!cont)
+		return (1);
+	if (join_in_place(line, cont, "") == -1)
+		return (-1);
+	ft_bzero(ctx, sizeof(*ctx));
+	scan_line_into(*line, ctx);
+	return (0);
+}
+
 char	*shell_read_logical_line(t_shell *shell, const char *primary)
 {
 	char			*line;
@@ -369,13 +404,19 @@ char	*shell_read_logical_line(t_shell *shell, const char *primary)
 	scan_line_into(line, &ctx);
 	while (needs_continuation(&ctx))
 	{
+		if (ctx.trailing_bs)
+		{
+			rc = handle_trailing_bs(shell, &line, &ctx);
+			if (rc == 1)
+				return (line);
+			if (rc == -1)
+				return (NULL);
+			continue ;
+		}
 		if (ctx.pending_hd)
 		{
 			if (drain_pending_heredocs(shell, &ctx) == -1)
-			{
-				free(line);
-				return (NULL);
-			}
+				return (free(line), (char *)NULL);
 			continue ;
 		}
 		rc = read_and_join_one(shell, &line, &ctx);
