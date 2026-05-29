@@ -139,20 +139,6 @@ static int	has(const char *hay, const char *needle)
 	return (strstr(hay, needle) != NULL);
 }
 
-/**
- * @brief Report a known, accepted interactive gap. A still-failing check
- *        prints XFAIL; an unexpected pass prints XPASS. Neither affects the
- *        suite's pass/fail counters -- mirrors the modules.sh convention.
- */
-static void	xfail_check(const char *what, int works)
-{
-	if (works)
-		printf("  \033[1;33mXPASS\033[0m %s (gap now works - promote it)\n",
-			what);
-	else
-		printf("  \033[1;33mXFAIL\033[0m %s (known gap, accepted)\n", what);
-}
-
 static void	test_interactive_prompt(void)
 {
 	char	out[8192];
@@ -333,24 +319,36 @@ static void	test_interactive_fg_then_ctrlc(void)
 		has(out, "FG_RESUMED"));
 }
 
-/* ---- known interactive gaps versus the correction (xfail) -------------- */
+/* ---- Inhibitors continuation: unclosed-quote and trailing-backslash --- */
 
+/**
+ * @brief Unclosed single quote opens a "> " continuation prompt; the
+ *        newline is part of the quoted string until the closing `'`.
+ *        Correction PDF, Inhibitors module: a `quote>` prompt indicates
+ *        the shell is waiting for the rest of the quoted string.
+ */
 static void	test_interactive_quote_continuation(void)
 {
 	char	out[8192];
 
 	run_pty("echo 'QC_OPEN\nQC_CLOSE'\nexit\n", out, sizeof(out));
-	xfail_check("unclosed quote opens a continuation prompt",
-		!has(out, "command not found"));
+	MU_ASSERT("unclosed quote opens a continuation prompt and joins lines",
+		has(out, "QC_OPEN") && has(out, "QC_CLOSE")
+		&& !has(out, "command not found"));
 }
 
+/**
+ * @brief Trailing `\` continues the line: `echo foo\<NL>bar` runs as
+ *        one command `echo foobar`. Correction PDF, Inhibitors module
+ *        sample test: `$> echo foo\`.
+ */
 static void	test_interactive_backslash_continuation(void)
 {
 	char	out[8192];
 
 	run_pty("echo BSL_\\\nCONT\nexit\n", out, sizeof(out));
-	xfail_check("trailing backslash continues the line",
-		!has(out, "command not found"));
+	MU_ASSERT("trailing backslash continues the line into one command",
+		has(out, "BSL_CONT") && !has(out, "command not found"));
 }
 
 /**

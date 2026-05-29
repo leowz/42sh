@@ -67,4 +67,11 @@ typedef struct s_shell {
  */
 char	*shell_read_line(t_shell *shell, const char *prompt);
 
+/**
+ * @brief Read a logical line, joining physical lines on unclosed quotes or
+ *        trailing-backslash line-continuation (REPL only, not heredoc).
+ * @return Heap-allocated buffer, or NULL on EOF before any input.
+ */
+char	*shell_read_logical_line(t_shell *shell, const char *primary);
+
 #endif

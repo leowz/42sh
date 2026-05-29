@@ -200,7 +200,7 @@ static void	repl_loop(t_shell *shell)
 			job_update_statuses(shell);
 			job_notify(shell);
 		}
-		raw_line = shell_read_line(shell, "42sh$ ");
+		raw_line = shell_read_logical_line(shell, "42sh$ ");
 		if (!raw_line)
 		{
 			if (shell->interactive)
