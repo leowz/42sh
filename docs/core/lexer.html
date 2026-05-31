@@ -1,0 +1,686 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lexer &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Signals" href="signals.html" />
+    <link rel="prev" title="Job Control" href="job_control.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lexer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.TOK"><code class="docutils literal notranslate"><span class="pre">TOK</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_token_type"><code class="docutils literal notranslate"><span class="pre">t_token_type</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_WORD"><code class="docutils literal notranslate"><span class="pre">TOK_WORD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_PIPE"><code class="docutils literal notranslate"><span class="pre">TOK_PIPE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_AND"><code class="docutils literal notranslate"><span class="pre">TOK_AND</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_OR"><code class="docutils literal notranslate"><span class="pre">TOK_OR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_SEMICOLON"><code class="docutils literal notranslate"><span class="pre">TOK_SEMICOLON</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_AMPERSAND"><code class="docutils literal notranslate"><span class="pre">TOK_AMPERSAND</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_NEWLINE"><code class="docutils literal notranslate"><span class="pre">TOK_NEWLINE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_REDIR_IN"><code class="docutils literal notranslate"><span class="pre">TOK_REDIR_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_REDIR_OUT"><code class="docutils literal notranslate"><span class="pre">TOK_REDIR_OUT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_REDIR_APPEND"><code class="docutils literal notranslate"><span class="pre">TOK_REDIR_APPEND</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_HEREDOC"><code class="docutils literal notranslate"><span class="pre">TOK_HEREDOC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_HEREDOC_STRIP"><code class="docutils literal notranslate"><span class="pre">TOK_HEREDOC_STRIP</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_REDIR_DUP_IN"><code class="docutils literal notranslate"><span class="pre">TOK_REDIR_DUP_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_REDIR_DUP_OUT"><code class="docutils literal notranslate"><span class="pre">TOK_REDIR_DUP_OUT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_LPAREN"><code class="docutils literal notranslate"><span class="pre">TOK_LPAREN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_RPAREN"><code class="docutils literal notranslate"><span class="pre">TOK_RPAREN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_ARITH_OPEN"><code class="docutils literal notranslate"><span class="pre">TOK_ARITH_OPEN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_ARITH_CLOSE"><code class="docutils literal notranslate"><span class="pre">TOK_ARITH_CLOSE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_EOF"><code class="docutils literal notranslate"><span class="pre">TOK_EOF</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token_type.TOK_ERROR"><code class="docutils literal notranslate"><span class="pre">TOK_ERROR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.lexer_tokenize"><code class="docutils literal notranslate"><span class="pre">lexer_tokenize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.lexer_reset_state"><code class="docutils literal notranslate"><span class="pre">lexer_reset_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.lexer_check_quotes"><code class="docutils literal notranslate"><span class="pre">lexer_check_quotes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.lexer_free_tokens"><code class="docutils literal notranslate"><span class="pre">lexer_free_tokens()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.token_new"><code class="docutils literal notranslate"><span class="pre">token_new()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.token_free"><code class="docutils literal notranslate"><span class="pre">token_free()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.is_operator"><code class="docutils literal notranslate"><span class="pre">is_operator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.is_operator_start"><code class="docutils literal notranslate"><span class="pre">is_operator_start()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.read_operator"><code class="docutils literal notranslate"><span class="pre">read_operator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.read_word"><code class="docutils literal notranslate"><span class="pre">read_word()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_operator"><code class="docutils literal notranslate"><span class="pre">t_operator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_operator.literal"><code class="docutils literal notranslate"><span class="pre">literal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_operator.type"><code class="docutils literal notranslate"><span class="pre">type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_token"><code class="docutils literal notranslate"><span class="pre">t_token</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token.type"><code class="docutils literal notranslate"><span class="pre">type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token.value"><code class="docutils literal notranslate"><span class="pre">value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_token.io_number"><code class="docutils literal notranslate"><span class="pre">io_number</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#entry-point">Entry Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#word-tokens">Word Tokens</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.toggle"><code class="docutils literal notranslate"><span class="pre">toggle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_cmdsub_start"><code class="docutils literal notranslate"><span class="pre">is_cmdsub_start()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#operator-tokens">Operator Tokens</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.extract_io_number"><code class="docutils literal notranslate"><span class="pre">extract_io_number()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.create_operator_token"><code class="docutils literal notranslate"><span class="pre">create_operator_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.g_arith_depth"><code class="docutils literal notranslate"><span class="pre">g_arith_depth</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#token-helpers">Token Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lexer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lexer">
+<h1>Lexer<a class="headerlink" href="#lexer" title="Link to this heading"></a></h1>
+<p>Tokenizer: splits raw input into a token stream for the parser. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.TOK">
+<span class="target" id="lexer_8h_1ad876af94b05c15fd2e3aaa9847f289a8"></span><span class="sig-name descname"><span class="n"><span class="pre">TOK</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">node</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.TOK" title="Link to this definition"></a><br /></dt>
+<dd><p>Convenience accessor: get <code class="docutils literal notranslate"><a class="reference internal" href="#structt__token"><span class="std std-ref"><span class="pre">t_token</span></span></a> <span class="pre">*</span></code> from a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-enums">Enums</p>
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.t_token_type">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_token_type</span></span></span><a class="headerlink" href="#c.t_token_type" title="Link to this definition"></a><br /></dt>
+<dd><p>Token types for the shell’s lexer. </p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example</span>
+$&gt;<span class="w"> </span><span class="o">(</span><span class="w"> </span>cat<span class="w"> </span>/etc/passwd<span class="w"> </span><span class="p">|</span><span class="w"> </span>egrep<span class="w"> </span><span class="s1">&#39;pulgamecanica&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print(&quot;$1&quot;, &quot;pwd&quot;)}&#39;</span><span class="w"> </span><span class="o">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;didn&#39;t work&quot;</span>
+</pre></div>
+</div>
+<p><img alt="https://raw.githubusercontent.com/leowz/42sh/main/docs/assets/tok_1.png" src="https://raw.githubusercontent.com/leowz/42sh/main/docs/assets/tok_1.png" /></p>
+<p>That tokenization bocomes the following AST tree:</p>
+<p><img alt="https://raw.githubusercontent.com/leowz/42sh/main/docs/assets/ast_2.png" src="https://raw.githubusercontent.com/leowz/42sh/main/docs/assets/ast_2.png" /></p>
+<p>These types represent the different kinds of tokens that can be identified in the shell’s input. They include words, operators, and special tokens like EOF and errors. </p>
+<p><em>Values:</em></p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_WORD">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345ae7dfa366936528afaf5c79581179e712"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_WORD</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_WORD" title="Link to this definition"></a><br /></dt>
+<dd><p>A word token ex: “ls” or “echo” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_PIPE">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a8150d50bac50a6a46e46d189ed394aae"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_PIPE</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_PIPE" title="Link to this definition"></a><br /></dt>
+<dd><p>A pipe token ex: “|” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_AND">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345aded8a8d44c88f59c76bc60bb60a63db8"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_AND</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_AND" title="Link to this definition"></a><br /></dt>
+<dd><p>A logical AND token ex: “&amp;&amp;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_OR">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a780be26c548e285625baea0cba46490c"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_OR</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_OR" title="Link to this definition"></a><br /></dt>
+<dd><p>A logical OR token ex: “||” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_SEMICOLON">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345aea2ea79171e8d0363830add7169ff88f"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_SEMICOLON</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_SEMICOLON" title="Link to this definition"></a><br /></dt>
+<dd><p>A semicolon token ex: “;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_AMPERSAND">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a1546fa20cd468e689fca59579121ef1c"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_AMPERSAND</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_AMPERSAND" title="Link to this definition"></a><br /></dt>
+<dd><p>An ampersand token ex: “&amp;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_NEWLINE">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345af95d944540ec4759be1efca8422b1db7"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_NEWLINE</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_NEWLINE" title="Link to this definition"></a><br /></dt>
+<dd><p>A newline token (end of command) </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_REDIR_IN">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345ac247272d679194a325744db17694173d"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_REDIR_IN</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_REDIR_IN" title="Link to this definition"></a><br /></dt>
+<dd><p>A redirect input token ex: “&lt;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_REDIR_OUT">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345ae74ff38c194862cd72d1d67cc61b60f5"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_REDIR_OUT</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_REDIR_OUT" title="Link to this definition"></a><br /></dt>
+<dd><p>A redirect output token ex: “&gt;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_REDIR_APPEND">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a6eba1c95a1dcec308cac9239230d17b0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_REDIR_APPEND</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_REDIR_APPEND" title="Link to this definition"></a><br /></dt>
+<dd><p>A redirect append token ex: “&gt;&gt;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_HEREDOC">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a9b40a95fa23ef4a54e5cedaa96906f91"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_HEREDOC</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_HEREDOC" title="Link to this definition"></a><br /></dt>
+<dd><p>A heredoc token ex: “&lt;&lt;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_HEREDOC_STRIP">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a10796abc5e382de7991452de20112471"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_HEREDOC_STRIP</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_HEREDOC_STRIP" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_REDIR_DUP_IN">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345af160143a78e902f4cdbdce1abeee3ed6"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_REDIR_DUP_IN</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_REDIR_DUP_IN" title="Link to this definition"></a><br /></dt>
+<dd><p>A heredoc without leading tab ex : “&lt;&lt;-” A duplicate redirect input token ex: “&lt;&amp;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_REDIR_DUP_OUT">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a2f29fa5191997134b67b05c42bb4ecb0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_REDIR_DUP_OUT</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_REDIR_DUP_OUT" title="Link to this definition"></a><br /></dt>
+<dd><p>A duplicate redirect output token ex: “&gt;&amp;” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_LPAREN">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a0607bdf3b8400b235f239e77154df0b7"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_LPAREN</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_LPAREN" title="Link to this definition"></a><br /></dt>
+<dd><p>A left parenthesis token ex: “(” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_RPAREN">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a98dec59d44e12030f1693d1e5d064c98"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_RPAREN</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_RPAREN" title="Link to this definition"></a><br /></dt>
+<dd><p>A right parenthesis token ex: “)” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_ARITH_OPEN">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345af531a698cf9b15c283a9b2ae5d4ec136"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_ARITH_OPEN</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_ARITH_OPEN" title="Link to this definition"></a><br /></dt>
+<dd><p>A open arithmetic sequence ex: “$((” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_ARITH_CLOSE">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a221bac7d282922dca1440714b3adbb84"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_ARITH_CLOSE</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_ARITH_CLOSE" title="Link to this definition"></a><br /></dt>
+<dd><p>A close arithmetic sequence ex: “))” </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_EOF">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345aee5e9bd304d0b8dba470b61e1643dcd8"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_EOF</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_EOF" title="Link to this definition"></a><br /></dt>
+<dd><p>An end-of-file token </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_token_type.TOK_ERROR">
+<span class="target" id="lexer_8h_1a328c1f5764a8cc2b1deb5e0313ea7345a1e45d4c51261381ea32625e93e1c6ea0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TOK_ERROR</span></span></span><a class="headerlink" href="#c.t_token_type.TOK_ERROR" title="Link to this definition"></a><br /></dt>
+<dd><p>An error token (invalid syntax) </p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lexer_tokenize">
+<span class="target" id="lexer_8h_1adb81c5d356577e3e125ee3864d49d782"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">lexer_tokenize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lexer_tokenize" title="Link to this definition"></a><br /></dt>
+<dd><p>Tokenize an input string into a list of tokens. </p>
+<p>This function takes a string as input and breaks it down into individual tokens based on the shell’s syntax rules.</p>
+<p>
+skip spaces and recognize the type of token before adding it in the list. The memory is allocated and the list must be freed. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> – The input string to tokenize.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to a t_list containing the parsed tokens, or NULL on error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lexer_reset_state">
+<span class="target" id="lexer_8h_1a82ff13f01e687bb1603bbb5f99677717"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lexer_reset_state</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lexer_reset_state" title="Link to this definition"></a><br /></dt>
+<dd><p>Reset stateful counters in lexer helpers (e.g. arithmetic depth). </p>
+<p>Called from <code class="docutils literal notranslate"><span class="pre">lexer_tokenize</span></code> so a previous malformed input cannot leak state into the next tokenization. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lexer_check_quotes">
+<span class="target" id="lexer_8h_1abcf05ed6d745b9006bf2612deb6dba4f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lexer_check_quotes</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">unclosed_quote</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lexer_check_quotes" title="Link to this definition"></a><br /></dt>
+<dd><p>Check for unclosed quotes. </p>
+<p>Sets *unclosed_quote to the quote char (’'’, ‘”’) or 0 if balanced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> – The input string to check. </p></li>
+<li><p><strong>unclosed_quote</strong> – A pointer to a char where the unclosed quote will be stored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 if an open quote is found, 0 if balanced. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lexer_free_tokens">
+<span class="target" id="lexer_8h_1a78eed3104c1d85c0017c610628083912"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lexer_free_tokens</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lexer_free_tokens" title="Link to this definition"></a><br /></dt>
+<dd><p>Free an entire token list (tokens + strings + nodes). </p>
+<p>This function frees all memory associated with a list of tokens.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokens</strong> – The list of tokens to free. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.token_new">
+<span class="target" id="lexer_8h_1ace55f1d9ae19a71a752c95e4be32cd7d"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">token_new</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">io_number</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.token_new" title="Link to this definition"></a><br /></dt>
+<dd><p>Token helpers (used by lexer internally and by tests) </p>
+<p>These functions are used to create and free tokens, check for operators, and read operators and words from the input string. They are also used by the unit tests to verify the correctness of the lexer implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> – The type of the token to create. </p></li>
+<li><p><strong>value</strong> – The raw string value of the token (with quotes preserved). </p></li>
+<li><p><strong>io_number</strong> – The file descriptor number for redirection tokens (set to -1 if not applicable).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new t_list node containing the created token, or NULL on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.token_free">
+<span class="target" id="lexer_8h_1add5a69db7c8cf62d8b11fe5a5372b571"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">token_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">token</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.token_free" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_operator">
+<span class="target" id="lexer_8h_1ac0adaba5911ba26850654b342ecab44f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_operator</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_operator" title="Link to this definition"></a><br /></dt>
+<dd><p>check if the character is in “&amp;|&gt;&lt;;{}\n” </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_operator_start">
+<span class="target" id="lexer_8h_1a21c9d7779f366b3b51ac455e9c045ae3"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_operator_start</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_operator_start" title="Link to this definition"></a><br /></dt>
+<dd><p>manage the digits in case of redirection then call is_operator </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.read_operator">
+<span class="target" id="lexer_8h_1aeebfb557b3c89324e0e84c7ea844701b"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">read_operator</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.read_operator" title="Link to this definition"></a><br /></dt>
+<dd><p>choose the good function to tokenize </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.read_word">
+<span class="target" id="lexer_8h_1a18639c5e2aee02015c57c0a067de96ee"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">read_word</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.read_word" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_operator">
+<span class="target" id="structt__operator"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_operator</span></span></span><a class="headerlink" href="#c.t_operator" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;lexer.h&gt;</em></div>
+<p>Struct representing a shell token. </p>
+<p>This struct holds the type of the token, its raw value (with quotes preserved for later expansion), and an optional io_number for redirection tokens. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_operator.literal">
+<span class="target" id="structt__operator_1a9d4f5e2315c824ab49999a0f5891b7c7"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">literal</span></span></span><a class="headerlink" href="#c.t_operator.literal" title="Link to this definition"></a><br /></dt>
+<dd><p>The literal string of the operator (e.g., “|”, “&amp;&amp;”) </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_operator.type">
+<span class="target" id="structt__operator_1a819b810a884ecccc8f14ef2829ca9a82"></span><a class="reference internal" href="#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><a class="headerlink" href="#c.t_operator.type" title="Link to this definition"></a><br /></dt>
+<dd><p>The token type corresponding to this operator </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_token">
+<span class="target" id="structt__token"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_token</span></span></span><a class="headerlink" href="#c.t_token" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;lexer.h&gt;</em></div>
+<p>Token data node. </p>
+<p>Stored in a t_list* returned by lexer_tokenize (each node-&gt;content is a t_token*). No *next field - traversal is via the t_list wrapper. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_token.type">
+<span class="target" id="structt__token_1a45ed1274dead7b19106f3b9e8236adc9"></span><a class="reference internal" href="#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><a class="headerlink" href="#c.t_token.type" title="Link to this definition"></a><br /></dt>
+<dd><p>Type of the token (word, operator, etc.) </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_token.value">
+<span class="target" id="structt__token_1a29ab9fecd89cb98e3a77b3608108a79e"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">value</span></span></span><a class="headerlink" href="#c.t_token.value" title="Link to this definition"></a><br /></dt>
+<dd><p>Raw token string (quotes preserved for expander) </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_token.io_number">
+<span class="target" id="structt__token_1acd4243e13aaa0ebdd5e24b30343639fd"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">io_number</span></span></span><a class="headerlink" href="#c.t_token.io_number" title="Link to this definition"></a><br /></dt>
+<dd><p>File descriptor number for redirection tokens (-1 if none) </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<section id="entry-point">
+<h2>Entry Point<a class="headerlink" href="#entry-point" title="Link to this heading"></a></h2>
+<p>main file of lexer module </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="lexer_8c_1adb81c5d356577e3e125ee3864d49d782"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">lexer_tokenize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Tokenize an input string into a list of tokens. </p>
+<p>skip spaces and recognize the type of token before adding it in the list. The memory is allocated and the list must be freed. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="word-tokens">
+<h2>Word Tokens<a class="headerlink" href="#word-tokens" title="Link to this heading"></a></h2>
+<p>file to manage words of the prompt command </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.toggle">
+<span class="target" id="lexer__words_8c_1a0f72b1b7d2560aaea1baff66b85328ef"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toggle</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">flag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.toggle" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_cmdsub_start">
+<span class="target" id="lexer__words_8c_1a9380790a10f5925ba628e837f4b26a9c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_cmdsub_start</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">scout</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">in_squote</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_cmdsub_start" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="lexer__words_8c_1a18639c5e2aee02015c57c0a067de96ee"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">read_word</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="operator-tokens">
+<h2>Operator Tokens<a class="headerlink" href="#operator-tokens" title="Link to this heading"></a></h2>
+<p>file to manage operators of the prompt command </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="lexer__operator_8c_1a82ff13f01e687bb1603bbb5f99677717"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lexer_reset_state</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Reset stateful counters in lexer helpers (e.g. arithmetic depth). </p>
+<p>Called from <code class="docutils literal notranslate"><span class="pre">lexer_tokenize</span></code> so a previous malformed input cannot leak state into the next tokenization. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="lexer__operator_8c_1ac0adaba5911ba26850654b342ecab44f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_operator</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>check if the character is in “&amp;|&gt;&lt;;{}\n” </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="lexer__operator_8c_1a21c9d7779f366b3b51ac455e9c045ae3"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_operator_start</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>manage the digits in case of redirection then call is_operator </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.extract_io_number">
+<span class="target" id="lexer__operator_8c_1aee0c9ba66e04fc64217be3941c6af5db"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">extract_io_number</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.extract_io_number" title="Link to this definition"></a><br /></dt>
+<dd><p>extract the file descriptor before the operator </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line</strong> – a pointer on the string of the operator </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an int </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.create_operator_token">
+<span class="target" id="lexer__operator_8c_1a6249975f4b01abd7ac65771d22d212f2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">create_operator_token</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">io_number</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">literal</span></span>, <a class="reference internal" href="#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.create_operator_token" title="Link to this definition"></a><br /></dt>
+<dd><p>Create a new t_list token node. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line</strong> – Address of the string to tokenize </p></li>
+<li><p><strong>io_number</strong> – file descriptor for redirection </p></li>
+<li><p><strong>literal</strong> – representation of the operator </p></li>
+<li><p><strong>type</strong> – A t_token_type </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A t_list token node </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="lexer__operator_8c_1aeebfb557b3c89324e0e84c7ea844701b"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">read_operator</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>choose the good function to tokenize </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_arith_depth">
+<span class="target" id="lexer__operator_8c_1a2b82410117afb3401eb4ae424f79b390"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_arith_depth</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#c.g_arith_depth" title="Link to this definition"></a><br /></dt>
+<dd><p>Arithmetic nesting depth, tracked across calls to read_operator. </p>
+<p>Incremented on <code class="docutils literal notranslate"><span class="pre">$</span></code>((, decremented on <code class="docutils literal notranslate"></code>)). When zero, <code class="docutils literal notranslate"></code>)) must NOT match as TOK_ARITH_CLOSE because it would steal the two closing parens of plain nested subshells like <code class="docutils literal notranslate"></code>(…)) and produce a spurious syntax error (regression introduced by PR #28). Reset from <code class="docutils literal notranslate"><span class="pre">lexer_tokenize</span></code> via <code class="docutils literal notranslate"><span class="pre">lexer_reset_state</span></code> so a malformed previous input cannot poison the next one. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c">
+<span class="target" id="lexer__operator_8c_1ab0fc5edcef708ca1a0972b07086647ff"></span><span class="sig-name descname"><span class="pre">static</span> <span class="pre">const</span> <span class="pre">t_operator</span> <span class="pre">operators</span> <span class="pre">[]</span> <span class="pre">=</span> <span class="pre">{{&quot;;&quot;,TOK_SEMICOLON},{&quot;\n&quot;,TOK_NEWLINE},{&quot;$((&quot;,TOK_ARITH_OPEN},{&quot;(&quot;,TOK_LPAREN},{&quot;))&quot;,TOK_ARITH_CLOSE},{&quot;)&quot;,TOK_RPAREN},{&quot;||&quot;,TOK_OR},{&quot;|&quot;,TOK_PIPE},{&quot;&amp;&amp;&quot;,TOK_AND},{&quot;&amp;&quot;,TOK_AMPERSAND},{&quot;&lt;&lt;-&quot;,</span> <span class="pre">TOK_HEREDOC_STRIP},{&quot;&lt;&lt;&quot;,TOK_HEREDOC},{&quot;&lt;&amp;&quot;,TOK_REDIR_DUP_IN},{&quot;&lt;&quot;,TOK_REDIR_IN},{&quot;&gt;&gt;&quot;,TOK_REDIR_APPEND},{&quot;&gt;&amp;&quot;,TOK_REDIR_DUP_OUT},{&quot;&gt;&quot;,TOK_REDIR_OUT},{NULL,	0}}</span></span></dt>
+<dd><p>array of struct s_operator struct </p>
+<p>match literal representation and token type</p>
+<p>important to keep long operators before short ones (e.g. &amp;&amp; and &amp;)</p>
+<p>this allow strncmp to works properly </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="token-helpers">
+<h2>Token Helpers<a class="headerlink" href="#token-helpers" title="Link to this heading"></a></h2>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="token_8c_1ace55f1d9ae19a71a752c95e4be32cd7d"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">token_new</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">io_number</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Token helpers (used by lexer internally and by tests) </p>
+<p>These functions are used to create and free tokens, check for operators, and read operators and words from the input string. They are also used by the unit tests to verify the correctness of the lexer implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> – The type of the token to create. </p></li>
+<li><p><strong>value</strong> – The raw string value of the token (with quotes preserved). </p></li>
+<li><p><strong>io_number</strong> – The file descriptor number for redirection tokens (set to -1 if not applicable).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new t_list node containing the created token, or NULL on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="token_8c_1add5a69db7c8cf62d8b11fe5a5372b571"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">token_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">token</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="token_8c_1a78eed3104c1d85c0017c610628083912"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lexer_free_tokens</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Free an entire token list (tokens + strings + nodes). </p>
+<p>This function frees all memory associated with a list of tokens.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokens</strong> – The list of tokens to free. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="job_control.html" class="btn btn-neutral float-left" title="Job Control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="signals.html" class="btn btn-neutral float-right" title="Signals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

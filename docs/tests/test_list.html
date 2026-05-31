@@ -1,0 +1,208 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_list.c &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="test_parser.c" href="test_parser.html" />
+    <link rel="prev" title="test_lexer.c" href="test_lexer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core/42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">test_list.c</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.LST_DUMMY"><code class="docutils literal notranslate"><span class="pre">LST_DUMMY</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.dummy_new"><code class="docutils literal notranslate"><span class="pre">dummy_new()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.del_dummy"><code class="docutils literal notranslate"><span class="pre">del_dummy()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.lst_append"><code class="docutils literal notranslate"><span class="pre">lst_append()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_list_suite"><code class="docutils literal notranslate"><span class="pre">test_list_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_dummy"><code class="docutils literal notranslate"><span class="pre">t_dummy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_dummy.id"><code class="docutils literal notranslate"><span class="pre">id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_dummy.name"><code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">test_list.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="test-list-c">
+<h1>test_list.c<a class="headerlink" href="#test-list-c" title="Link to this heading"></a></h1>
+<p>Test suite for libft’s singly-linked list (t_list). </p>
+<p>
+Storage convention: ft_lstnew(ptr) stores the pointer directly in <code class="docutils literal notranslate"><span class="pre">content</span></code>. Access pattern: <code class="docutils literal notranslate"><span class="pre">(T</span> <span class="pre">*)node-&gt;content</span></code> - wrapped here by the <code class="docutils literal notranslate"><span class="pre">LST_DUMMY()</span></code> macro.<dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica (arosado-)</p>
+</dd>
+</dl>
+</p>
+<p>Covers ft_lstnew(), ft_lstsize(), forward traversal, ft_lstdel() (pointer-and-node free), and ft_lstadd() (prepend to front).</p>
+<p>This suite is always compiled and always runs - it is not guarded by a feature flag because <code class="docutils literal notranslate"><span class="pre">t_list</span></code> is a core Libft primitive. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.LST_DUMMY">
+<span class="target" id="test__list_8c_1a9d6e0e8fb21c4b6c9d8670fdc31aace3"></span><span class="sig-name descname"><span class="n"><span class="pre">LST_DUMMY</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.LST_DUMMY" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.dummy_new">
+<span class="target" id="test__list_8c_1a976801ff4b69baf480ab8ff6f65a0254"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.t_dummy" title="t_dummy"><span class="n"><span class="pre">t_dummy</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">dummy_new</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.dummy_new" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.del_dummy">
+<span class="target" id="test__list_8c_1ae6783723f924c427d10e876a69ff0d42"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">del_dummy</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">content</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.del_dummy" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lst_append">
+<span class="target" id="test__list_8c_1a08b97418368d9ef2d3417aafceb1cef6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">lst_append</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">head</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">node</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lst_append" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_list_suite">
+<span class="target" id="test__list_8c_1ad88047b8cb23d2d51d9b331a013b922f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_list_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_list_suite" title="Link to this definition"></a><br /></dt>
+<dd><p>Run all singly-linked list assertions.</p>
+<p>Builds an append-order list <code class="docutils literal notranslate"><span class="pre">[alpha(1)</span> <span class="pre">-&gt;</span> <span class="pre">beta(2)</span> <span class="pre">-&gt;</span> <span class="pre">gamma(3)]</span></code>, verifies ft_lstsize() and forward traversal via <code class="docutils literal notranslate"><span class="pre">-&gt;next</span></code>, then exercises ft_lstdel() (freeing all nodes with del_dummy) and asserts the head pointer is NULL afterwards.</p>
+<p>A second sub-test uses ft_lstadd() (prepend) to verify that two nodes inserted as <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">second]</span></code> are stored as <code class="docutils literal notranslate"><span class="pre">[second</span> <span class="pre">-&gt;</span> <span class="pre">first]</span></code> in the list.</p>
+<p><blockquote>
+<div><p><strong>Precondition:</strong> <code class="docutils literal notranslate"><span class="pre">Libft/srcs/ft_stdlib/</span></code> must be compiled and linked. </p>
+</div></blockquote>
+</p>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_dummy">
+<span class="target" id="structt__dummy"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_dummy</span></span></span><a class="headerlink" href="#c.t_dummy" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_dummy.id">
+<span class="target" id="structt__dummy_1a0a942d2e7167d4e5d7700d4c4db10bed"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">id</span></span></span><a class="headerlink" href="#c.t_dummy.id" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_dummy.name">
+<span class="target" id="structt__dummy_1aae39e62dc89d4d6235435dfae57c72dc"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">name</span></span></span><a class="headerlink" href="#c.t_dummy.name" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="test_lexer.html" class="btn btn-neutral float-left" title="test_lexer.c" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_parser.html" class="btn btn-neutral float-right" title="test_parser.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

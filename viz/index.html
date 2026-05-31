@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>42sh · Shell Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">42sh <span>viz</span></div>
+    <p class="subtitle">Tokenization &amp; AST explorer</p>
+    <div style="flex:1"></div>
+    <button id="settings-btn" class="toolbar-btn" title="Settings">
+      <span class="btn-icon">&#x2699;</span> Settings
+    </button>
+  </header>
+
+  <!-- Settings modal -->
+  <div id="settings-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button id="settings-close" class="modal-close">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Curve style -->
+        <div class="setting-group">
+          <label class="setting-label">Link curve style</label>
+          <div class="setting-options" id="curve-options">
+            <button class="setting-chip active" data-curve="cubic">Cubic</button>
+            <button class="setting-chip" data-curve="step">Step</button>
+            <button class="setting-chip" data-curve="straight">Straight</button>
+            <button class="setting-chip" data-curve="elbow">Elbow</button>
+            <button class="setting-chip" data-curve="arc">Arc</button>
+          </div>
+          <svg id="curve-preview" width="100%" height="70"></svg>
+        </div>
+
+        <!-- Node fill -->
+        <div class="setting-group">
+          <label class="setting-label">Node fill</label>
+          <div class="setting-options" id="fill-options">
+            <button class="setting-chip active" data-fill="translucent">Translucent</button>
+            <button class="setting-chip" data-fill="solid">Solid</button>
+            <button class="setting-chip" data-fill="outline">Outline only</button>
+          </div>
+        </div>
+
+        <!-- Tree orientation -->
+        <div class="setting-group">
+          <label class="setting-label">Tree orientation</label>
+          <div class="setting-options" id="orientation-options">
+            <button class="setting-chip active" data-orientation="horizontal">Horizontal</button>
+            <button class="setting-chip" data-orientation="vertical">Vertical</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Sidebar: list of sessions -->
+    <aside id="sidebar">
+      <h2>Sessions</h2>
+      <div id="session-list">
+        <p class="hint">Loading…</p>
+      </div>
+      <div class="sidebar-footer">
+        <label class="load-btn">
+          Load JSON manually
+          <input type="file" id="file-picker" accept=".json" multiple hidden />
+        </label>
+      </div>
+    </aside>
+
+    <!-- Main panel -->
+    <section id="panel">
+      <div id="welcome" class="welcome">
+        <p>Select a session from the sidebar<br/>or load JSON files manually.</p>
+      </div>
+
+      <div id="viz-container" style="display:none">
+        <!-- Input line -->
+        <div id="input-display"></div>
+
+        <!-- Tab bar -->
+        <div id="tab-bar">
+          <button class="tab active" data-tab="tokens">Tokens</button>
+          <button class="tab" data-tab="ast">AST</button>
+        </div>
+
+        <!-- Tokens pane -->
+        <div id="tokens-pane" class="tab-pane active">
+          <div id="token-strip"></div>
+          <div id="legend"></div>
+          <div id="arc-toolbar">
+            <button id="toggle-relations" class="toolbar-btn active" title="Toggle same-type relation arcs">
+              <span class="btn-icon">&#x2312;</span> Relations
+            </button>
+          </div>
+          <svg id="arc-diagram"></svg>
+          <div id="detail-panel" hidden>
+            <button id="detail-close">&#x2715;</button>
+            <h3 id="detail-type"></h3>
+            <table id="detail-table"></table>
+          </div>
+        </div>
+
+        <!-- AST pane -->
+        <div id="ast-pane" class="tab-pane">
+          <div id="ast-toolbar">
+            <button id="ast-reset-zoom" class="toolbar-btn" title="Reset zoom and position">
+              <span class="btn-icon">&#x21BA;</span> Reset view
+            </button>
+          </div>
+          <div id="ast-container">
+            <svg id="ast-svg"></svg>
+          </div>
+          <div id="ast-detail" hidden>
+            <button id="ast-detail-close">&#x2715;</button>
+            <h3 id="ast-detail-type"></h3>
+            <div id="ast-detail-body"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

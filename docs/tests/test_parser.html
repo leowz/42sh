@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_parser.c &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="test_executor.c" href="test_executor.html" />
+    <link rel="prev" title="test_list.c" href="test_list.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core/42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_list.html">test_list.c</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">test_parser.c</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.BUFSIZE"><code class="docutils literal notranslate"><span class="pre">BUFSIZE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_simple_command"><code class="docutils literal notranslate"><span class="pre">test_simple_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_command_args"><code class="docutils literal notranslate"><span class="pre">test_command_args()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_pipe"><code class="docutils literal notranslate"><span class="pre">test_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_and"><code class="docutils literal notranslate"><span class="pre">test_and()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_or"><code class="docutils literal notranslate"><span class="pre">test_or()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_sequence"><code class="docutils literal notranslate"><span class="pre">test_sequence()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_subshell_pipe"><code class="docutils literal notranslate"><span class="pre">test_subshell_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_subshell_redir"><code class="docutils literal notranslate"><span class="pre">test_subshell_redir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirection"><code class="docutils literal notranslate"><span class="pre">test_redirection()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_complex_redir"><code class="docutils literal notranslate"><span class="pre">test_complex_redir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_multiple_redirs"><code class="docutils literal notranslate"><span class="pre">test_multiple_redirs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_background_separator"><code class="docutils literal notranslate"><span class="pre">test_background_separator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_multiple_background_chain"><code class="docutils literal notranslate"><span class="pre">test_multiple_background_chain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_trailing_background"><code class="docutils literal notranslate"><span class="pre">test_trailing_background()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_pipe_newline"><code class="docutils literal notranslate"><span class="pre">test_pipe_newline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_and_newline"><code class="docutils literal notranslate"><span class="pre">test_and_newline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_only_pipe"><code class="docutils literal notranslate"><span class="pre">test_only_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_only_and"><code class="docutils literal notranslate"><span class="pre">test_only_and()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_only_or_and"><code class="docutils literal notranslate"><span class="pre">test_only_or_and()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_unclose_parenthesis"><code class="docutils literal notranslate"><span class="pre">test_unclose_parenthesis()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_unopen_parenthesis"><code class="docutils literal notranslate"><span class="pre">test_unopen_parenthesis()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirs_in_a_row"><code class="docutils literal notranslate"><span class="pre">test_redirs_in_a_row()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.write_to_pipe"><code class="docutils literal notranslate"><span class="pre">write_to_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_basic"><code class="docutils literal notranslate"><span class="pre">test_heredoc_basic()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_basic"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_basic()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_multiline"><code class="docutils literal notranslate"><span class="pre">test_heredoc_multiline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_multiline"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_multiline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_quoted_no_expand"><code class="docutils literal notranslate"><span class="pre">test_heredoc_quoted_no_expand()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_quoted_no_expand"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_quoted_no_expand()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_pipe"><code class="docutils literal notranslate"><span class="pre">test_heredoc_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_pipe"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_with_redir"><code class="docutils literal notranslate"><span class="pre">test_heredoc_with_redir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_with_redir"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_with_redir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_unterminated"><code class="docutils literal notranslate"><span class="pre">test_heredoc_unterminated()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_unterminated"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_unterminated()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_group"><code class="docutils literal notranslate"><span class="pre">test_heredoc_group()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_group"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_group()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_empty"><code class="docutils literal notranslate"><span class="pre">test_heredoc_empty()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_stripped_empty"><code class="docutils literal notranslate"><span class="pre">test_heredoc_stripped_empty()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_no_heredoc"><code class="docutils literal notranslate"><span class="pre">test_no_heredoc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment"><code class="docutils literal notranslate"><span class="pre">test_assignment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_multiple_assignments"><code class="docutils literal notranslate"><span class="pre">test_multiple_assignments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_only"><code class="docutils literal notranslate"><span class="pre">test_assignment_only()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_after_command"><code class="docutils literal notranslate"><span class="pre">test_assignment_after_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_and_args"><code class="docutils literal notranslate"><span class="pre">test_assignment_and_args()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_with_redir"><code class="docutils literal notranslate"><span class="pre">test_assignment_with_redir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_in_pipeline"><code class="docutils literal notranslate"><span class="pre">test_assignment_in_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_invalid_assignment_digit"><code class="docutils literal notranslate"><span class="pre">test_invalid_assignment_digit()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_empty_value_assignment"><code class="docutils literal notranslate"><span class="pre">test_empty_value_assignment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_plus_equals_not_assignment"><code class="docutils literal notranslate"><span class="pre">test_plus_equals_not_assignment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_before_subshell"><code class="docutils literal notranslate"><span class="pre">test_assignment_before_subshell()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.assert_command_node"><code class="docutils literal notranslate"><span class="pre">assert_command_node()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.assert_argv_at"><code class="docutils literal notranslate"><span class="pre">assert_argv_at()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.assert_assignment_at"><code class="docutils literal notranslate"><span class="pre">assert_assignment_at()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_underscore_name"><code class="docutils literal notranslate"><span class="pre">test_assignment_underscore_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_underscore_inside_name"><code class="docutils literal notranslate"><span class="pre">test_assignment_underscore_inside_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_alnum_value"><code class="docutils literal notranslate"><span class="pre">test_assignment_alnum_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_value_with_extra_equals"><code class="docutils literal notranslate"><span class="pre">test_assignment_value_with_extra_equals()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_double_quoted"><code class="docutils literal notranslate"><span class="pre">test_assignment_double_quoted()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_single_quoted"><code class="docutils literal notranslate"><span class="pre">test_assignment_single_quoted()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_double_quoted_with_space"><code class="docutils literal notranslate"><span class="pre">test_assignment_double_quoted_with_space()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_double_quoted_empty"><code class="docutils literal notranslate"><span class="pre">test_assignment_double_quoted_empty()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_double_quoted_with_hash_and_equals"><code class="docutils literal notranslate"><span class="pre">test_assignment_double_quoted_with_hash_and_equals()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_dollar_value"><code class="docutils literal notranslate"><span class="pre">test_assignment_dollar_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_double_quoted_dollar"><code class="docutils literal notranslate"><span class="pre">test_assignment_double_quoted_dollar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_mixed_quoted_and_bare"><code class="docutils literal notranslate"><span class="pre">test_assignment_mixed_quoted_and_bare()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_many_bare_then_args"><code class="docutils literal notranslate"><span class="pre">test_assignment_many_bare_then_args()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_after_argv_is_arg"><code class="docutils literal notranslate"><span class="pre">test_assignment_after_argv_is_arg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_only_empty_value"><code class="docutils literal notranslate"><span class="pre">test_assignment_only_empty_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_only_multiple"><code class="docutils literal notranslate"><span class="pre">test_assignment_only_multiple()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_leading_equals_falls_to_argv"><code class="docutils literal notranslate"><span class="pre">test_assignment_leading_equals_falls_to_argv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_dash_in_name_falls_to_argv"><code class="docutils literal notranslate"><span class="pre">test_assignment_dash_in_name_falls_to_argv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_pipeline_quoted_both_sides"><code class="docutils literal notranslate"><span class="pre">test_assignment_pipeline_quoted_both_sides()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_assignment_with_two_redirs"><code class="docutils literal notranslate"><span class="pre">test_assignment_with_two_redirs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_parser_suite"><code class="docutils literal notranslate"><span class="pre">test_parser_suite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">test_parser.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="test-parser-c">
+<h1>test_parser.c<a class="headerlink" href="#test-parser-c" title="Link to this heading"></a></h1>
+<p>Unit tests for the 42sh parser module. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.BUFSIZE">
+<span class="target" id="test__parser_8c_1aeca034f67218340ecb2261a22c2f3dcd"></span><span class="sig-name descname"><span class="n"><span class="pre">BUFSIZE</span></span></span><a class="headerlink" href="#c.BUFSIZE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_simple_command">
+<span class="target" id="test__parser_8c_1a1718ae6a347e45a8b36180a7b5d8d095"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_simple_command</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_simple_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_command_args">
+<span class="target" id="test__parser_8c_1a2e7651e2de091af3dbb877dd75d5da91"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_command_args</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_command_args" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_pipe">
+<span class="target" id="test__parser_8c_1a1fcdb53cbc4d65a7f22dacf010c7cd26"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_pipe" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_and">
+<span class="target" id="test__parser_8c_1aa539d344a0b3396fc4d96bcf8ee2aefd"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_and</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_and" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_or">
+<span class="target" id="test__parser_8c_1a3569c85b4c4cbba5ec6832c79095142c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_or</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_or" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_sequence">
+<span class="target" id="test__parser_8c_1a9d83d46d5244d4b5a814f3e1a3d54d48"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_sequence</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_sequence" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_subshell_pipe">
+<span class="target" id="test__parser_8c_1aae6ee344896324550137826a7e00dfb9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_subshell_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_subshell_pipe" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_subshell_redir">
+<span class="target" id="test__parser_8c_1a6ba448c4752f95d602e7f55280a3057d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_subshell_redir</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_subshell_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirection">
+<span class="target" id="test__parser_8c_1a397c5701382232241dbbc8094aecd72c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirection</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirection" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_complex_redir">
+<span class="target" id="test__parser_8c_1a2c862a054dff7c850b298ec359b93e66"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_complex_redir</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_complex_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_multiple_redirs">
+<span class="target" id="test__parser_8c_1a25685b09901aa71690d5e31334cf3691"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_multiple_redirs</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_multiple_redirs" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_background_separator">
+<span class="target" id="test__parser_8c_1afa7e6e0004f9da1f99ab98f1f21bf2af"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_background_separator</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_background_separator" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_multiple_background_chain">
+<span class="target" id="test__parser_8c_1a01829cdbfecd50d5caafc5eebab6e0ec"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_multiple_background_chain</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_multiple_background_chain" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_trailing_background">
+<span class="target" id="test__parser_8c_1add9b4038e1719a61758ffa7f2fab0882"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_trailing_background</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_trailing_background" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_pipe_newline">
+<span class="target" id="test__parser_8c_1a910e746fddb8d86918d3d0e72214a1ea"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_pipe_newline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_pipe_newline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_and_newline">
+<span class="target" id="test__parser_8c_1a7d01c1e97fcc14a46495cf739b8c8c62"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_and_newline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_and_newline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_only_pipe">
+<span class="target" id="test__parser_8c_1a07fa778cb9c92c4f771fce2cc337854a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_only_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_only_pipe" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_only_and">
+<span class="target" id="test__parser_8c_1a9df3b63a54ee7cbcb75fcc20d8e7da47"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_only_and</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_only_and" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_only_or_and">
+<span class="target" id="test__parser_8c_1aade5d309265d071fe42059088115d67a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_only_or_and</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_only_or_and" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_unclose_parenthesis">
+<span class="target" id="test__parser_8c_1ae1ba6ba8385b721e28a8e32ba3b13c66"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_unclose_parenthesis</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_unclose_parenthesis" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_unopen_parenthesis">
+<span class="target" id="test__parser_8c_1a90497c55102b44d8895ca3211e5dcd4e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_unopen_parenthesis</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_unopen_parenthesis" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirs_in_a_row">
+<span class="target" id="test__parser_8c_1abf1ae2e742e3cc78f899b4399d22842d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirs_in_a_row</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirs_in_a_row" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.write_to_pipe">
+<span class="target" id="test__parser_8c_1afaf9b8a7f67f3b377e589e57e4eec10e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">write_to_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">content</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_basic">
+<span class="target" id="test__parser_8c_1a7ed8eb8a5f10ed6d9be8bf6b5265a545"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_basic</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_basic" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_basic">
+<span class="target" id="test__parser_8c_1ac55d3dad0aad54c593408becd43a59a8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_basic</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_basic" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_multiline">
+<span class="target" id="test__parser_8c_1aa7f0df289214bbc96d2c33d8a8d47121"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_multiline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_multiline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_multiline">
+<span class="target" id="test__parser_8c_1a832e1e6cfc99279cdbd832606ff42175"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_multiline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_multiline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_quoted_no_expand">
+<span class="target" id="test__parser_8c_1a639a360db56eb886277c582d82d357ea"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_quoted_no_expand</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_quoted_no_expand" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_quoted_no_expand">
+<span class="target" id="test__parser_8c_1a79904b43bfd226629454a46ff1137a3a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_quoted_no_expand</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_quoted_no_expand" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_pipe">
+<span class="target" id="test__parser_8c_1a82c09b8a7bb4522f59238dcb7718b84e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_pipe" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_pipe">
+<span class="target" id="test__parser_8c_1abab516c83d78f0132f1750a4122ca62b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_pipe" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_with_redir">
+<span class="target" id="test__parser_8c_1a93b2dd07387387d654051c5b1461b10c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_with_redir</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_with_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_with_redir">
+<span class="target" id="test__parser_8c_1a168676cb0169143f2258a79751161871"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_with_redir</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_with_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_unterminated">
+<span class="target" id="test__parser_8c_1ae018cfdc0748338a1c6f34668589012e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_unterminated</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_unterminated" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_unterminated">
+<span class="target" id="test__parser_8c_1a980287139a244c6444cebcaf21aa9441"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_unterminated</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_unterminated" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_group">
+<span class="target" id="test__parser_8c_1a432ede01d8f50feb6416008493ad6577"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_group</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_group" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_group">
+<span class="target" id="test__parser_8c_1a978d53283cf6085939998bdaa2382313"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_group</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_group" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_empty">
+<span class="target" id="test__parser_8c_1a88be4fbbf95419ed713ffdcf180b0358"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_empty</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_empty" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_stripped_empty">
+<span class="target" id="test__parser_8c_1a4aac7ac0c9dfaf6f519e1a6d098f4d38"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_stripped_empty</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_stripped_empty" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_no_heredoc">
+<span class="target" id="test__parser_8c_1a855118846c2c995168c69f14f4453fc7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_no_heredoc</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_no_heredoc" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment">
+<span class="target" id="test__parser_8c_1a163c50147e1cc1ee877dacf59ac0e42b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_multiple_assignments">
+<span class="target" id="test__parser_8c_1aaf4d4bf4a8889f687874ee52b86270f8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_multiple_assignments</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_multiple_assignments" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_only">
+<span class="target" id="test__parser_8c_1a14604a7aef048bf83142342c752ff92f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_only</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_only" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_after_command">
+<span class="target" id="test__parser_8c_1a53e06e59aa80c0ba479b275c5dbe5fde"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_after_command</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_after_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_and_args">
+<span class="target" id="test__parser_8c_1ac78e31eb9c40b19f2cd58cb8ea897c00"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_and_args</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_and_args" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_with_redir">
+<span class="target" id="test__parser_8c_1a4388586e86eaf1bc2e62e31fbebabe3a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_with_redir</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_with_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_in_pipeline">
+<span class="target" id="test__parser_8c_1a239f32dac8bfe747ba63a0fb7e134965"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_in_pipeline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_in_pipeline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_invalid_assignment_digit">
+<span class="target" id="test__parser_8c_1aae692493aeab2554d794f316507e05ca"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_invalid_assignment_digit</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_invalid_assignment_digit" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_empty_value_assignment">
+<span class="target" id="test__parser_8c_1a3e2ab77f817a19ab5404cd6d192676b8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_empty_value_assignment</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_empty_value_assignment" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_plus_equals_not_assignment">
+<span class="target" id="test__parser_8c_1a92bfc15f3db009c40f552fada0158eed"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_plus_equals_not_assignment</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_plus_equals_not_assignment" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_before_subshell">
+<span class="target" id="test__parser_8c_1a996384698e87789daec2407d2d72cdc3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_before_subshell</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_before_subshell" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.assert_command_node">
+<span class="target" id="test__parser_8c_1a320a1e11ba571b8b17253fff08f6f174"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">assert_command_node</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.assert_command_node" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.assert_argv_at">
+<span class="target" id="test__parser_8c_1a84fd352001bb9ebebdc4c963bf4039f1"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">assert_argv_at</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">i</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">expected</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">func_name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.assert_argv_at" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.assert_assignment_at">
+<span class="target" id="test__parser_8c_1afd953e2f7c64daa710449cba2722d429"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">assert_assignment_at</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">a</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">i</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">expected</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">func_name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.assert_assignment_at" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_underscore_name">
+<span class="target" id="test__parser_8c_1ac7de094ef88962a60f95c21b9f2a9e25"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_underscore_name</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_underscore_name" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_underscore_inside_name">
+<span class="target" id="test__parser_8c_1a8baf2e6f94fb190fe1984c256d8a477c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_underscore_inside_name</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_underscore_inside_name" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_alnum_value">
+<span class="target" id="test__parser_8c_1ac496355d52354aa02ab00be5cee8edf7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_alnum_value</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_alnum_value" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_value_with_extra_equals">
+<span class="target" id="test__parser_8c_1a5ff0487409c673a5d92282230f4a948e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_value_with_extra_equals</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_value_with_extra_equals" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_double_quoted">
+<span class="target" id="test__parser_8c_1a20f05e646c6ac62787c237ed0cd81c3c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_double_quoted</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_double_quoted" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_single_quoted">
+<span class="target" id="test__parser_8c_1a3b7f9ee05865b5e695453f54c3ca2876"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_single_quoted</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_single_quoted" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_double_quoted_with_space">
+<span class="target" id="test__parser_8c_1ab3915e695b93195375be687191f7b28a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_double_quoted_with_space</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_double_quoted_with_space" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_double_quoted_empty">
+<span class="target" id="test__parser_8c_1a536a8788332a0f8310979f6fbde4ee20"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_double_quoted_empty</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_double_quoted_empty" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_double_quoted_with_hash_and_equals">
+<span class="target" id="test__parser_8c_1a1b2eaa9cf279cac30906729d2e01a923"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_double_quoted_with_hash_and_equals</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_double_quoted_with_hash_and_equals" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_dollar_value">
+<span class="target" id="test__parser_8c_1a611bd8342126d397e6918cc9dbaf817e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_dollar_value</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_dollar_value" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_double_quoted_dollar">
+<span class="target" id="test__parser_8c_1a489cccdbc44741a00911db8e067fa4d8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_double_quoted_dollar</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_double_quoted_dollar" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_mixed_quoted_and_bare">
+<span class="target" id="test__parser_8c_1ae4e0daf120a8fe10ad3900ef66d0d849"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_mixed_quoted_and_bare</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_mixed_quoted_and_bare" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_many_bare_then_args">
+<span class="target" id="test__parser_8c_1ac15e77eb82b2a6d849c8f264201958b6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_many_bare_then_args</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_many_bare_then_args" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_after_argv_is_arg">
+<span class="target" id="test__parser_8c_1a1c58d0eab79a50296374cd28629460e2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_after_argv_is_arg</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_after_argv_is_arg" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_only_empty_value">
+<span class="target" id="test__parser_8c_1a270cf93ac23b7197b1bd60421c7d7dc3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_only_empty_value</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_only_empty_value" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_only_multiple">
+<span class="target" id="test__parser_8c_1aafee6cace2ca31a7a419a6fa9ae82945"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_only_multiple</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_only_multiple" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_leading_equals_falls_to_argv">
+<span class="target" id="test__parser_8c_1a9fbe1a3ee3ce7a93e0b3558c3fd58264"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_leading_equals_falls_to_argv</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_leading_equals_falls_to_argv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_dash_in_name_falls_to_argv">
+<span class="target" id="test__parser_8c_1a3c308c772b81e9c3959a483b8f292b12"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_dash_in_name_falls_to_argv</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_dash_in_name_falls_to_argv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_pipeline_quoted_both_sides">
+<span class="target" id="test__parser_8c_1a1245c54793cc4d78fa5ad67a55fb8526"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_pipeline_quoted_both_sides</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_pipeline_quoted_both_sides" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_assignment_with_two_redirs">
+<span class="target" id="test__parser_8c_1afa2e419018515766bd6930a5a0a91ee7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_assignment_with_two_redirs</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_assignment_with_two_redirs" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_parser_suite">
+<span class="target" id="test__parser_8c_1aa1d98fd6af93411a354e0163e8c609fa"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_parser_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_parser_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="test_list.html" class="btn btn-neutral float-left" title="test_list.c" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_executor.html" class="btn btn-neutral float-right" title="test_executor.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

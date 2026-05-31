@@ -1,0 +1,520 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Control &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lexer" href="lexer.html" />
+    <link rel="prev" title="History" href="history.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Job Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_job_status"><code class="docutils literal notranslate"><span class="pre">t_job_status</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job_status.JOB_RUNNING"><code class="docutils literal notranslate"><span class="pre">JOB_RUNNING</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job_status.JOB_STOPPED"><code class="docutils literal notranslate"><span class="pre">JOB_STOPPED</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job_status.JOB_DONE"><code class="docutils literal notranslate"><span class="pre">JOB_DONE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job_status.JOB_TERMINATED"><code class="docutils literal notranslate"><span class="pre">JOB_TERMINATED</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_control_init"><code class="docutils literal notranslate"><span class="pre">job_control_init()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_create"><code class="docutils literal notranslate"><span class="pre">job_create()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_add_process"><code class="docutils literal notranslate"><span class="pre">job_add_process()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_find_by_id"><code class="docutils literal notranslate"><span class="pre">job_find_by_id()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_find_by_pid"><code class="docutils literal notranslate"><span class="pre">job_find_by_pid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_find_by_spec"><code class="docutils literal notranslate"><span class="pre">job_find_by_spec()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_free"><code class="docutils literal notranslate"><span class="pre">job_free()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_remove"><code class="docutils literal notranslate"><span class="pre">job_remove()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_launch_background"><code class="docutils literal notranslate"><span class="pre">job_launch_background()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_launch_foreground"><code class="docutils literal notranslate"><span class="pre">job_launch_foreground()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_continue_foreground"><code class="docutils literal notranslate"><span class="pre">job_continue_foreground()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_continue_background"><code class="docutils literal notranslate"><span class="pre">job_continue_background()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_wait"><code class="docutils literal notranslate"><span class="pre">job_wait()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_apply_status"><code class="docutils literal notranslate"><span class="pre">job_apply_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_recompute_status"><code class="docutils literal notranslate"><span class="pre">job_recompute_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_update_statuses"><code class="docutils literal notranslate"><span class="pre">job_update_statuses()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_notify"><code class="docutils literal notranslate"><span class="pre">job_notify()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_status_str"><code class="docutils literal notranslate"><span class="pre">job_status_str()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_print_line"><code class="docutils literal notranslate"><span class="pre">job_print_line()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_print_termination"><code class="docutils literal notranslate"><span class="pre">job_print_termination()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.job_control_cleanup"><code class="docutils literal notranslate"><span class="pre">job_control_cleanup()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_process"><code class="docutils literal notranslate"><span class="pre">t_process</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_process.pid"><code class="docutils literal notranslate"><span class="pre">pid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_process.cmd"><code class="docutils literal notranslate"><span class="pre">cmd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_process.status"><code class="docutils literal notranslate"><span class="pre">status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_process.completed"><code class="docutils literal notranslate"><span class="pre">completed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_process.stopped"><code class="docutils literal notranslate"><span class="pre">stopped</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_job"><code class="docutils literal notranslate"><span class="pre">t_job</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.id"><code class="docutils literal notranslate"><span class="pre">id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.pgid"><code class="docutils literal notranslate"><span class="pre">pgid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.cmd_line"><code class="docutils literal notranslate"><span class="pre">cmd_line</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.processes"><code class="docutils literal notranslate"><span class="pre">processes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.status"><code class="docutils literal notranslate"><span class="pre">status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.notified"><code class="docutils literal notranslate"><span class="pre">notified</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_job.foreground"><code class="docutils literal notranslate"><span class="pre">foreground</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Job Control</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="job-control">
+<h1>Job Control<a class="headerlink" href="#job-control" title="Link to this heading"></a></h1>
+<p>Job and process tracking for foreground/background execution. </p>
+<p>
+A <strong>job</strong> is one pipeline launched by the shell (foreground or background). Each job has its own process group (<code class="docutils literal notranslate"><span class="pre">pgid</span></code>) so the controlling terminal can deliver signals to the whole pipeline at once, and so the shell can suspend or resume it independently of itself.<dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica</p>
+</dd>
+</dl>
+</p>
+<p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t_shell.jobs</span></code> : <code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of <code class="docutils literal notranslate"><span class="pre">t_job*</span></code> (one entry per known job)</p></li>
+<li><p><code class="docutils literal notranslate"><a class="reference internal" href="#structt__job_1ae883dd9d96eab86af7f936b27ac68587"><span class="std std-ref"><span class="pre">t_job.processes</span></span></a></code> : <code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of <code class="docutils literal notranslate"><span class="pre">t_process*</span></code> (one entry per pipeline stage) </p></li>
+</ul>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-enums">Enums</p>
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.t_job_status">
+<span class="target" id="job__control_8h_1ac6cd414072afed38545c5b3e10aa639e"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_job_status</span></span></span><a class="headerlink" href="#c.t_job_status" title="Link to this definition"></a><br /></dt>
+<dd><p>Lifecycle state of a job, recomputed from its processes. </p>
+<p><em>Values:</em></p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_job_status.JOB_RUNNING">
+<span class="target" id="job__control_8h_1ac6cd414072afed38545c5b3e10aa639eacf176fbf96bc64b13bde1e3068fa9074"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JOB_RUNNING</span></span></span><a class="headerlink" href="#c.t_job_status.JOB_RUNNING" title="Link to this definition"></a><br /></dt>
+<dd><p>At least one process is still running and none stopped. </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_job_status.JOB_STOPPED">
+<span class="target" id="job__control_8h_1ac6cd414072afed38545c5b3e10aa639eaae19d28656e4f7c4ca908a4f4c69ef45"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JOB_STOPPED</span></span></span><a class="headerlink" href="#c.t_job_status.JOB_STOPPED" title="Link to this definition"></a><br /></dt>
+<dd><p>At least one process received SIGTSTP/SIGSTOP (Ctrl-Z). </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_job_status.JOB_DONE">
+<span class="target" id="job__control_8h_1ac6cd414072afed38545c5b3e10aa639ea8cefc70cabd1cdbf227263d409d9aeca"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JOB_DONE</span></span></span><a class="headerlink" href="#c.t_job_status.JOB_DONE" title="Link to this definition"></a><br /></dt>
+<dd><p>Every process exited normally (any exit code). </p>
+</dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_job_status.JOB_TERMINATED">
+<span class="target" id="job__control_8h_1ac6cd414072afed38545c5b3e10aa639eaa5d090cf71c74770df3baf17ce23a29f"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JOB_TERMINATED</span></span></span><a class="headerlink" href="#c.t_job_status.JOB_TERMINATED" title="Link to this definition"></a><br /></dt>
+<dd><p>At least one process was killed by a signal. </p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_control_init">
+<span class="target" id="job__control_8h_1af60e8d75b536610fddf26de29ea26159"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_control_init</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_control_init" title="Link to this definition"></a><br /></dt>
+<dd><p>Place the shell in its own process group and claim the terminal. </p>
+<p>Idempotent when the shell is already a session leader. Skipped when <code class="docutils literal notranslate"><span class="pre">shell-&gt;interactive</span></code> is 0 (job control is a no-op without a controlling TTY). On return <code class="docutils literal notranslate"><span class="pre">shell-&gt;shell_pgid</span></code> is authoritative and <code class="docutils literal notranslate"><span class="pre">shell-&gt;original_termios</span></code> holds the saved terminal settings. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 on <code class="docutils literal notranslate"><span class="pre">setpgid</span></code> failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_create">
+<span class="target" id="job__control_8h_1a59e531803a9a0ae90a3de5b7f8f399aa"></span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">job_create</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd_line</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_create" title="Link to this definition"></a><br /></dt>
+<dd><p>Allocate a job, append it to <code class="docutils literal notranslate"><span class="pre">shell-&gt;jobs</span></code>, and make it <code class="docutils literal notranslate"><span class="pre">current_job</span></code>. </p>
+<p>The next free id is <code class="docutils literal notranslate"><span class="pre">max(existing</span> <span class="pre">ids)</span> <span class="pre">+</span> <span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">cmd_line</span></code> is duplicated with <code class="docutils literal notranslate"><span class="pre">ft_strdup</span></code> and released by <code class="docutils literal notranslate"><span class="pre">job_free</span></code>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Newly created job, or NULL on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_add_process">
+<span class="target" id="job__control_8h_1aa2bd17e60985332965fb252ea5e394d1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_add_process</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span>, <span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="n"><span class="pre">pid</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_add_process" title="Link to this definition"></a><br /></dt>
+<dd><p>Register a forked child as a stage of <code class="docutils literal notranslate"><span class="pre">job</span></code>. </p>
+<p>Appends a <code class="docutils literal notranslate"><a class="reference internal" href="#structt__process"><span class="std std-ref"><span class="pre">t_process</span></span></a></code> to <code class="docutils literal notranslate"><span class="pre">job-&gt;processes</span></code>. <code class="docutils literal notranslate"><span class="pre">cmd</span></code> is duplicated. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_find_by_id">
+<span class="target" id="job__control_8h_1a7324ef9601f3358e6fe2ceea15cf146c"></span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">job_find_by_id</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_find_by_id" title="Link to this definition"></a><br /></dt>
+<dd><p>Find a job by its shell-assigned id, or NULL. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_find_by_pid">
+<span class="target" id="job__control_8h_1a60c25b23d62bec52e10b9c705a7d9814"></span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">job_find_by_pid</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="n"><span class="pre">pid</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_find_by_pid" title="Link to this definition"></a><br /></dt>
+<dd><p>Find the job containing a given pid, or NULL. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_find_by_spec">
+<span class="target" id="job__control_8h_1ae0b74c98850a101048ad712a22459a70"></span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">job_find_by_spec</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_find_by_spec" title="Link to this definition"></a><br /></dt>
+<dd><p>Resolve a bash-style job spec to a <code class="docutils literal notranslate"><span class="pre">t_job*</span></code>. </p>
+<p>Accepted forms: NULL / “” / “%” / “%+” / “%%” → current job; “%-” → the job preceding the current one; “%N” → id N; “%prefix” → first job whose <code class="docutils literal notranslate"><span class="pre">cmd_line</span></code> starts with <code class="docutils literal notranslate"><span class="pre">prefix</span></code>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Matching job or NULL if spec is malformed / no such job. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_free">
+<span class="target" id="job__control_8h_1a245ccc78da4d09ad15556451f11572d1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_free</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job_ptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_free" title="Link to this definition"></a><br /></dt>
+<dd><p>Free a job and all of its processes. </p>
+<p>Matches the <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">(*)(void</span> <span class="pre">*)</span></code> deleter signature of <code class="docutils literal notranslate"><span class="pre">ft_lstdel</span></code>. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_remove">
+<span class="target" id="job__control_8h_1ac6a28612181b9c4bd1299cfc5ac62bb6"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_remove</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_remove" title="Link to this definition"></a><br /></dt>
+<dd><p>Unlink <code class="docutils literal notranslate"><span class="pre">job</span></code> from <code class="docutils literal notranslate"><span class="pre">shell-&gt;jobs</span></code> and release it. </p>
+<p>Clears <code class="docutils literal notranslate"><span class="pre">shell-&gt;current_job</span></code> if it referenced the removed job. No-op if <code class="docutils literal notranslate"><span class="pre">job</span></code> is not in the list (silent for safety). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_launch_background">
+<span class="target" id="job__control_8h_1a7e6f9862bf4c05ff16c71321371233c7"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_launch_background</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_launch_background" title="Link to this definition"></a><br /></dt>
+<dd><p>Hand a job off to the background and print <code class="docutils literal notranslate"><span class="pre">[id]</span> <span class="pre">pgid</span></code> on stderr. </p>
+<p>The child was already forked with its own pgid by the caller. This does <em>not</em> wait - the job is reaped later by <code class="docutils literal notranslate"><span class="pre">job_update_statuses</span></code> between prompts. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 if <code class="docutils literal notranslate"><span class="pre">job</span></code> is NULL. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_launch_foreground">
+<span class="target" id="job__control_8h_1af50b7c9930b025b50cc73a78cc36387f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_launch_foreground</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_launch_foreground" title="Link to this definition"></a><br /></dt>
+<dd><p>Hand the terminal to <code class="docutils literal notranslate"><span class="pre">job</span></code>, wait for it, then take it back. </p>
+<p>Uses <code class="docutils literal notranslate"><span class="pre">tcsetpgrp(terminal_fd,</span> <span class="pre">job-&gt;pgid)</span></code> to transfer terminal ownership so <code class="docutils literal notranslate"><span class="pre">SIGINT</span></code>/<code class="docutils literal notranslate"><span class="pre">SIGTSTP</span></code> reach the pipeline. After <code class="docutils literal notranslate"><span class="pre">job_wait</span></code> returns, the shell reclaims the terminal and restores its saved termios. Non-interactive shells skip the tc* handoff and just reap the pgid. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exit status of the pipeline (last completed process), or 128+WSTOPSIG if the job was stopped. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_continue_foreground">
+<span class="target" id="job__control_8h_1a9198aafc37112f8983e94d2a92122693"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_continue_foreground</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_continue_foreground" title="Link to this definition"></a><br /></dt>
+<dd><p>Resume a stopped job in the foreground. </p>
+<p>Sends <code class="docutils literal notranslate"><span class="pre">SIGCONT</span></code> to the job’s pgid, hands the terminal back to it, and waits. Leaves the job in <code class="docutils literal notranslate"><span class="pre">shell-&gt;jobs</span></code> if it stops again, removes it on completion. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exit status, or 128+WSTOPSIG if stopped again. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_continue_background">
+<span class="target" id="job__control_8h_1a2e1a5d7045d870bdb5a6ca81972aa7fc"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_continue_background</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_continue_background" title="Link to this definition"></a><br /></dt>
+<dd><p>Resume a stopped job in the background. </p>
+<p>Sends <code class="docutils literal notranslate"><span class="pre">SIGCONT</span></code> and prints <code class="docutils literal notranslate"><span class="pre">[id]</span> <span class="pre">cmd_line</span> <span class="pre">&amp;</span></code> on stderr. Does not wait - the job is reaped between prompts like any bg job. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 on invalid input or <code class="docutils literal notranslate"><span class="pre">kill</span></code> failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_wait">
+<span class="target" id="job__control_8h_1a299cd28a216da7f979f60bb4d04a3176"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_wait</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_wait" title="Link to this definition"></a><br /></dt>
+<dd><p>Blocking reap of every process in <code class="docutils literal notranslate"><span class="pre">job</span></code>. </p>
+<p>Loops <code class="docutils literal notranslate"><span class="pre">waitpid(-pgid,</span> <span class="pre">...,</span> <span class="pre">WUNTRACED)</span></code> until every process is completed or at least one is stopped. Per-process flags and the aggregate <code class="docutils literal notranslate"><span class="pre">status</span></code> are updated in place. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exit status of the last completed process, 128+WSTOPSIG on stop, -1 on unrecoverable waitpid error. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_apply_status">
+<span class="target" id="job__control_8h_1abef461ce86f36d9ef9921e3052abacbe"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_apply_status</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span>, <span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="n"><span class="pre">pid</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">status</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_apply_status" title="Link to this definition"></a><br /></dt>
+<dd><p>Apply a single <code class="docutils literal notranslate"><span class="pre">waitpid</span></code> result to one process of <code class="docutils literal notranslate"><span class="pre">job</span></code>. </p>
+<p>Updates <code class="docutils literal notranslate"><span class="pre">status</span></code>, <code class="docutils literal notranslate"><span class="pre">completed</span></code>, <code class="docutils literal notranslate"><span class="pre">stopped</span></code>, clears <code class="docutils literal notranslate"><span class="pre">notified</span></code>, and flips the aggregate <code class="docutils literal notranslate"><span class="pre">status</span></code> to JOB_TERMINATED on a signalled death. Does <strong>not</strong> recompute running/stopped - call <code class="docutils literal notranslate"><span class="pre">job_recompute_status</span></code> afterwards. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 if <code class="docutils literal notranslate"><span class="pre">pid</span></code> belonged to this job, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_recompute_status">
+<span class="target" id="job__control_8h_1a68b51eb28090d82a85fa3306afcbe5df"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_recompute_status</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_recompute_status" title="Link to this definition"></a><br /></dt>
+<dd><p>Recompute <code class="docutils literal notranslate"><span class="pre">job-&gt;status</span></code> from the flags of its processes. </p>
+<p>Result is JOB_DONE (all completed, no signalled), JOB_TERMINATED (preserved if set by <code class="docutils literal notranslate"><span class="pre">job_apply_status</span></code>), JOB_STOPPED (any stopped), or JOB_RUNNING. Idempotent. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_update_statuses">
+<span class="target" id="job__control_8h_1a501d1f7ef33124173134b85e3b6e255e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_update_statuses</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_update_statuses" title="Link to this definition"></a><br /></dt>
+<dd><p>Non-blocking reap of every shell-owned child. </p>
+<p>Loops <code class="docutils literal notranslate"><span class="pre">waitpid(-1,</span> <span class="pre">...,</span> <span class="pre">WNOHANG</span> <span class="pre">|</span> <span class="pre">WUNTRACED</span> <span class="pre">|</span> <span class="pre">WCONTINUED)</span></code> until there is nothing more to collect. Updates per-process flags and recomputes the owning job’s <code class="docutils literal notranslate"><span class="pre">status</span></code>. Safe to call when no jobs are tracked. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_notify">
+<span class="target" id="job__control_8h_1aeaf6efdf2892ff9277429bd11b588327"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_notify</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_notify" title="Link to this definition"></a><br /></dt>
+<dd><p>Print a status line for every job that has not been notified yet, then drop JOB_DONE / JOB_TERMINATED jobs from <code class="docutils literal notranslate"><span class="pre">shell-&gt;jobs</span></code>. </p>
+<p>Call between prompts. <code class="docutils literal notranslate"><span class="pre">shell-&gt;current_job</span></code> is cleared if it referenced a job that gets removed. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_status_str">
+<span class="target" id="job__control_8h_1a4ff2c82f957a27f1dbe081851b6e1fcd"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">job_status_str</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_job_status" title="t_job_status"><span class="n"><span class="pre">t_job_status</span></span></a><span class="w"> </span><span class="n"><span class="pre">s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_status_str" title="Link to this definition"></a><br /></dt>
+<dd><p>Human-readable label for a <code class="docutils literal notranslate"><span class="pre">t_job_status</span></code> value (for listings). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_print_line">
+<span class="target" id="job__control_8h_1a346d00d536b89d0cd1756e8d62812e34"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_print_line</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">fd</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_print_line" title="Link to this definition"></a><br /></dt>
+<dd><p>Print one job listing line, bash-compatible. </p>
+<p>Format: “[N]M  Status[(SIG)]&lt;pad&gt;  cmd-line\n”, where M is the current-job marker (‘+’, ‘-’, or ‘ ‘) and (SIG) is appended only for non-SIGTSTP stops or signal-terminated jobs. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fd</strong> – File descriptor to write to (STDOUT for <code class="docutils literal notranslate"><span class="pre">jobs</span></code>, STDERR for auto-notifications). </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_print_termination">
+<span class="target" id="job__control_8h_1a7340950e2449587008d607c5d62d77fd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_print_termination</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_print_termination" title="Link to this definition"></a><br /></dt>
+<dd><p>Print “Segmentation fault (core dumped)”-style message for a foreground job whose last process died by signal. </p>
+<p>Mirrors bash’s foreground signal-death output. Silent for SIGINT and SIGPIPE (bash suppresses those to avoid noise from Ctrl-C and broken-pipe situations). Adds “ (core dumped)” when WCOREDUMP indicates a core file was produced. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.job_control_cleanup">
+<span class="target" id="job__control_8h_1a1ea69968da8eb12a61dc54f17a0b8065"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">job_control_cleanup</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.job_control_cleanup" title="Link to this definition"></a><br /></dt>
+<dd><p>Release every job and process still tracked by <code class="docutils literal notranslate"><span class="pre">shell</span></code>. </p>
+<p>Called from <code class="docutils literal notranslate"><span class="pre">shell_cleanup</span></code> on exit. Leaves <code class="docutils literal notranslate"><span class="pre">shell-&gt;jobs</span></code> NULL and <code class="docutils literal notranslate"><span class="pre">shell-&gt;current_job</span></code> NULL. </p>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_process">
+<span class="target" id="structt__process"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_process</span></span></span><a class="headerlink" href="#c.t_process" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;job_control.h&gt;</em></div>
+<p>A single process belonging to a job (one pipeline stage). </p>
+<p>Stored in <code class="docutils literal notranslate"><a class="reference internal" href="#structt__job_1ae883dd9d96eab86af7f936b27ac68587"><span class="std std-ref"><span class="pre">t_job.processes</span></span></a></code> as the <code class="docutils literal notranslate"><span class="pre">content</span></code> of a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node. Reaped and updated by <code class="docutils literal notranslate"><span class="pre">job_update_statuses</span></code>. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_process.pid">
+<span class="target" id="structt__process_1ab67eb8222fec450c75465d329638ea9e"></span><span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pid</span></span></span><a class="headerlink" href="#c.t_process.pid" title="Link to this definition"></a><br /></dt>
+<dd><p>Child pid returned by fork(). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_process.cmd">
+<span class="target" id="structt__process_1a1f6ba879ccf19d7c7c18b8d057b44c02"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">cmd</span></span></span><a class="headerlink" href="#c.t_process.cmd" title="Link to this definition"></a><br /></dt>
+<dd><p>Human-readable description of this stage (for listings). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_process.status">
+<span class="target" id="structt__process_1a18b767e0ea1af315b098fd427917c0b0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status</span></span></span><a class="headerlink" href="#c.t_process.status" title="Link to this definition"></a><br /></dt>
+<dd><p>Raw <code class="docutils literal notranslate"><span class="pre">wstatus</span></code> value from the last waitpid() on this pid. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_process.completed">
+<span class="target" id="structt__process_1a61d8a54b70599f79a76a646da42a9363"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">completed</span></span></span><a class="headerlink" href="#c.t_process.completed" title="Link to this definition"></a><br /></dt>
+<dd><p>1 once the process has exited (normally or by signal). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_process.stopped">
+<span class="target" id="structt__process_1a8429ae9c8715a0af5736f7e8d5988302"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stopped</span></span></span><a class="headerlink" href="#c.t_process.stopped" title="Link to this definition"></a><br /></dt>
+<dd><p>1 while the process is stopped (SIGTSTP/SIGSTOP). </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_job">
+<span class="target" id="structt__job"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_job</span></span></span><a class="headerlink" href="#c.t_job" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;job_control.h&gt;</em></div>
+<p>One pipeline launched by the shell (background or foreground). </p>
+<p>Stored in <code class="docutils literal notranslate"><span class="pre">t_shell.jobs</span></code> as the <code class="docutils literal notranslate"><span class="pre">content</span></code> of a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node. Built by <code class="docutils literal notranslate"><span class="pre">job_create</span></code>, grown by <code class="docutils literal notranslate"><span class="pre">job_add_process</span></code>, reaped by <code class="docutils literal notranslate"><span class="pre">job_update_statuses</span></code>, and released by <code class="docutils literal notranslate"><span class="pre">job_free</span></code> (either via <code class="docutils literal notranslate"><span class="pre">job_notify</span></code> when completed, or <code class="docutils literal notranslate"><span class="pre">job_control_cleanup</span></code> on exit). </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.id">
+<span class="target" id="structt__job_1aea2864720746b36e531a743ee4d5b3a9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">id</span></span></span><a class="headerlink" href="#c.t_job.id" title="Link to this definition"></a><br /></dt>
+<dd><p>Shell-assigned sequential id (1-based); used by <code class="docutils literal notranslate"><span class="pre">N</span></code> job-spec and by <code class="docutils literal notranslate"><span class="pre">jobs</span></code> listings. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.pgid">
+<span class="target" id="structt__job_1a16327d5f89bf91b9b14cd519e0d4d7dc"></span><span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pgid</span></span></span><a class="headerlink" href="#c.t_job.pgid" title="Link to this definition"></a><br /></dt>
+<dd><p>Process-group id shared by every pipeline stage. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.cmd_line">
+<span class="target" id="structt__job_1a3f5c857f99412155fab21f83ef0d3329"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">cmd_line</span></span></span><a class="headerlink" href="#c.t_job.cmd_line" title="Link to this definition"></a><br /></dt>
+<dd><p>Displayed by <code class="docutils literal notranslate"><span class="pre">jobs</span></code>/notifications. Built from the AST subtree via <code class="docutils literal notranslate"><span class="pre">ast_to_string</span></code>, not the raw input line, so <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">;</span> <span class="pre">sleep</span> <span class="pre">5</span> <span class="pre">&amp;</span></code> shows only <code class="docutils literal notranslate"><span class="pre">sleep</span> <span class="pre">5</span></code>. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.processes">
+<span class="target" id="structt__job_1ae883dd9d96eab86af7f936b27ac68587"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">processes</span></span></span><a class="headerlink" href="#c.t_job.processes" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of <code class="docutils literal notranslate"><span class="pre">t_process*</span></code> - one per pipeline stage. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.status">
+<span class="target" id="structt__job_1a488e1fbe0331677eb1f9b201e495b031"></span><a class="reference internal" href="#c.t_job_status" title="t_job_status"><span class="n"><span class="pre">t_job_status</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status</span></span></span><a class="headerlink" href="#c.t_job.status" title="Link to this definition"></a><br /></dt>
+<dd><p>Aggregate lifecycle state (see <code class="docutils literal notranslate"><span class="pre">t_job_status</span></code>). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.notified">
+<span class="target" id="structt__job_1a5c2c78fbd3f3357009362962c77feee4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">notified</span></span></span><a class="headerlink" href="#c.t_job.notified" title="Link to this definition"></a><br /></dt>
+<dd><p>1 once the user has been informed about the current <code class="docutils literal notranslate"><span class="pre">status</span></code>; cleared whenever <code class="docutils literal notranslate"><span class="pre">status</span></code> changes so the next <code class="docutils literal notranslate"><span class="pre">job_notify</span></code> prints it again. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_job.foreground">
+<span class="target" id="structt__job_1a6aedbd36d0c5be17437ce852c537e568"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">foreground</span></span></span><a class="headerlink" href="#c.t_job.foreground" title="Link to this definition"></a><br /></dt>
+<dd><p>1 if the job currently owns the controlling terminal. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="history.html" class="btn btn-neutral float-left" title="History" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lexer.html" class="btn btn-neutral float-right" title="Lexer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

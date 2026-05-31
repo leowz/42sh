@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_lexer.c &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="test_list.c" href="test_list.html" />
+    <link rel="prev" title="test_history.c" href="test_history.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core/42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_history.html">test_history.c</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">test_lexer.c</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.nth_token"><code class="docutils literal notranslate"><span class="pre">nth_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.assert_token_type"><code class="docutils literal notranslate"><span class="pre">assert_token_type()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_token_new_basic"><code class="docutils literal notranslate"><span class="pre">test_token_new_basic()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_token_new_io_number"><code class="docutils literal notranslate"><span class="pre">test_token_new_io_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_is_operator_true"><code class="docutils literal notranslate"><span class="pre">test_is_operator_true()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_is_operator_false"><code class="docutils literal notranslate"><span class="pre">test_is_operator_false()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_is_operator_start_simple"><code class="docutils literal notranslate"><span class="pre">test_is_operator_start_simple()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_is_operator_start_io_number"><code class="docutils literal notranslate"><span class="pre">test_is_operator_start_io_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_is_operator_start_digit_not_redir"><code class="docutils literal notranslate"><span class="pre">test_is_operator_start_digit_not_redir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_is_operator_start_word"><code class="docutils literal notranslate"><span class="pre">test_is_operator_start_word()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_word_simple"><code class="docutils literal notranslate"><span class="pre">test_read_word_simple()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_word_single_quote"><code class="docutils literal notranslate"><span class="pre">test_read_word_single_quote()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_word_double_quote"><code class="docutils literal notranslate"><span class="pre">test_read_word_double_quote()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_word_backslash_escape"><code class="docutils literal notranslate"><span class="pre">test_read_word_backslash_escape()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_word_stops_at_operator"><code class="docutils literal notranslate"><span class="pre">test_read_word_stops_at_operator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_word_pipe_in_single_quote"><code class="docutils literal notranslate"><span class="pre">test_read_word_pipe_in_single_quote()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.operator_type"><code class="docutils literal notranslate"><span class="pre">operator_type()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.read_operator_crashes"><code class="docutils literal notranslate"><span class="pre">read_operator_crashes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_operator_single_char"><code class="docutils literal notranslate"><span class="pre">test_read_operator_single_char()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_operator_double_char"><code class="docutils literal notranslate"><span class="pre">test_read_operator_double_char()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_operator_io_number"><code class="docutils literal notranslate"><span class="pre">test_read_operator_io_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_read_operator_malformed_no_crash"><code class="docutils literal notranslate"><span class="pre">test_read_operator_malformed_no_crash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_simple_command"><code class="docutils literal notranslate"><span class="pre">test_tokenize_simple_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_pipe"><code class="docutils literal notranslate"><span class="pre">test_tokenize_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_redirect_out"><code class="docutils literal notranslate"><span class="pre">test_tokenize_redirect_out()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_heredoc"><code class="docutils literal notranslate"><span class="pre">test_tokenize_heredoc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_heredoc_strip"><code class="docutils literal notranslate"><span class="pre">test_tokenize_heredoc_strip()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_empty"><code class="docutils literal notranslate"><span class="pre">test_tokenize_empty()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_whitespace_trimmed"><code class="docutils literal notranslate"><span class="pre">test_tokenize_whitespace_trimmed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_and_or"><code class="docutils literal notranslate"><span class="pre">test_tokenize_and_or()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_quoted_operators"><code class="docutils literal notranslate"><span class="pre">test_tokenize_quoted_operators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_io_number"><code class="docutils literal notranslate"><span class="pre">test_tokenize_io_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_subshell"><code class="docutils literal notranslate"><span class="pre">test_tokenize_subshell()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_tokenize_newline_separator"><code class="docutils literal notranslate"><span class="pre">test_tokenize_newline_separator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_lexer_suite"><code class="docutils literal notranslate"><span class="pre">test_lexer_suite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">test_lexer.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="test-lexer-c">
+<h1>test_lexer.c<a class="headerlink" href="#test-lexer-c" title="Link to this heading"></a></h1>
+<p>Unit tests for the 42sh lexer module. </p>
+<p>Covers lexer_tokenize(), is_operator(), is_operator_start(), read_word(), read_operator(), token_new(), and lexer_free_tokens().</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.nth_token">
+<span class="target" id="test__lexer_8c_1a44b252b6d4de617cd7a24145ab6b59db"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../core/lexer.html#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">nth_token</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">head</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.nth_token" title="Link to this definition"></a><br /></dt>
+<dd><p>Return the nth token (0-based) from a token list. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>head</strong> – Head of the list returned by lexer_tokenize(). </p></li>
+<li><p><strong>n</strong> – Zero-based index of the desired node. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to the t_token, or NULL if the list is shorter than n. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.assert_token_type">
+<span class="target" id="test__lexer_8c_1acae311d7f9f8c555efc3501a9773ae0a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">assert_token_type</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">idx</span></span>, <a class="reference internal" href="../core/lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">expected</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.assert_token_type" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_token_new_basic">
+<span class="target" id="test__lexer_8c_1a6d83f8bff9488b16a9e90861f7b89cd1"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_token_new_basic</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_token_new_basic" title="Link to this definition"></a><br /></dt>
+<dd><p>token_new allocates a node and sets all three fields correctly. </p>
+<p>Verifies that the returned list node is non-NULL, that its content pointer is non-NULL, and that type, value, and io_number match the arguments. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_token_new_io_number">
+<span class="target" id="test__lexer_8c_1a4f362484c2edca639f4ee18e318a352d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_token_new_io_number</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_token_new_io_number" title="Link to this definition"></a><br /></dt>
+<dd><p>token_new stores a positive io_number without modification. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_is_operator_true">
+<span class="target" id="test__lexer_8c_1a96676b5903a0554fd708eee85d4ad033"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_is_operator_true</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_is_operator_true" title="Link to this definition"></a><br /></dt>
+<dd><p>is_operator returns non-zero for every recognised operator character. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_is_operator_false">
+<span class="target" id="test__lexer_8c_1a1c066523f183007728b8508e6534615b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_is_operator_false</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_is_operator_false" title="Link to this definition"></a><br /></dt>
+<dd><p>is_operator returns zero for ordinary characters. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_is_operator_start_simple">
+<span class="target" id="test__lexer_8c_1a813062559d3d0169fcd7095418dc6c8b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_is_operator_start_simple</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_is_operator_start_simple" title="Link to this definition"></a><br /></dt>
+<dd><p>is_operator_start detects a bare operator at the start of a string. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_is_operator_start_io_number">
+<span class="target" id="test__lexer_8c_1abc95a36c8489289463ef15e42cb61327"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_is_operator_start_io_number</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_is_operator_start_io_number" title="Link to this definition"></a><br /></dt>
+<dd><p>is_operator_start detects a digit-prefixed redirect (e.g. “2&gt;”). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_is_operator_start_digit_not_redir">
+<span class="target" id="test__lexer_8c_1a33ea972d3665a8f39389912141151c81"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_is_operator_start_digit_not_redir</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_is_operator_start_digit_not_redir" title="Link to this definition"></a><br /></dt>
+<dd><p>is_operator_start returns zero when digits are not followed by a redirect character. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_is_operator_start_word">
+<span class="target" id="test__lexer_8c_1a74ccb2cde386e348dd84bfec7c403635"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_is_operator_start_word</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_is_operator_start_word" title="Link to this definition"></a><br /></dt>
+<dd><p>is_operator_start returns zero for plain words. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_word_simple">
+<span class="target" id="test__lexer_8c_1a691b7c69f2780980fd44e5a9e36c3cc6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_word_simple</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_word_simple" title="Link to this definition"></a><br /></dt>
+<dd><p>read_word consumes a simple unquoted word and stops at whitespace. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_word_single_quote">
+<span class="target" id="test__lexer_8c_1a4b3243be2b3061cdbd941375f98d60fc"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_word_single_quote</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_word_single_quote" title="Link to this definition"></a><br /></dt>
+<dd><p>read_word includes the entire single-quoted span as one token. </p>
+<p>Spaces inside single quotes must not terminate the word. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_word_double_quote">
+<span class="target" id="test__lexer_8c_1a166829d7b5d3e140d0f196e62c72f206"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_word_double_quote</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_word_double_quote" title="Link to this definition"></a><br /></dt>
+<dd><p>read_word includes the entire double-quoted span as one token. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_word_backslash_escape">
+<span class="target" id="test__lexer_8c_1ab2e98657bb620f32e11e1a1ff297d2ed"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_word_backslash_escape</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_word_backslash_escape" title="Link to this definition"></a><br /></dt>
+<dd><p>read_word respects a backslash-escaped space outside quotes. </p>
+<p>“hello\ world” should be consumed as a single token. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_word_stops_at_operator">
+<span class="target" id="test__lexer_8c_1ace22a14b8c4bed6d26f174d535bdb8dd"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_word_stops_at_operator</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_word_stops_at_operator" title="Link to this definition"></a><br /></dt>
+<dd><p>read_word stops at an operator character. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_word_pipe_in_single_quote">
+<span class="target" id="test__lexer_8c_1ac74f6637300b1c4a52279c22ddf3d0a3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_word_pipe_in_single_quote</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_word_pipe_in_single_quote" title="Link to this definition"></a><br /></dt>
+<dd><p>A pipe inside single quotes is NOT an operator boundary. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.operator_type">
+<span class="target" id="test__lexer_8c_1afb3e32dbb1f7042765bf98a4965577a0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../core/lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">operator_type</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.operator_type" title="Link to this definition"></a><br /></dt>
+<dd><p>Helper: tokenise a single operator string and return its type. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.read_operator_crashes">
+<span class="target" id="test__lexer_8c_1ad6e8ad23b5c4120289bdeb021ff4904a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_operator_crashes</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.read_operator_crashes" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_operator_single_char">
+<span class="target" id="test__lexer_8c_1a275defc2d9262bea0008a42e5a242e60"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_operator_single_char</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_operator_single_char" title="Link to this definition"></a><br /></dt>
+<dd><p>read_operator correctly classifies every single-character operator. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_operator_double_char">
+<span class="target" id="test__lexer_8c_1adf3821d8b4cb1a6df02cf0d3bd780f14"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_operator_double_char</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_operator_double_char" title="Link to this definition"></a><br /></dt>
+<dd><p>read_operator correctly classifies every two-character operator. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_operator_io_number">
+<span class="target" id="test__lexer_8c_1ac913d53db39a8674b889f564af769a67"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_operator_io_number</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_operator_io_number" title="Link to this definition"></a><br /></dt>
+<dd><p>read_operator extracts an io_number from a digit-prefixed redirect. </p>
+<p>“2&gt;” must produce TOK_REDIR_OUT with io_number == 2. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_read_operator_malformed_no_crash">
+<span class="target" id="test__lexer_8c_1a2e57e9afaeeb1e233407f98837cb4108"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_read_operator_malformed_no_crash</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_read_operator_malformed_no_crash" title="Link to this definition"></a><br /></dt>
+<dd><p>read_operator must not crash on malformed digit-prefixed non-operator input (e.g. “42x”). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_simple_command">
+<span class="target" id="test__lexer_8c_1a3b704d408f6a4857082e338f75d7cbed"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_simple_command</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_simple_command" title="Link to this definition"></a><br /></dt>
+<dd><p>“echo hello” produces WORD WORD EOF (3 tokens). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_pipe">
+<span class="target" id="test__lexer_8c_1a4676338776447da0fc42b9c7b274738c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_pipe" title="Link to this definition"></a><br /></dt>
+<dd><p>“echo | cat” produces WORD PIPE WORD EOF (4 tokens). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_redirect_out">
+<span class="target" id="test__lexer_8c_1a3aa9c88a3f56da95f32a1a42b5b02787"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_redirect_out</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_redirect_out" title="Link to this definition"></a><br /></dt>
+<dd><p>“echo &gt; file” produces WORD REDIR_OUT WORD EOF (4 tokens). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_heredoc">
+<span class="target" id="test__lexer_8c_1a0c357a2f63c991975b81307208e05920"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_heredoc</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_heredoc" title="Link to this definition"></a><br /></dt>
+<dd><p>“cat &lt;&lt; EOF” produces WORD HEREDOC WORD EOF (4 tokens). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_heredoc_strip">
+<span class="target" id="test__lexer_8c_1a0b8e560f63f04755b38dc08a3afa4d62"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_heredoc_strip</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_heredoc_strip" title="Link to this definition"></a><br /></dt>
+<dd><p>“cat &lt;&lt;- EOF” produces WORD HEREDOC_STRIP WORD EOF (4 tokens). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_empty">
+<span class="target" id="test__lexer_8c_1a96dd8f47005365547999e315522f3e24"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_empty</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_empty" title="Link to this definition"></a><br /></dt>
+<dd><p>An empty string produces only a single TOK_EOF token. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_whitespace_trimmed">
+<span class="target" id="test__lexer_8c_1ac08a2e35a98c3dd0a8519c85a4f38c8a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_whitespace_trimmed</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_whitespace_trimmed" title="Link to this definition"></a><br /></dt>
+<dd><p>Leading and trailing spaces are ignored. </p>
+<p>“  echo  “ should yield the same token stream as “echo”. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_and_or">
+<span class="target" id="test__lexer_8c_1a27aca9ef3641a399756966c52da0de6c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_and_or</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_and_or" title="Link to this definition"></a><br /></dt>
+<dd><p>“cmd &amp;&amp; other || fallback” produces the correct AND/OR tokens. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_quoted_operators">
+<span class="target" id="test__lexer_8c_1a8754da98431503aa5358491cb47cc037"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_quoted_operators</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_quoted_operators" title="Link to this definition"></a><br /></dt>
+<dd><p>Quoted strings containing operators are treated as a single WORD. </p>
+<p>“echo ‘|; &lt;&gt;’” must not produce any operator tokens. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_io_number">
+<span class="target" id="test__lexer_8c_1afe514b166ea0df715fe6cf2de2c1bfc0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_io_number</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_io_number" title="Link to this definition"></a><br /></dt>
+<dd><p>A digit-prefixed redirect stores the correct io_number on the token. </p>
+<p>“cmd 2&gt;&gt;err” must produce io_number == 2 on the TOK_REDIR_APPEND token. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_subshell">
+<span class="target" id="test__lexer_8c_1ada1fa7fbed5cfd35f006276a25cf28b5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_subshell</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_subshell" title="Link to this definition"></a><br /></dt>
+<dd><p>Subshell syntax “(echo hi)” produces LPAREN WORD WORD RPAREN EOF. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_tokenize_newline_separator">
+<span class="target" id="test__lexer_8c_1a51bf5e5cb0439bc4d9ba097a0b83cdda"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_tokenize_newline_separator</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_tokenize_newline_separator" title="Link to this definition"></a><br /></dt>
+<dd><p>Newline is a shell command separator and must be tokenized. </p>
+<p>“echo\ncat” should produce WORD NEWLINE WORD EOF. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_lexer_suite">
+<span class="target" id="test__lexer_8c_1a3f55654cb0ab6091503e15145037ad77"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_lexer_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_lexer_suite" title="Link to this definition"></a><br /></dt>
+<dd><p>Run all lexer unit tests. </p>
+<p>Called by test_runner.c via MU_RUN(test_lexer_suite). </p>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="test_history.html" class="btn btn-neutral float-left" title="test_history.c" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_list.html" class="btn btn-neutral float-right" title="test_list.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,440 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_executor.c &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="test_stubs.c" href="test_stubs.html" />
+    <link rel="prev" title="test_parser.c" href="test_parser.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core/42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">test_executor.c</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.P2_NOEXEC_PATH"><code class="docutils literal notranslate"><span class="pre">P2_NOEXEC_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.P2_MISSING_PATH"><code class="docutils literal notranslate"><span class="pre">P2_MISSING_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.stub_shell_init"><code class="docutils literal notranslate"><span class="pre">stub_shell_init()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.stub_shell_cleanup"><code class="docutils literal notranslate"><span class="pre">stub_shell_cleanup()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.fork_exit_and_get"><code class="docutils literal notranslate"><span class="pre">fork_exit_and_get()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.fork_signal_and_get"><code class="docutils literal notranslate"><span class="pre">fork_signal_and_get()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_get_exit_status"><code class="docutils literal notranslate"><span class="pre">test_get_exit_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_split_assignment"><code class="docutils literal notranslate"><span class="pre">test_split_assignment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_find_command"><code class="docutils literal notranslate"><span class="pre">test_find_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirections_output"><code class="docutils literal notranslate"><span class="pre">test_redirections_output()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirections_append"><code class="docutils literal notranslate"><span class="pre">test_redirections_append()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirections_input"><code class="docutils literal notranslate"><span class="pre">test_redirections_input()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.write_to_pipe"><code class="docutils literal notranslate"><span class="pre">write_to_pipe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirections_heredoc_in_list"><code class="docutils literal notranslate"><span class="pre">test_redirections_heredoc_in_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirections_bad_file"><code class="docutils literal notranslate"><span class="pre">test_redirections_bad_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_redirections_save_restore"><code class="docutils literal notranslate"><span class="pre">test_redirections_save_restore()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.make_true_cmd"><code class="docutils literal notranslate"><span class="pre">make_true_cmd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.make_false_cmd"><code class="docutils literal notranslate"><span class="pre">make_false_cmd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.free_cmd_ast"><code class="docutils literal notranslate"><span class="pre">free_cmd_ast()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.make_echo_to_file"><code class="docutils literal notranslate"><span class="pre">make_echo_to_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.free_echo_ast"><code class="docutils literal notranslate"><span class="pre">free_echo_ast()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_and"><code class="docutils literal notranslate"><span class="pre">test_execute_and()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_or"><code class="docutils literal notranslate"><span class="pre">test_execute_or()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_sequence"><code class="docutils literal notranslate"><span class="pre">test_execute_sequence()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_external_command"><code class="docutils literal notranslate"><span class="pre">test_execute_external_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_builtin_command"><code class="docutils literal notranslate"><span class="pre">test_execute_builtin_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_assignment_only"><code class="docutils literal notranslate"><span class="pre">test_execute_assignment_only()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_pipeline"><code class="docutils literal notranslate"><span class="pre">test_execute_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_pipeline_three"><code class="docutils literal notranslate"><span class="pre">test_execute_pipeline_three()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_pipeline_exit_status"><code class="docutils literal notranslate"><span class="pre">test_pipeline_exit_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_subshell"><code class="docutils literal notranslate"><span class="pre">test_execute_subshell()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_subshell_isolation"><code class="docutils literal notranslate"><span class="pre">test_execute_subshell_isolation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_block"><code class="docutils literal notranslate"><span class="pre">test_execute_block()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_execute_background"><code class="docutils literal notranslate"><span class="pre">test_execute_background()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_executor_dispatch"><code class="docutils literal notranslate"><span class="pre">test_executor_dispatch()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_complex_logical_chains"><code class="docutils literal notranslate"><span class="pre">test_complex_logical_chains()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_temp_assignments"><code class="docutils literal notranslate"><span class="pre">test_builtin_temp_assignments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_pipeline_with_heredoc"><code class="docutils literal notranslate"><span class="pre">test_pipeline_with_heredoc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_sequence_mixed"><code class="docutils literal notranslate"><span class="pre">test_sequence_mixed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.run_shell"><code class="docutils literal notranslate"><span class="pre">run_shell()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_b1_exit_stops_sequence"><code class="docutils literal notranslate"><span class="pre">test_b1_exit_stops_sequence()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_b1_exit_stops_or_chain"><code class="docutils literal notranslate"><span class="pre">test_b1_exit_stops_or_chain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_b2_assignment_reaches_pipeline"><code class="docutils literal notranslate"><span class="pre">test_b2_assignment_reaches_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_b4_not_executable_is_126"><code class="docutils literal notranslate"><span class="pre">test_b4_not_executable_is_126()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_b4_missing_path_is_127"><code class="docutils literal notranslate"><span class="pre">test_b4_missing_path_is_127()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_executor_suite"><code class="docutils literal notranslate"><span class="pre">test_executor_suite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">test_executor.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="test-executor-c">
+<h1>test_executor.c<a class="headerlink" href="#test-executor-c" title="Link to this heading"></a></h1>
+<p>Comprehensive test suite for the executor module. </p>
+<p>Tests: exec_utils, command_search, redirections, heredoc, logical operators, pipeline, subshell, block, background, simple command execution (builtins + externals).</p>
+<p>Uses functional stubs from test_stubs.c for dependencies. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.P2_NOEXEC_PATH">
+<span class="target" id="test__executor_8c_1ae4b3fb42bbce902cf16d4ab2af193b64"></span><span class="sig-name descname"><span class="n"><span class="pre">P2_NOEXEC_PATH</span></span></span><a class="headerlink" href="#c.P2_NOEXEC_PATH" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.P2_MISSING_PATH">
+<span class="target" id="test__executor_8c_1a95d1287727076242b05c87e4c2b7bf44"></span><span class="sig-name descname"><span class="n"><span class="pre">P2_MISSING_PATH</span></span></span><a class="headerlink" href="#c.P2_MISSING_PATH" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.stub_shell_init">
+<span class="target" id="test__executor_8c_1a779d6812752f7c125f2de7f92d625404"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stub_shell_init</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../core/42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.stub_shell_init" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.stub_shell_cleanup">
+<span class="target" id="test__executor_8c_1a310b6fe77b78fdadd0e37a5a9545917e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stub_shell_cleanup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../core/42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.stub_shell_cleanup" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.fork_exit_and_get">
+<span class="target" id="test__executor_8c_1abcc86c5c34b7c84898a8d7b5b608da9d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fork_exit_and_get</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">code</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.fork_exit_and_get" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.fork_signal_and_get">
+<span class="target" id="test__executor_8c_1a2352622a1f68f5cd7c1a2a801dfa9076"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fork_signal_and_get</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">sig</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.fork_signal_and_get" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_get_exit_status">
+<span class="target" id="test__executor_8c_1a9c62e9464fcebc1cdd97d97a1c02f8e8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_get_exit_status</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_get_exit_status" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_split_assignment">
+<span class="target" id="test__executor_8c_1a38aa31f8786cbf6158d2a026a903b305"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_split_assignment</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_split_assignment" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_find_command">
+<span class="target" id="test__executor_8c_1a4e05697cec28008d70346aa234feb00f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_find_command</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_find_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirections_output">
+<span class="target" id="test__executor_8c_1a4d1d2d8a8ce64cfe2661137d55a8ba13"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirections_output</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirections_output" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirections_append">
+<span class="target" id="test__executor_8c_1aeedd803b8ea7c9576e3af507db01789e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirections_append</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirections_append" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirections_input">
+<span class="target" id="test__executor_8c_1ad5ddbeb6891aba847d199bfbcc071689"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirections_input</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirections_input" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.write_to_pipe">
+<span class="target" id="test__executor_8c_1a1600948754f4dc5f3be9bda2b438cd1e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_to_pipe</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">content</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.write_to_pipe" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirections_heredoc_in_list">
+<span class="target" id="test__executor_8c_1a63981a74ca467a3b2881aeaa0fba6c21"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirections_heredoc_in_list</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirections_heredoc_in_list" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirections_bad_file">
+<span class="target" id="test__executor_8c_1a9d5dbdbb5e8a1f1de775738605d403f9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirections_bad_file</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirections_bad_file" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_redirections_save_restore">
+<span class="target" id="test__executor_8c_1afc4459ebebc793b13e7ef57e0b873d81"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_redirections_save_restore</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_redirections_save_restore" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.make_true_cmd">
+<span class="target" id="test__executor_8c_1a21cac790cbe131d6f94910ef504b7c32"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">make_true_cmd</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.make_true_cmd" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.make_false_cmd">
+<span class="target" id="test__executor_8c_1af086c62a29959ca5f60360d7b7baf58e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">make_false_cmd</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.make_false_cmd" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.free_cmd_ast">
+<span class="target" id="test__executor_8c_1a7cd7017b7454705a7bfc9b24b8953531"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_cmd_ast</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.free_cmd_ast" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.make_echo_to_file">
+<span class="target" id="test__executor_8c_1afa67a46c9e237b19a16683d48966056f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">make_echo_to_file</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">filepath</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">text</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.make_echo_to_file" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.free_echo_ast">
+<span class="target" id="test__executor_8c_1a4dff8d65cee38eac2941cd9e9de7463a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_echo_ast</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../core/ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.free_echo_ast" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_and">
+<span class="target" id="test__executor_8c_1aa32fa0c125617a78d48951e8809da0c9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_and</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_and" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_or">
+<span class="target" id="test__executor_8c_1ab2f3751c84c38174200fcd4f0a04ddc0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_or</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_or" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_sequence">
+<span class="target" id="test__executor_8c_1a81a79281ed78d071b54acad74864b294"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_sequence</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_sequence" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_external_command">
+<span class="target" id="test__executor_8c_1acedbe18f89f93af6b328a3c92261e98c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_external_command</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_external_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_builtin_command">
+<span class="target" id="test__executor_8c_1af5b741cadb8c887f663b30a36167e6c0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_builtin_command</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_builtin_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_assignment_only">
+<span class="target" id="test__executor_8c_1ae1be782c8ebef512d60a648fe1618925"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_assignment_only</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_assignment_only" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_pipeline">
+<span class="target" id="test__executor_8c_1afb36075b917c6bd0a0793d1666aea249"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_pipeline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_pipeline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_pipeline_three">
+<span class="target" id="test__executor_8c_1ae937aa40067ce32cada5c2ff805dbc62"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_pipeline_three</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_pipeline_three" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_pipeline_exit_status">
+<span class="target" id="test__executor_8c_1a11060986fa96fdeaff647a70580e0d89"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_pipeline_exit_status</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_pipeline_exit_status" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_subshell">
+<span class="target" id="test__executor_8c_1a7a69c35a57383d18fa555344256422b9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_subshell</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_subshell" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_subshell_isolation">
+<span class="target" id="test__executor_8c_1a9edcae038a4f2717b9c104d528a5e303"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_subshell_isolation</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_subshell_isolation" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_block">
+<span class="target" id="test__executor_8c_1ab9cf937fba4231ba9e12b6dcae168906"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_block</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_block" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_execute_background">
+<span class="target" id="test__executor_8c_1a350ba7f5ed01a1da58de5e0fc63958fc"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_execute_background</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_execute_background" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_executor_dispatch">
+<span class="target" id="test__executor_8c_1ad24ef2ee35aa792b832a78b69e563532"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_executor_dispatch</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_executor_dispatch" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_complex_logical_chains">
+<span class="target" id="test__executor_8c_1ae8869ea7e7abb68516a69a0c9ca284cb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_complex_logical_chains</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_complex_logical_chains" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_temp_assignments">
+<span class="target" id="test__executor_8c_1a153b28c63c1aac6cff6ea056df039c00"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_temp_assignments</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_temp_assignments" title="Link to this definition"></a><br /></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">VAR=val</span> <span class="pre">builtin</span></code> assignment is visible to the builtin and restored afterwards. </p>
+<p>Drives <code class="docutils literal notranslate"><span class="pre">HOME=/tmp</span> <span class="pre">cd</span></code>: cd with no arguments changes to $HOME, so a successful chdir to /tmp proves the builtin saw the temporary HOME, and HOME reverting to its prior value proves exec_builtin restored it. The process cwd is saved and restored since <code class="docutils literal notranslate"><span class="pre">cd</span></code> runs in-process. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_pipeline_with_heredoc">
+<span class="target" id="test__executor_8c_1a03ef89eeff9656d4593cbf44338b6e9f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_pipeline_with_heredoc</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_pipeline_with_heredoc" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_sequence_mixed">
+<span class="target" id="test__executor_8c_1abd4c86aa9f2c9f85196fa3f7c1292be4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_sequence_mixed</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_sequence_mixed" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.run_shell">
+<span class="target" id="test__executor_8c_1a018e9670b2eae618548c21eac6fccb3f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">run_shell</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">which_fd</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">outsz</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.run_shell" title="Link to this definition"></a><br /></dt>
+<dd><p>Run ./42sh, feed <code class="docutils literal notranslate"><span class="pre">input</span></code> on stdin, capture one fd, return exit code. </p>
+<p><code class="docutils literal notranslate"><span class="pre">which_fd</span></code> selects the captured stream (1 = stdout, 2 = stderr); the other stream is sent to /dev/null. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> – Command text written to the shell’s stdin. </p></li>
+<li><p><strong>which_fd</strong> – 1 to capture stdout, 2 to capture stderr. </p></li>
+<li><p><strong>out</strong> – Buffer receiving the captured output (NUL-terminated). </p></li>
+<li><p><strong>outsz</strong> – Size of <code class="docutils literal notranslate"><span class="pre">out</span></code>. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The shell’s exit code, or -1 on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_b1_exit_stops_sequence">
+<span class="target" id="test__executor_8c_1a5a1b37ca808807aa96976d3801c6712a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_b1_exit_stops_sequence</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_b1_exit_stops_sequence" title="Link to this definition"></a><br /></dt>
+<dd><p>B1: a <code class="docutils literal notranslate"><span class="pre">;</span></code> list must stop at <code class="docutils literal notranslate"><span class="pre">exit</span></code>; nothing after it runs. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_b1_exit_stops_or_chain">
+<span class="target" id="test__executor_8c_1ac2a4e04fce8aec889b7e51f85d1c4831"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_b1_exit_stops_or_chain</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_b1_exit_stops_or_chain" title="Link to this definition"></a><br /></dt>
+<dd><p>B1: an <code class="docutils literal notranslate"><span class="pre">||</span></code> branch must not run once <code class="docutils literal notranslate"><span class="pre">exit</span></code> has stopped the shell. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_b2_assignment_reaches_pipeline">
+<span class="target" id="test__executor_8c_1a5a22a29b23880dd97f5c492aa546f5cb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_b2_assignment_reaches_pipeline</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_b2_assignment_reaches_pipeline" title="Link to this definition"></a><br /></dt>
+<dd><p>B2: <code class="docutils literal notranslate"><span class="pre">FOO=val</span> <span class="pre">env</span> <span class="pre">|</span> <span class="pre">cat</span></code> must show FOO in the piped command’s env. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_b4_not_executable_is_126">
+<span class="target" id="test__executor_8c_1a08ddbf7fe0652c58fb7117440d6e9cc2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_b4_not_executable_is_126</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_b4_not_executable_is_126" title="Link to this definition"></a><br /></dt>
+<dd><p>B4: a non-executable file invoked by path exits 126 (permission). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_b4_missing_path_is_127">
+<span class="target" id="test__executor_8c_1a7256b52a0a4ce21c68e80de50de15bf7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_b4_missing_path_is_127</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_b4_missing_path_is_127" title="Link to this definition"></a><br /></dt>
+<dd><p>B4: a genuinely missing path still exits 127 (not found). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_executor_suite">
+<span class="target" id="test__executor_8c_1adb32f52edd3d95e6521cbc9e01c97db3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_executor_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_executor_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="test_parser.html" class="btn btn-neutral float-left" title="test_parser.c" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_stubs.html" class="btn btn-neutral float-right" title="test_stubs.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

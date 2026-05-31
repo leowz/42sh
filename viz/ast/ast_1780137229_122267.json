@@ -1,0 +1,13 @@
+{
+  "input": "make",
+  "tok_file": "viz/tokenizations/tok_1780137229_121984.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["make"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

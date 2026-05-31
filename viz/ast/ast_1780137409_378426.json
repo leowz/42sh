@@ -1,0 +1,13 @@
+{
+  "input": "exit",
+  "tok_file": "viz/tokenizations/tok_1780137409_378116.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["exit"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "input": "cat 4<redir",
+  "tok_file": "viz/tokenizations/tok_1780137140_076870.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["cat"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+      {
+        "type": "<",
+        "fd": 4,
+        "target": "redir",
+        "heredoc_delim": null,
+        "heredoc_quoted": 0
+      }
+    ]
+  }
+}

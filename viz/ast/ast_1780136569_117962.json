@@ -1,0 +1,13 @@
+{
+  "input": "clear",
+  "tok_file": "viz/tokenizations/tok_1780136569_115910.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["clear"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

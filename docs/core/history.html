@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Job Control" href="job_control.html" />
+    <link rel="prev" title="Expander" href="expander.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_shell"><code class="docutils literal notranslate"><span class="pre">t_shell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.history_init"><code class="docutils literal notranslate"><span class="pre">history_init()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.history_file_path"><code class="docutils literal notranslate"><span class="pre">history_file_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.history_load"><code class="docutils literal notranslate"><span class="pre">history_load()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.history_save"><code class="docutils literal notranslate"><span class="pre">history_save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">History</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="history">
+<h1>History<a class="headerlink" href="#history" title="Link to this heading"></a></h1>
+<p>Collection of functions for managing the shell’s command history. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.t_shell">
+<span class="target" id="history_8h_1ae4cfb7c093350dca726786f683b6aca3"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_shell</span></span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.history_init">
+<span class="target" id="history_8h_1ab81c4fd56d1ad17af3d94ac33bf8727e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">history_init</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.history_init" title="Link to this definition"></a><br /></dt>
+<dd><p>Initialize the history subsystem. </p>
+<p><blockquote>
+<div><p>Forward declaration to avoid circular dependency with 42sh.h</p>
+</div></blockquote>
+</p>
+<p>This sets up readline’s history handling and loads the history file if available. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.history_file_path">
+<span class="target" id="history_8h_1a867aecd470d427b62ac12eb938b584cf"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">history_file_path</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.history_file_path" title="Link to this definition"></a><br /></dt>
+<dd><p>Determine the path to the history file based on environment variables. </p>
+<p>Follows POSIX-compliant lookup order: first checks $HISTFILE, then falls back to $HOME/.sh_history. Returns a malloc’d string that the caller must free. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.history_load">
+<span class="target" id="history_8h_1ad5ca958d3b4dd9efbc1c012621e9fdc1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">history_load</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">file_path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.history_load" title="Link to this definition"></a><br /></dt>
+<dd><p>Load the command history from a file into readline’s in-memory history list. </p>
+<p>This function uses readline’s <code class="docutils literal notranslate"><span class="pre">read_history()</span></code> to populate the history list. If <code class="docutils literal notranslate"><span class="pre">file_path</span></code> is NULL, this function does nothing. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.history_save">
+<span class="target" id="history_8h_1a8e0a612c7073effe8313f12743f16340"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">history_save</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">file_path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.history_save" title="Link to this definition"></a><br /></dt>
+<dd><p>Save the in-memory command history list to a file. </p>
+<p>This function uses readline’s <code class="docutils literal notranslate"><span class="pre">write_history()</span></code> to write the history list to disk. If <code class="docutils literal notranslate"><span class="pre">file_path</span></code> is NULL, this function does nothing. </p>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="expander.html" class="btn btn-neutral float-left" title="Expander" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="job_control.html" class="btn btn-neutral float-right" title="Job Control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

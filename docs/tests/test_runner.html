@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_runner.c &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="test_btree.c" href="test_btree.html" />
+    <link rel="prev" title="minunit.h - Test Framework" href="minunit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core/42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">test_runner.c</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_dlist_suite"><code class="docutils literal notranslate"><span class="pre">test_dlist_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_list_suite"><code class="docutils literal notranslate"><span class="pre">test_list_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_history_suite"><code class="docutils literal notranslate"><span class="pre">test_history_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_executor_suite"><code class="docutils literal notranslate"><span class="pre">test_executor_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_lexer_suite"><code class="docutils literal notranslate"><span class="pre">test_lexer_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_btree_suite"><code class="docutils literal notranslate"><span class="pre">test_btree_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_parser_suite"><code class="docutils literal notranslate"><span class="pre">test_parser_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_echo_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_echo_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_cd_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_cd_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_expander_suite"><code class="docutils literal notranslate"><span class="pre">test_expander_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_variables_suite"><code class="docutils literal notranslate"><span class="pre">test_variables_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_job_control_suite"><code class="docutils literal notranslate"><span class="pre">test_job_control_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_exit_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_exit_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_type_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_type_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_heredoc_bugs_suite"><code class="docutils literal notranslate"><span class="pre">test_heredoc_bugs_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_set_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_set_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_unset_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_unset_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_export_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_export_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_hash_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_hash_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_arithmetic_suite"><code class="docutils literal notranslate"><span class="pre">test_arithmetic_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_alias_suite"><code class="docutils literal notranslate"><span class="pre">test_alias_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_alias_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_alias_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_interactive_suite"><code class="docutils literal notranslate"><span class="pre">test_interactive_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.test_builtin_test_suite"><code class="docutils literal notranslate"><span class="pre">test_builtin_test_suite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.g_mu_passed"><code class="docutils literal notranslate"><span class="pre">g_mu_passed</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.g_mu_failed"><code class="docutils literal notranslate"><span class="pre">g_mu_failed</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">test_runner.c</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="test-runner-c">
+<h1>test_runner.c<a class="headerlink" href="#test-runner-c" title="Link to this heading"></a></h1>
+<p>Entry point for the 42sh unit test suite. </p>
+<p>
+Run with: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica (arosado-)</p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_dlist_suite">
+<span class="target" id="test__runner_8c_1a56a44d58871d24693590a2a2a5929410"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_dlist_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Run all doubly-linked list assertions.</p>
+<p>Builds a three-node list <code class="docutils literal notranslate"><span class="pre">[1</span> <span class="pre">&lt;-&gt;</span> <span class="pre">2</span> <span class="pre">&lt;-&gt;</span> <span class="pre">3]</span></code>, verifies size, forward and backward links, sentinel NULL values at both ends, then calls ft_dlstclear() and asserts the head pointer is NULL afterwards. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_list_suite">
+<span class="target" id="test__runner_8c_1ad88047b8cb23d2d51d9b331a013b922f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_list_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Run all singly-linked list assertions.</p>
+<p>Builds an append-order list <code class="docutils literal notranslate"><span class="pre">[alpha(1)</span> <span class="pre">-&gt;</span> <span class="pre">beta(2)</span> <span class="pre">-&gt;</span> <span class="pre">gamma(3)]</span></code>, verifies ft_lstsize() and forward traversal via <code class="docutils literal notranslate"><span class="pre">-&gt;next</span></code>, then exercises ft_lstdel() (freeing all nodes with del_dummy) and asserts the head pointer is NULL afterwards.</p>
+<p>A second sub-test uses ft_lstadd() (prepend) to verify that two nodes inserted as <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">second]</span></code> are stored as <code class="docutils literal notranslate"><span class="pre">[second</span> <span class="pre">-&gt;</span> <span class="pre">first]</span></code> in the list.</p>
+<p><blockquote>
+<div><p><strong>Precondition:</strong> <code class="docutils literal notranslate"><span class="pre">Libft/srcs/ft_stdlib/</span></code> must be compiled and linked. </p>
+</div></blockquote>
+</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_history_suite">
+<span class="target" id="test__runner_8c_1a953c023e7d1c6765a76f380b8e116f83"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_history_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Run all history module assertions.</p>
+<p><ul class="simple">
+<li><p>history_file_path: $HISTFILE takes priority.</p></li>
+<li><p>history_file_path: falls back to $HOME/.sh_history when $HISTFILE unset.</p></li>
+<li><p>history_save / history_load round-trip preserves all entries. </p></li>
+</ul>
+</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_executor_suite">
+<span class="target" id="test__runner_8c_1adb32f52edd3d95e6521cbc9e01c97db3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_executor_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_lexer_suite">
+<span class="target" id="test__runner_8c_1a3f55654cb0ab6091503e15145037ad77"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_lexer_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Run all lexer unit tests. </p>
+<p>Called by test_runner.c via MU_RUN(test_lexer_suite). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_btree_suite">
+<span class="target" id="test__runner_8c_1ab9171ba079f04aae04ecfef8e1cf8998"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_btree_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_parser_suite">
+<span class="target" id="test__runner_8c_1aa1d98fd6af93411a354e0163e8c609fa"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_parser_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_echo_suite">
+<span class="target" id="test__runner_8c_1a2c8512f1751cdb06254e4c86eeec1355"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_echo_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_echo_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_cd_suite">
+<span class="target" id="test__runner_8c_1a39f0c790e8b07a8615894afc232a4d6e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_cd_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_cd_suite" title="Link to this definition"></a><br /></dt>
+<dd><p>Run the full test suite for the cd builtin. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_expander_suite">
+<span class="target" id="test__runner_8c_1a5f2acff050974c6964ebd67adf409858"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_expander_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_expander_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_variables_suite">
+<span class="target" id="test__runner_8c_1a18d5f4dee18c42295e657bf79f3207cd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_variables_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_variables_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_job_control_suite">
+<span class="target" id="test__runner_8c_1ad69e339f43b95af33e427ea520bde420"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_job_control_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_job_control_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_exit_suite">
+<span class="target" id="test__runner_8c_1afd2c31b54666e40e82c23a82c62cd7a1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_exit_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_exit_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_type_suite">
+<span class="target" id="test__runner_8c_1acaa4a40fcafdab6cf9708643619706d5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_type_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_type_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_heredoc_bugs_suite">
+<span class="target" id="test__runner_8c_1a6eb1c96d0f9bcc97c32503fcdc8e968b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_heredoc_bugs_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_heredoc_bugs_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_set_suite">
+<span class="target" id="test__runner_8c_1aae1c53a37cdc6d51e7813e5bb403299d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_set_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_set_suite" title="Link to this definition"></a><br /></dt>
+<dd><p>Run the full test suite for the set builtin. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_unset_suite">
+<span class="target" id="test__runner_8c_1a5e2b9b6f2c776c755dd58bbdd1bd5ffc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_unset_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_unset_suite" title="Link to this definition"></a><br /></dt>
+<dd><p>Run the full test suite for the unset builtin. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_export_suite">
+<span class="target" id="test__runner_8c_1a93a0327369a188f8d4727b718eebb8e6"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_export_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_export_suite" title="Link to this definition"></a><br /></dt>
+<dd><p>Run the full test suite for the export builtin. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_hash_suite">
+<span class="target" id="test__runner_8c_1ac0403edac5f84f53ef779f765688b061"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_hash_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_hash_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_arithmetic_suite">
+<span class="target" id="test__runner_8c_1a5f6b362bfb5bc282be914681e3d98397"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_arithmetic_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_arithmetic_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_alias_suite">
+<span class="target" id="test__runner_8c_1a0c7ae888a6a396387d56c18af501d51d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_alias_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_alias_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_alias_suite">
+<span class="target" id="test__runner_8c_1a2de993b4fbde2c51f162cbb942e78bd0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_alias_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_alias_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_interactive_suite">
+<span class="target" id="test__runner_8c_1a77f50998ae3c6af41ca75aa70232e243"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_interactive_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_interactive_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.test_builtin_test_suite">
+<span class="target" id="test__runner_8c_1a457ba030106cb8fd1f577ba1e0920800"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">test_builtin_test_suite</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.test_builtin_test_suite" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.main">
+<span class="target" id="test__runner_8c_1a840291bc02cba5474a4cb46a9b9566fe"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">main</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.main" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_mu_passed">
+<span class="target" id="test__runner_8c_1ac51733f344bcae0e1919ff3b50b48aab"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_mu_passed</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><br /></dt>
+<dd><p>Running total of assertions that passed.</p>
+<p>Defined in test_runner.c; all test translation units share this counter through the <code class="docutils literal notranslate"><span class="pre">extern</span></code> declaration in this header. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_mu_failed">
+<span class="target" id="test__runner_8c_1a38b980a3609d2ef4b9f54d25c94a43b2"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_mu_failed</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><br /></dt>
+<dd><p>Running total of assertions that failed.</p>
+<p>A non-zero value causes MU_SUMMARY() to return exit code 1 so that <code class="docutils literal notranslate"><span class="pre">make</span></code> can detect and report test failures. </p>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="minunit.html" class="btn btn-neutral float-left" title="minunit.h - Test Framework" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_btree.html" class="btn btn-neutral float-right" title="test_btree.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

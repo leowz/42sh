@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>minunit.h - Test Framework &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="test_runner.c" href="test_runner.html" />
+    <link rel="prev" title="Variables" href="../core/variables.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../core/42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">minunit.h - Test Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.MU_ASSERT"><code class="docutils literal notranslate"><span class="pre">MU_ASSERT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.MU_ASSERT_INT"><code class="docutils literal notranslate"><span class="pre">MU_ASSERT_INT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.MU_ASSERT_STR"><code class="docutils literal notranslate"><span class="pre">MU_ASSERT_STR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.MU_RUN"><code class="docutils literal notranslate"><span class="pre">MU_RUN</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.MU_SUMMARY"><code class="docutils literal notranslate"><span class="pre">MU_SUMMARY</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.mu_assert"><code class="docutils literal notranslate"><span class="pre">mu_assert()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.mu_assert_int"><code class="docutils literal notranslate"><span class="pre">mu_assert_int()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.mu_assert_str"><code class="docutils literal notranslate"><span class="pre">mu_assert_str()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.mu_run"><code class="docutils literal notranslate"><span class="pre">mu_run()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.mu_summary"><code class="docutils literal notranslate"><span class="pre">mu_summary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.g_mu_passed"><code class="docutils literal notranslate"><span class="pre">g_mu_passed</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.g_mu_failed"><code class="docutils literal notranslate"><span class="pre">g_mu_failed</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">minunit.h - Test Framework</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="minunit-h-test-framework">
+<h1>minunit.h - Test Framework<a class="headerlink" href="#minunit-h-test-framework" title="Link to this heading"></a></h1>
+<p>Minimal header-only unit-test framework for 42sh. </p>
+<p>
+Provides shared pass/fail counters and assertion macros used across all test suites. No external libraries are required beyond libc.<dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica (arosado-)</p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MU_ASSERT">
+<span class="target" id="minunit_8h_1a275154f8be52591956909a446dd657ee"></span><span class="sig-name descname"><span class="n"><span class="pre">MU_ASSERT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">msg</span></span>, <span class="n"><span class="pre">expr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.MU_ASSERT" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MU_ASSERT_INT">
+<span class="target" id="minunit_8h_1afa8eb7208279982898dc95b66ebbbe28"></span><span class="sig-name descname"><span class="n"><span class="pre">MU_ASSERT_INT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">expected</span></span>, <span class="n"><span class="pre">actual</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.MU_ASSERT_INT" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MU_ASSERT_STR">
+<span class="target" id="minunit_8h_1a8e77365753ba61cea3307df6a3f315fa"></span><span class="sig-name descname"><span class="n"><span class="pre">MU_ASSERT_STR</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">msg</span></span>, <span class="n"><span class="pre">expected</span></span>, <span class="n"><span class="pre">actual</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.MU_ASSERT_STR" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MU_RUN">
+<span class="target" id="minunit_8h_1a774173f15522b614eefb8abb57610799"></span><span class="sig-name descname"><span class="n"><span class="pre">MU_RUN</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">fn</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.MU_RUN" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MU_SUMMARY">
+<span class="target" id="minunit_8h_1a28c9352187a5f8fd54500bdc4b3b537f"></span><span class="sig-name descname"><span class="n"><span class="pre">MU_SUMMARY</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#c.MU_SUMMARY" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.mu_assert">
+<span class="target" id="minunit_8h_1ab26e74f6c5baa9a0f2629d3f89aa62bb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mu_assert</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">line</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">msg</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">expr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.mu_assert" title="Link to this definition"></a><br /></dt>
+<dd><p>Generic boolean assertion.</p>
+<p>Evaluates <em>expr</em>. Prints a green <strong>PASS</strong> line on success, or a red <strong>FAIL</strong> line including the source location on failure. Do not call directly - use the <em>MU_ASSERT</em> macro.</p>
+<p>
+Example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">MU_ASSERT</span><span class="p">(</span><span class="s">&quot;pointer is not null&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg</strong> – Human-readable description shown in the output line. </p></li>
+<li><p><strong>expr</strong> – Non-zero = pass, zero = fail.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.mu_assert_int">
+<span class="target" id="minunit_8h_1a7197018c003e82f9dcd0f5dc9d42e431"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mu_assert_int</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">line</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">expected</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">actual</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.mu_assert_int" title="Link to this definition"></a><br /></dt>
+<dd><p>Integer equality assertion.</p>
+<p>Compares <em>expected</em> and <em>actual</em> as <code class="docutils literal notranslate"><span class="pre">int</span></code> values. On failure the output includes both the expected and the actual values. Do not call directly - use the <em>MU_ASSERT_INT</em> macro.</p>
+<p>
+Example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">MU_ASSERT_INT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">ft_lstsize</span><span class="p">(</span><span class="n">list</span><span class="p">));</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected</strong> – The value the expression should produce. </p></li>
+<li><p><strong>actual</strong> – The expression under test.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.mu_assert_str">
+<span class="target" id="minunit_8h_1a3576f9c0f7a95faf2e3e2deff0c3291d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mu_assert_str</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">line</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">msg</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">expected</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">actual</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.mu_assert_str" title="Link to this definition"></a><br /></dt>
+<dd><p>String equality assertion (NULL-safe).</p>
+<p>Compares <em>expected</em> and <em>actual</em> with strcmp(3). A NULL <em>actual</em> is treated as a failure and printed as <code class="docutils literal notranslate"><span class="pre">&quot;(null)&quot;</span></code> in the output line. Do not call directly - use the <em>MU_ASSERT_STR</em> macro.</p>
+<p>
+Example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">MU_ASSERT_STR</span><span class="p">(</span><span class="s">&quot;newest entry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pwd&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">history_prev</span><span class="p">(</span><span class="o">&amp;</span><span class="n">h</span><span class="p">));</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg</strong> – Human-readable label shown in the output line. </p></li>
+<li><p><strong>expected</strong> – The expected C string (must not be NULL). </p></li>
+<li><p><strong>actual</strong> – The actual C string returned by the code under test.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.mu_run">
+<span class="target" id="minunit_8h_1a3d2c36d46d4c778dc62e61dda3bce3e8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mu_run</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">)</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.mu_run" title="Link to this definition"></a><br /></dt>
+<dd><p>Execute a test suite function and announce its name.</p>
+<p>Prints a cyan header line with the name of <em>fn</em> then calls <code class="docutils literal notranslate"><span class="pre">fn()</span></code>. Typically used in <code class="docutils literal notranslate"><span class="pre">main()</span></code> of test_runner.c. Do not call directly - use the <em>MU_RUN</em> macro.</p>
+<p>
+Example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">MU_RUN</span><span class="p">(</span><span class="n">test_list_suite</span><span class="p">);</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Stringified name of the test suite function. </p></li>
+<li><p><strong>fn</strong> – Function pointer to the test suite.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.mu_summary">
+<span class="target" id="minunit_8h_1acc41eaa9702dcf7fbec96104a58a053f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mu_summary</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.mu_summary" title="Link to this definition"></a><br /></dt>
+<dd><p>Print the final pass/fail totals and return an exit code.</p>
+<p>Must be called as the last statement in <code class="docutils literal notranslate"><span class="pre">main()</span></code> via the <em>MU_SUMMARY</em> macro. Returns <code class="docutils literal notranslate"><span class="pre">0</span></code> if all tests passed or <code class="docutils literal notranslate"><span class="pre">1</span></code> if any test failed, so that <code class="docutils literal notranslate"><span class="pre">make</span></code> can propagate the result.</p>
+<p>Example:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MU_RUN</span><span class="p">(</span><span class="n">test_list_suite</span><span class="p">);</span>
+<span class="w">    </span><span class="n">MU_SUMMARY</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_mu_passed">
+<span class="target" id="minunit_8h_1ac51733f344bcae0e1919ff3b50b48aab"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_mu_passed</span></span></span><a class="headerlink" href="#c.g_mu_passed" title="Link to this definition"></a><br /></dt>
+<dd><p>Running total of assertions that passed.</p>
+<p>Defined in test_runner.c; all test translation units share this counter through the <code class="docutils literal notranslate"><span class="pre">extern</span></code> declaration in this header. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_mu_failed">
+<span class="target" id="minunit_8h_1a38b980a3609d2ef4b9f54d25c94a43b2"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_mu_failed</span></span></span><a class="headerlink" href="#c.g_mu_failed" title="Link to this definition"></a><br /></dt>
+<dd><p>Running total of assertions that failed.</p>
+<p>A non-zero value causes MU_SUMMARY() to return exit code 1 so that <code class="docutils literal notranslate"><span class="pre">make</span></code> can detect and report test failures. </p>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../core/variables.html" class="btn btn-neutral float-left" title="Variables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_runner.html" class="btn btn-neutral float-right" title="test_runner.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

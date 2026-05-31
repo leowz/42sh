@@ -1,0 +1,13 @@
+{
+  "input": "iextt",
+  "tok_file": "viz/tokenizations/tok_1780153874_019940.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["iextt"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

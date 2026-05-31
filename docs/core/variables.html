@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Variables &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="minunit.h - Test Framework" href="../tests/minunit.html" />
+    <link rel="prev" title="Signals" href="signals.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.LST_VAR"><code class="docutils literal notranslate"><span class="pre">LST_VAR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.LST_ALIAS"><code class="docutils literal notranslate"><span class="pre">LST_ALIAS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_shell"><code class="docutils literal notranslate"><span class="pre">t_shell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_get_value"><code class="docutils literal notranslate"><span class="pre">var_get_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_get"><code class="docutils literal notranslate"><span class="pre">var_get()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_set"><code class="docutils literal notranslate"><span class="pre">var_set()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_unset"><code class="docutils literal notranslate"><span class="pre">var_unset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_export"><code class="docutils literal notranslate"><span class="pre">var_export()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_get_environ"><code class="docutils literal notranslate"><span class="pre">var_get_environ()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_init_from_environ"><code class="docutils literal notranslate"><span class="pre">var_init_from_environ()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_is_valid_identifier"><code class="docutils literal notranslate"><span class="pre">var_is_valid_identifier()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.var_is_assignment"><code class="docutils literal notranslate"><span class="pre">var_is_assignment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_var"><code class="docutils literal notranslate"><span class="pre">t_var</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_var.name"><code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_var.value"><code class="docutils literal notranslate"><span class="pre">value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_var.exported"><code class="docutils literal notranslate"><span class="pre">exported</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_var.readonly"><code class="docutils literal notranslate"><span class="pre">readonly</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_alias"><code class="docutils literal notranslate"><span class="pre">t_alias</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_alias.name"><code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_alias.value"><code class="docutils literal notranslate"><span class="pre">value</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Variables</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="variables">
+<h1>Variables<a class="headerlink" href="#variables" title="Link to this heading"></a></h1>
+<p>Shell variable and alias data structures, plus the variable management API (set, unset, export, environ rebuild) used by the rest of the shell. </p>
+<p>
+Variables and aliases are stored on the central <code class="docutils literal notranslate"><a class="reference internal" href="42sh.html#structt__shell"><span class="std std-ref"><span class="pre">t_shell</span></span></a></code> struct as <code class="docutils literal notranslate"><span class="pre">t_list*</span></code> chains of <code class="docutils literal notranslate"><span class="pre">t_var*</span></code> / <code class="docutils literal notranslate"><span class="pre">t_alias*</span></code> content pointers. This header owns those node types, the casting macros used to walk them, and every mutator that touches the variable table (create, set, unset, export, environ rebuild). The full <code class="docutils literal notranslate"><a class="reference internal" href="42sh.html#structt__shell"><span class="std std-ref"><span class="pre">t_shell</span></span></a></code> definition lives in <code class="docutils literal notranslate"><span class="pre">42sh.h</span></code>; this header forward-declares it so callers that only need the variable API can avoid pulling the full shell state header. <dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica</p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.LST_VAR">
+<span class="target" id="variables_8h_1a5a49064e358c60160041915899a72675"></span><span class="sig-name descname"><span class="n"><span class="pre">LST_VAR</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.LST_VAR" title="Link to this definition"></a><br /></dt>
+<dd><p>Casts a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node’s content to <code class="docutils literal notranslate"><a class="reference internal" href="#structt__var"><span class="std std-ref"><span class="pre">t_var</span></span></a> <span class="pre">*</span></code>. </p>
+</dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.LST_ALIAS">
+<span class="target" id="variables_8h_1ad46750e5decb6e1c6712a5094dcb155b"></span><span class="sig-name descname"><span class="n"><span class="pre">LST_ALIAS</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.LST_ALIAS" title="Link to this definition"></a><br /></dt>
+<dd><p>Casts a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node’s content to <code class="docutils literal notranslate"><a class="reference internal" href="#structt__alias"><span class="std std-ref"><span class="pre">t_alias</span></span></a> <span class="pre">*</span></code>. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.t_shell">
+<span class="target" id="variables_8h_1ae4cfb7c093350dca726786f683b6aca3"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_shell</span></span></span><br /></dt>
+<dd><p>Forward declaration to avoid circular dependency with 42sh.h. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_get_value">
+<span class="target" id="variables_8h_1a34d64e2d617b8150135833725de494b5"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">var_get_value</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_get_value" title="Link to this definition"></a><br /></dt>
+<dd><p>Get the value string of variable <code class="docutils literal notranslate"><span class="pre">name</span></code>, or NULL if unset. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_get">
+<span class="target" id="variables_8h_1a396b5d9757ac37a9ec75d89751e4d151"></span><a class="reference internal" href="#c.t_var" title="t_var"><span class="n"><span class="pre">t_var</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">var_get</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_get" title="Link to this definition"></a><br /></dt>
+<dd><p>Get the <code class="docutils literal notranslate"><a class="reference internal" href="#structt__var"><span class="std std-ref"><span class="pre">t_var</span></span></a></code> node for <code class="docutils literal notranslate"><span class="pre">name</span></code>, or NULL if unset. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_set">
+<span class="target" id="variables_8h_1a7449c0accbffef4d5206e9ca409d1352"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_set</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_set" title="Link to this definition"></a><br /></dt>
+<dd><p>Set (or create) variable <code class="docutils literal notranslate"><span class="pre">name</span></code> to <code class="docutils literal notranslate"><span class="pre">value</span></code>. Returns 0 on success. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_unset">
+<span class="target" id="variables_8h_1a66ca6a16bd8984e1444cdcc49449e500"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_unset</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_unset" title="Link to this definition"></a><br /></dt>
+<dd><p>Remove variable <code class="docutils literal notranslate"><span class="pre">name</span></code>. Returns 0 on success. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_export">
+<span class="target" id="variables_8h_1a6b45d6b8582d4547fff4a50af896d820"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_export</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_export" title="Link to this definition"></a><br /></dt>
+<dd><p>Mark variable <code class="docutils literal notranslate"><span class="pre">name</span></code> for export to child processes. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_get_environ">
+<span class="target" id="variables_8h_1a10f5ed3e1876c045b7edde6a89ebf7b7"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">var_get_environ</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_get_environ" title="Link to this definition"></a><br /></dt>
+<dd><p>Return (and cache) the <code class="docutils literal notranslate"><span class="pre">NULL</span></code>-terminated <code class="docutils literal notranslate"><span class="pre">envp</span></code> array for execve. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_init_from_environ">
+<span class="target" id="variables_8h_1ab4c47b6819e673136a6af03eb7df90a8"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_init_from_environ</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">envp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_init_from_environ" title="Link to this definition"></a><br /></dt>
+<dd><p>Populate <code class="docutils literal notranslate"><span class="pre">shell-&gt;variables</span></code> from the process’s initial <code class="docutils literal notranslate"><span class="pre">envp</span></code>. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_is_valid_identifier">
+<span class="target" id="variables_8h_1aaeb625ee7dcefd4a991cea9c9415362f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_is_valid_identifier</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_is_valid_identifier" title="Link to this definition"></a><br /></dt>
+<dd><p>Check whether <code class="docutils literal notranslate"><span class="pre">name</span></code> is a valid shell identifier. </p>
+<p>True if <code class="docutils literal notranslate"><span class="pre">name</span></code> is a valid shell identifier (export/unset/set validation).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 if <code class="docutils literal notranslate"><span class="pre">name</span></code> starts with a letter or ‘_’ and the rest are alphanumerics or ‘_’; 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.var_is_assignment">
+<span class="target" id="variables_8h_1ad32168792806d85e06d5d6b1b2871a03"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">var_is_assignment</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">eq_pos</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.var_is_assignment" title="Link to this definition"></a><br /></dt>
+<dd><p>Check whether <code class="docutils literal notranslate"><span class="pre">str</span></code> has the form “NAME=VALUE”. </p>
+<p>True if <code class="docutils literal notranslate"><span class="pre">str</span></code> has the form “NAME=VALUE”; on success <code class="docutils literal notranslate"><span class="pre">*eq_pos</span></code> is the ‘=’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str</strong> – The candidate assignment string. </p></li>
+<li><p><strong>eq_pos</strong> – Out: index of the ‘=’ on success. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 if <code class="docutils literal notranslate"><span class="pre">str</span></code> is an assignment, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_var">
+<span class="target" id="structt__var"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_var</span></span></span><a class="headerlink" href="#c.t_var" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;variables.h&gt;</em></div>
+<p>Shell variable data node. </p>
+<p>One instance per named variable. Stored in <code class="docutils literal notranslate"><span class="pre">t_shell.variables</span></code> as the <code class="docutils literal notranslate"><span class="pre">content</span></code> of a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node; traversal is done via that wrapper, which is why this struct carries no <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer of its own. Both <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">value</span></code> are heap-owned by this module. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_var.name">
+<span class="target" id="structt__var_1aafdc545b10c80b0c05345bacbd9967da"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">name</span></span></span><a class="headerlink" href="#c.t_var.name" title="Link to this definition"></a><br /></dt>
+<dd><p>Variable name (heap-owned, never NULL once set). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_var.value">
+<span class="target" id="structt__var_1a325926758c43e96d0069018a344a138e"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">value</span></span></span><a class="headerlink" href="#c.t_var.value" title="Link to this definition"></a><br /></dt>
+<dd><p>Variable value, or NULL for “exported but unset”. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_var.exported">
+<span class="target" id="structt__var_1a6708ca68dee55f6a1d351a3624523e3f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exported</span></span></span><a class="headerlink" href="#c.t_var.exported" title="Link to this definition"></a><br /></dt>
+<dd><p>1 when this name should appear in <code class="docutils literal notranslate"><span class="pre">execve</span></code>’s envp. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_var.readonly">
+<span class="target" id="structt__var_1a2586db1ca459645095bd43693aab9113"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">readonly</span></span></span><a class="headerlink" href="#c.t_var.readonly" title="Link to this definition"></a><br /></dt>
+<dd><p>1 when set/unset should refuse writes. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_alias">
+<span class="target" id="structt__alias"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_alias</span></span></span><a class="headerlink" href="#c.t_alias" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;variables.h&gt;</em></div>
+<p>Alias data node. </p>
+<p>Stored in <code class="docutils literal notranslate"><span class="pre">t_shell.aliases</span></code> as the <code class="docutils literal notranslate"><span class="pre">content</span></code> of a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node. Like <code class="docutils literal notranslate"><a class="reference internal" href="#structt__var"><span class="std std-ref"><span class="pre">t_var</span></span></a></code>, the linked-list plumbing is provided by the wrapping <code class="docutils literal notranslate"><span class="pre">t_list</span></code>, not by this struct. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_alias.name">
+<span class="target" id="structt__alias_1a5ebddb254c47e01a0560431b38f05281"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">name</span></span></span><a class="headerlink" href="#c.t_alias.name" title="Link to this definition"></a><br /></dt>
+<dd><p>Alias name (heap-owned). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_alias.value">
+<span class="target" id="structt__alias_1aedfea1bfb035e898535a9671c089f54e"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">value</span></span></span><a class="headerlink" href="#c.t_alias.value" title="Link to this definition"></a><br /></dt>
+<dd><p>Replacement text (heap-owned). </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="signals.html" class="btn btn-neutral float-left" title="Signals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tests/minunit.html" class="btn btn-neutral float-right" title="minunit.h - Test Framework" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

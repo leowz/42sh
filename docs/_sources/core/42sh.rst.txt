@@ -1,0 +1,6 @@
+42sh (Shell State)
+==================
+
+.. doxygenfile:: 42sh.h
+   :project: core
+

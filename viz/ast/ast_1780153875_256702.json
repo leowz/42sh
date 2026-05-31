@@ -1,0 +1,13 @@
+{
+  "input": "eixx",
+  "tok_file": "viz/tokenizations/tok_1780153875_256472.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["eixx"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

@@ -1,0 +1,208 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signals &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Variables" href="variables.html" />
+    <link rel="prev" title="Lexer" href="lexer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Signals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_shell"><code class="docutils literal notranslate"><span class="pre">t_shell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.signals_setup_interactive"><code class="docutils literal notranslate"><span class="pre">signals_setup_interactive()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.signals_setup_executing"><code class="docutils literal notranslate"><span class="pre">signals_setup_executing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.signals_setup_child"><code class="docutils literal notranslate"><span class="pre">signals_setup_child()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.signals_check"><code class="docutils literal notranslate"><span class="pre">signals_check()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.g_signal_received"><code class="docutils literal notranslate"><span class="pre">g_signal_received</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Signals</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="signals">
+<h1>Signals<a class="headerlink" href="#signals" title="Link to this heading"></a></h1>
+<p>Signal handling for interactive mode, command execution, and child processes. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.t_shell">
+<span class="target" id="signals_8h_1ae4cfb7c093350dca726786f683b6aca3"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_shell</span></span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.signals_setup_interactive">
+<span class="target" id="signals_8h_1abe78d06d6e81a19904ff85914fc08cfe"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">signals_setup_interactive</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.signals_setup_interactive" title="Link to this definition"></a><br /></dt>
+<dd><p>SIGINT - custom handler: newline + redisplay prompt (like bash)</p>
+<p>SIGQUIT - ignored (Ctrl-\ does nothing at prompt)</p>
+<p>SIGTSTP - ignored (Ctrl-Z at prompt is a no-op; children handle it)</p>
+<p>SIGTTIN - ignored (shell never blocks reading from a bg tty)</p>
+<p>SIGTTOU - ignored (tcsetpgrp/tcsetattr from shell must not self-stop) </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.signals_setup_executing">
+<span class="target" id="signals_8h_1acac49e0059a26de4fe54b44a9a615b31"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">signals_setup_executing</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.signals_setup_executing" title="Link to this definition"></a><br /></dt>
+<dd><p>SIGINT - ignored (let signal reach the child process)</p>
+<p>SIGQUIT - ignored (let signal reach the child process)</p>
+<p>SIGTSTP - ignored (let signal reach the child process)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The parent simply waits; the child handles or dies from the signal. </p>
+</div>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.signals_setup_child">
+<span class="target" id="signals_8h_1aae998bb6e93b7d3297a66ce4fe974998"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">signals_setup_child</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.signals_setup_child" title="Link to this definition"></a><br /></dt>
+<dd><p>After fork the child inherits the parent’s signal dispositions (SIG_IGN for interactive mode). We must reset them to SIG_DFL so the executed program responds to signals normally. SIGPIPE is reset alongside the others: this matches dash/ash and gives children a predictable disposition regardless of how the shell itself was launched &amp;#8212; e.g. an IDE-embedded terminal or CI runner that sets SIGPIPE=SIG_IGN upstream cannot otherwise sneak that into our children and cause SIGPIPE-targeted probes (signals.sh’s kill -PIPE case) to silently no-op. (bash leaves it inherited; we deliberately diverge.) The pipeline-test stderr-vs-bash comparison still needs a canonical SIGPIPE environment for symmetry; the test side handles that via a perl trampoline in b_case (tests/integration/posix_baseline.sh). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.signals_check">
+<span class="target" id="signals_8h_1ac1a715284871c447f1a7663279586ae3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">signals_check</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.signals_check" title="Link to this definition"></a><br /></dt>
+<dd><p>Called in the main loop before each prompt iteration.</p>
+<p>Sets $? to the appropriate value (130 for SIGINT = 128 + 2). </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_signal_received">
+<span class="target" id="signals_8h_1adf4ae317ae9d4cefe43aa85c4489f1c9"></span><span class="k"><span class="pre">volatile</span></span><span class="w"> </span><span class="n"><span class="pre">sig_atomic_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_signal_received</span></span></span><a class="headerlink" href="#c.g_signal_received" title="Link to this definition"></a><br /></dt>
+<dd><p>Global signal flag (volatile for signal handler safety) </p>
+<p><blockquote>
+<div><p>Forward declaration to avoid circular dependency with 42sh.h</p>
+</div></blockquote>
+</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>if you remember in the <a class="reference internal" href="ast.html#parser_8h_1abf01edcae0f1c7b5ebbf02c057a80b34"><span class="std std-ref">parser_parse</span></a> function we pass the shell this is the variable which can help us detect heredoc signals! </p>
+</div>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lexer.html" class="btn btn-neutral float-left" title="Lexer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="variables.html" class="btn btn-neutral float-right" title="Variables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

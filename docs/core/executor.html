@@ -1,0 +1,1017 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executor &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Expander" href="expander.html" />
+    <link rel="prev" title="Builtins" href="builtins.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Executor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.MAX_PIPELINE"><code class="docutils literal notranslate"><span class="pre">MAX_PIPELINE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.MAX_SAVED_FDS"><code class="docutils literal notranslate"><span class="pre">MAX_SAVED_FDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.CMD_HASH_BUCKETS"><code class="docutils literal notranslate"><span class="pre">CMD_HASH_BUCKETS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_init"><code class="docutils literal notranslate"><span class="pre">cmd_hash_init()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_destroy"><code class="docutils literal notranslate"><span class="pre">cmd_hash_destroy()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_clear"><code class="docutils literal notranslate"><span class="pre">cmd_hash_clear()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_get"><code class="docutils literal notranslate"><span class="pre">cmd_hash_get()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_set"><code class="docutils literal notranslate"><span class="pre">cmd_hash_set()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_delete"><code class="docutils literal notranslate"><span class="pre">cmd_hash_delete()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_hash_iter"><code class="docutils literal notranslate"><span class="pre">cmd_hash_iter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.executor_execute"><code class="docutils literal notranslate"><span class="pre">executor_execute()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_simple_command"><code class="docutils literal notranslate"><span class="pre">execute_simple_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_pipeline"><code class="docutils literal notranslate"><span class="pre">execute_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_and"><code class="docutils literal notranslate"><span class="pre">execute_and()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_or"><code class="docutils literal notranslate"><span class="pre">execute_or()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_sequence"><code class="docutils literal notranslate"><span class="pre">execute_sequence()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_subshell"><code class="docutils literal notranslate"><span class="pre">execute_subshell()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_block"><code class="docutils literal notranslate"><span class="pre">execute_block()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.execute_background"><code class="docutils literal notranslate"><span class="pre">execute_background()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.setup_redirections"><code class="docutils literal notranslate"><span class="pre">setup_redirections()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.restore_redirections"><code class="docutils literal notranslate"><span class="pre">restore_redirections()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.find_command"><code class="docutils literal notranslate"><span class="pre">find_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.exec_pipeline_external"><code class="docutils literal notranslate"><span class="pre">exec_pipeline_external()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.get_exit_status"><code class="docutils literal notranslate"><span class="pre">get_exit_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.split_assignment"><code class="docutils literal notranslate"><span class="pre">split_assignment()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.apply_assignments"><code class="docutils literal notranslate"><span class="pre">apply_assignments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.report_command_error"><code class="docutils literal notranslate"><span class="pre">report_command_error()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_cmd_hash_value"><code class="docutils literal notranslate"><span class="pre">t_cmd_hash_value</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_cmd_hash_value.path"><code class="docutils literal notranslate"><span class="pre">path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_cmd_hash_value.hits"><code class="docutils literal notranslate"><span class="pre">hits</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dispatch">Dispatch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.dispatch_node"><code class="docutils literal notranslate"><span class="pre">dispatch_node()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-commands">Simple Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.exec_assignment_only"><code class="docutils literal notranslate"><span class="pre">exec_assignment_only()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.save_and_apply_assigns"><code class="docutils literal notranslate"><span class="pre">save_and_apply_assigns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.restore_assigns"><code class="docutils literal notranslate"><span class="pre">restore_assigns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.exec_builtin"><code class="docutils literal notranslate"><span class="pre">exec_builtin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.exec_child"><code class="docutils literal notranslate"><span class="pre">exec_child()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.launch_simple_job"><code class="docutils literal notranslate"><span class="pre">launch_simple_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.prewarm_cmd_cache"><code class="docutils literal notranslate"><span class="pre">prewarm_cmd_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#logical">Logical (&amp;&amp;, ||, ;)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipes">Pipes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_pipeline"><code class="docutils literal notranslate"><span class="pre">collect_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.close_pipes"><code class="docutils literal notranslate"><span class="pre">close_pipes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.pipe_child"><code class="docutils literal notranslate"><span class="pre">pipe_child()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.open_pipes"><code class="docutils literal notranslate"><span class="pre">open_pipes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.fork_stage"><code class="docutils literal notranslate"><span class="pre">fork_stage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.spawn_pipeline"><code class="docutils literal notranslate"><span class="pre">spawn_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.prewarm_pipeline_cache"><code class="docutils literal notranslate"><span class="pre">prewarm_pipeline_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.expand_pipeline_stages"><code class="docutils literal notranslate"><span class="pre">expand_pipeline_stages()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#subshell-block-background">Subshell, Block, Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.subshell_child"><code class="docutils literal notranslate"><span class="pre">subshell_child()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.launch_subshell_job"><code class="docutils literal notranslate"><span class="pre">launch_subshell_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.bg_child"><code class="docutils literal notranslate"><span class="pre">bg_child()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.bg_apply_assignments"><code class="docutils literal notranslate"><span class="pre">bg_apply_assignments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.bg_simple_child"><code class="docutils literal notranslate"><span class="pre">bg_simple_child()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#i-o-redirections">I/O Redirections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.redir_get_fd"><code class="docutils literal notranslate"><span class="pre">redir_get_fd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.redir_open_file"><code class="docutils literal notranslate"><span class="pre">redir_open_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.apply_dup_redir"><code class="docutils literal notranslate"><span class="pre">apply_dup_redir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.apply_one_redir"><code class="docutils literal notranslate"><span class="pre">apply_one_redir()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#path-lookup">PATH Lookup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.build_path"><code class="docutils literal notranslate"><span class="pre">build_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.free_split"><code class="docutils literal notranslate"><span class="pre">free_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.search_path"><code class="docutils literal notranslate"><span class="pre">search_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.lookup_cached"><code class="docutils literal notranslate"><span class="pre">lookup_cached()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Executor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="executor">
+<h1>Executor<a class="headerlink" href="#executor" title="Link to this heading"></a></h1>
+<p>Walks the AST and runs each node: simple commands, pipelines,
+logical operators, subshells, blocks, and background jobs.</p>
+<p>Defines the executor functions for handling AST nodes. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>zweng, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MAX_PIPELINE">
+<span class="target" id="executor_8h_1a498417d62a77a67bbc7bedb36028b029"></span><span class="sig-name descname"><span class="n"><span class="pre">MAX_PIPELINE</span></span></span><a class="headerlink" href="#c.MAX_PIPELINE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.MAX_SAVED_FDS">
+<span class="target" id="executor_8h_1a7c14f55f70137112158099bfda977b13"></span><span class="sig-name descname"><span class="n"><span class="pre">MAX_SAVED_FDS</span></span></span><a class="headerlink" href="#c.MAX_SAVED_FDS" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.CMD_HASH_BUCKETS">
+<span class="target" id="executor_8h_1a2c999407559f55e82ee06a464b15b7d7"></span><span class="sig-name descname"><span class="n"><span class="pre">CMD_HASH_BUCKETS</span></span></span><a class="headerlink" href="#c.CMD_HASH_BUCKETS" title="Link to this definition"></a><br /></dt>
+<dd><p>Default bucket count for the command-path hash table (prime, small). </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_init">
+<span class="target" id="executor_8h_1a199573c826f93cb718d04362e75d7667"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_init</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_init" title="Link to this definition"></a><br /></dt>
+<dd><p>Allocate <code class="docutils literal notranslate"><span class="pre">shell-&gt;cmd_hash</span></code> if not already present. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_destroy">
+<span class="target" id="executor_8h_1af22595b8f0919eef1e61e9a9e367dc73"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_destroy</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_destroy" title="Link to this definition"></a><br /></dt>
+<dd><p>Drop every entry and free the table itself. Safe to call repeatedly. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_clear">
+<span class="target" id="executor_8h_1aa2082db08b6b48325ab09506179fc7cc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_clear</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_clear" title="Link to this definition"></a><br /></dt>
+<dd><p>Drop every entry but keep the table allocated (for <code class="docutils literal notranslate"><span class="pre">hash</span> <span class="pre">-r</span></code>). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_get">
+<span class="target" id="executor_8h_1ae5021119ea2dcc84a2fbe2aedae1f713"></span><a class="reference internal" href="#c.t_cmd_hash_value" title="t_cmd_hash_value"><span class="n"><span class="pre">t_cmd_hash_value</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_get</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_get" title="Link to this definition"></a><br /></dt>
+<dd><p>Look up <code class="docutils literal notranslate"><span class="pre">name</span></code> without bumping the hit counter. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_set">
+<span class="target" id="executor_8h_1ad9ed3b9e71bd9b1f7daed573bc7f1a12"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_set" title="Link to this definition"></a><br /></dt>
+<dd><p>Insert or replace <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">-&gt;</span> <span class="pre">path</span></code> (path is duplicated internally). </p>
+<p>Preserves the hit counter when <code class="docutils literal notranslate"><span class="pre">name</span></code> already exists, so <code class="docutils literal notranslate"><span class="pre">hash</span> <span class="pre">-p</span></code> doesn’t reset history. Returns 1 on success, 0 on allocation failure (table left unchanged). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_delete">
+<span class="target" id="executor_8h_1a48a8266109b3e65815265945c65ec600"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_delete</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_delete" title="Link to this definition"></a><br /></dt>
+<dd><p>Remove <code class="docutils literal notranslate"><span class="pre">name</span></code>. Returns 1 if an entry was removed, 0 otherwise. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_hash_iter">
+<span class="target" id="executor_8h_1a8d7d3064eecef61247cdcb9791cd9c10"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_hash_iter</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#c.t_cmd_hash_value" title="t_cmd_hash_value"><span class="n"><span class="pre">t_cmd_hash_value</span></span></a><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">)</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">userdata</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_hash_iter" title="Link to this definition"></a><br /></dt>
+<dd><p>Iterate every (name, value) pair in insertion-agnostic order. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.executor_execute">
+<span class="target" id="executor_8h_1a13bdda5f80abca3b850f0c2f1b59afad"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">executor_execute</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.executor_execute" title="Link to this definition"></a><br /></dt>
+<dd><p>Main dispatch function for executing AST nodes. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the central shell state </p></li>
+<li><p><strong>ast</strong> – Pointer to the AST node to execute </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exit status code </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_simple_command">
+<span class="target" id="executor_8h_1a7fb5f0020e176d996687d2ef8b923273"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_simple_command</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_simple_command" title="Link to this definition"></a><br /></dt>
+<dd><p>Node-type executors. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the central shell state </p></li>
+<li><p><strong>ast</strong> – Pointer to the AST node to execute </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exit status code </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_pipeline">
+<span class="target" id="executor_8h_1a911d93d3f592804b8d583782d8fbc577"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_pipeline</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_pipeline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_and">
+<span class="target" id="executor_8h_1a93d24b6056370f86c919883614f06fc1"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_and</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_and" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_or">
+<span class="target" id="executor_8h_1ad3018390cc0c46546ed4dcfd02f7d37a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_or</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_or" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_sequence">
+<span class="target" id="executor_8h_1a3db4216b6397bf04d3d5204db9121b82"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_sequence</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_sequence" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_subshell">
+<span class="target" id="executor_8h_1a97aa6ca9cf39810fd7c277463e80892e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_subshell</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_subshell" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_block">
+<span class="target" id="executor_8h_1a47767d0e775a42e7e38303e3c35f53cc"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_block</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_block" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.execute_background">
+<span class="target" id="executor_8h_1a082c2d122e58ca7a13b035dc8347a639"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_background</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.execute_background" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.setup_redirections">
+<span class="target" id="executor_8h_1a9b33cb188925fd4bdbfe0a0b67e063ab"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setup_redirections</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redirs</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">saved_fds</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.setup_redirections" title="Link to this definition"></a><br /></dt>
+<dd><p>redirection setup </p>
+<p>
+If saved_fds is not NULL, save stdin/stdout/stderr first (for restore). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>redirs</strong> – List of redirection nodes </p></li>
+<li><p><strong>saved_fds</strong> – Array to save original file descriptors </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exit status code</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.restore_redirections">
+<span class="target" id="executor_8h_1a745761ea2f87e3968790c84e434b349e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">restore_redirections</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">saved_fds</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.restore_redirections" title="Link to this definition"></a><br /></dt>
+<dd><p>Restore redirections. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>saved_fds</strong> – Array of saved file descriptors </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.find_command">
+<span class="target" id="executor_8h_1ae2070267d1e53aa5bc6ac0dc0c85b1b8"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">find_command</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.find_command" title="Link to this definition"></a><br /></dt>
+<dd><p>Command search (PATH) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the central shell state </p></li>
+<li><p><strong>name</strong> – Name of the command to search for </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to the found command, or NULL if not found </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.exec_pipeline_external">
+<span class="target" id="executor_8h_1a6c614c345c8dc1b86aed2d8e4a10f1e1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exec_pipeline_external</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.exec_pipeline_external" title="Link to this definition"></a><br /></dt>
+<dd><p>Pipeline helper (called from pipe_child, does not return) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the central shell state </p></li>
+<li><p><strong>cmd</strong> – Pointer to the command node </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.get_exit_status">
+<span class="target" id="executor_8h_1a1c76237e804221f0b304bb911f2d9871"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">get_exit_status</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">wstatus</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.get_exit_status" title="Link to this definition"></a><br /></dt>
+<dd><p>get exit status from wait status </p>
+<p><ul>
+<li><p>Normal exit: WEXITSTATUS (0-255)</p>
+<p><ul class="simple">
+<li><p>Killed by signal: 128 + signal number </p></li>
+</ul>
+</p>
+</li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wstatus</strong> – Wait status code </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exit status code</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.split_assignment">
+<span class="target" id="executor_8h_1adfc974609bf3404693e579212d74e1f8"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">split_assignment</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">assign</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.split_assignment" title="Link to this definition"></a><br /></dt>
+<dd><p>Caller must free both *name and *value.</p>
+<p>If no ‘=’ found, *name = dup of assign, *value = dup of “”. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.apply_assignments">
+<span class="target" id="executor_8h_1ac708873ebb5b07462e4e7d0663866608"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_assignments</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">assigns</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">do_export</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.apply_assignments" title="Link to this definition"></a><br /></dt>
+<dd><p>Apply variable assignments to the shell (shared by the simple command and pipeline child paths). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>assigns</strong> – List of “NAME=value” assignment strings. </p></li>
+<li><p><strong>do_export</strong> – Whether to also export each variable. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.report_command_error">
+<span class="target" id="executor_8h_1a5ee9b55ed22911cbba049dcc3e94fa4e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">report_command_error</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.report_command_error" title="Link to this definition"></a><br /></dt>
+<dd><p>Print the diagnostic for an unrunnable command and return its exit status: 126 if the path exists but is not executable, 127 if it could not be found. </p>
+<p>
+Print the diagnostic for an unrunnable command and return its exit status: 126 if the path exists but is not executable, 127 if it could not be found.</p>
+<p>Distinguishes “exists but not executable” (126, permission denied) from “not found” (127). Only a name containing ‘/’ can be probed for existence on disk; a bare name that PATH search failed to resolve is reported as not found. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The command name as typed. </p></li>
+<li><p><strong>name</strong> – The command name as typed. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>126 or 127.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>126 if the path exists but is not executable, 127 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_cmd_hash_value">
+<span class="target" id="structt__cmd__hash__value"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_cmd_hash_value</span></span></span><a class="headerlink" href="#c.t_cmd_hash_value" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;executor.h&gt;</em></div>
+<p>Cached PATH lookup, indexed by command name in <code class="docutils literal notranslate"><span class="pre">shell-&gt;cmd_hash</span></code>. </p>
+<p><code class="docutils literal notranslate"><span class="pre">path</span></code> is heap-allocated and owned by the value. <code class="docutils literal notranslate"><span class="pre">hits</span></code> tracks how many times the cache satisfied a lookup (read by <code class="docutils literal notranslate"><span class="pre">hash</span></code>). </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_cmd_hash_value.path">
+<span class="target" id="structt__cmd__hash__value_1af112173a2d7edbf781bef6f55ba7df6b"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">path</span></span></span><a class="headerlink" href="#c.t_cmd_hash_value.path" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_cmd_hash_value.hits">
+<span class="target" id="structt__cmd__hash__value_1a40d499f7e2e9b6ede842154fb0c8c8d5"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hits</span></span></span><a class="headerlink" href="#c.t_cmd_hash_value.hits" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<section id="dispatch">
+<h2>Dispatch<a class="headerlink" href="#dispatch" title="Link to this heading"></a></h2>
+<p>Command execution functionality for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.dispatch_node">
+<span class="target" id="executor_8c_1ad8547dbe3169fab5fe7c0d506a0f21b5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dispatch_node</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.dispatch_node" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="executor_8c_1afeaac1ccfa0ed531a1a7e05a5c3553f0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">executor_execute</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="simple-commands">
+<h2>Simple Commands<a class="headerlink" href="#simple-commands" title="Link to this heading"></a></h2>
+<p>Command execution functionality for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__command_8c_1a1351987941d5c21c2b2d1075ab83192c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_assignments</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">assigns</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">do_export</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Apply assignments permanently to shell variables. </p>
+<p>Used for a bare assignment, and in a forked child (a simple command or a pipeline stage) before execve. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>assigns</strong> – The list of assignments. </p></li>
+<li><p><strong>do_export</strong> – Whether to export the variables. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.exec_assignment_only">
+<span class="target" id="exec__command_8c_1a0de325da5ae68b6ac34b1626a7dc66b0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exec_assignment_only</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.exec_assignment_only" title="Link to this definition"></a><br /></dt>
+<dd><p>Handle empty command (just assignments and/or redirections). </p>
+<p>Example: FOO=bar or FOO=bar &gt; file </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>cmd</strong> – The command structure. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, 1 on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.save_and_apply_assigns">
+<span class="target" id="exec__command_8c_1a95dbb95edbd59e28b8b1b93fd09aeb42"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">save_and_apply_assigns</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">assigns</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">old_names</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">old_vals</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.save_and_apply_assigns" title="Link to this definition"></a><br /></dt>
+<dd><p>Save old values, apply temporary assignments for builtin scope. </p>
+<p>old_names/old_vals arrays store what to restore afterward. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>assigns</strong> – The list of assignments. </p></li>
+<li><p><strong>old_names</strong> – Array to store old variable names. </p></li>
+<li><p><strong>old_vals</strong> – Array to store old variable values. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Count of saved assignments. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.restore_assigns">
+<span class="target" id="exec__command_8c_1a6304ebdcb4b79fa4cadc233d22c6f981"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">restore_assigns</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">old_names</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">old_vals</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.restore_assigns" title="Link to this definition"></a><br /></dt>
+<dd><p>Restore old variable values after builtin execution. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>old_names</strong> – Array of old variable names. </p></li>
+<li><p><strong>old_vals</strong> – Array of old variable values. </p></li>
+<li><p><strong>count</strong> – Number of assignments to restore. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.exec_builtin">
+<span class="target" id="exec__command_8c_1a3b79e4e47fe5d00cd0d0d87c30e954b9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exec_builtin</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span>, <a class="reference internal" href="builtins.html#c.t_builtin_fn" title="t_builtin_fn"><span class="n"><span class="pre">t_builtin_fn</span></span></a><span class="w"> </span><span class="n"><span class="pre">fn</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.exec_builtin" title="Link to this definition"></a><br /></dt>
+<dd><p>Execute a builtin with temporary assignments and redirections. </p>
+<p>Assignments are scoped to this command only, then restored. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>cmd</strong> – The command structure. </p></li>
+<li><p><strong>fn</strong> – The builtin function to execute. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The exit status of the builtin. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.exec_child">
+<span class="target" id="exec__command_8c_1ad322c9cda57efe8a46003e4c8f0d2990"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exec_child</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.exec_child" title="Link to this definition"></a><br /></dt>
+<dd><p>Child process: place in own pgrp, apply assignments, exec. </p>
+<p><code class="docutils literal notranslate"><span class="pre">setpgid(0,</span> <span class="pre">0)</span></code> race-free paired with parent-side <code class="docutils literal notranslate"><span class="pre">setpgid(pid,pid)</span></code>; <code class="docutils literal notranslate"><span class="pre">tcsetpgrp</span></code> hands the terminal off before the child could block on stdin (parent’s SIG_IGN for SIGTTOU is still inherited here). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.launch_simple_job">
+<span class="target" id="exec__command_8c_1a180527c453ffea6e80e079d00f4f88c2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">launch_simple_job</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span>, <span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="n"><span class="pre">pid</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.launch_simple_job" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.prewarm_cmd_cache">
+<span class="target" id="exec__command_8c_1a6979aa2b42fd1c6c12fc1c02f2f1245b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">prewarm_cmd_cache</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.prewarm_cmd_cache" title="Link to this definition"></a><br /></dt>
+<dd><p>Resolve and cache the external command in the parent before forking, so the cache survives in the shell process. </p>
+<p>Skipped when the command has prefix assignments - those may change <code class="docutils literal notranslate"><span class="pre">PATH</span></code> for this invocation only, so resolution must happen in the child after apply_assignments. The result is freed immediately; we’re only here to warm <code class="docutils literal notranslate"><span class="pre">shell-&gt;cmd_hash</span></code>. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__command_8c_1a0e12907f55849d2aa88e96d8394c9373"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_simple_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="logical">
+<h2>Logical (&amp;&amp;, ||, ;)<a class="headerlink" href="#logical" title="Link to this heading"></a></h2>
+<p>Logical command execution functionality for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__logical_8c_1a7cd7ab86de1e21b51d453062402d8fdb"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_and</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>cmd1 &amp;&amp; cmd2 : run right only if left succeeds (exit 0) </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__logical_8c_1a524d8eb277456b3326321d579e7c280a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_or</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>cmd1 || cmd2 : run right only if left fails (exit != 0) </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__logical_8c_1a72e39927e76def57b55f5d055274eb0d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_sequence</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>cmd1 ; cmd2 : run both, return status of right </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="pipes">
+<h2>Pipes<a class="headerlink" href="#pipes" title="Link to this heading"></a></h2>
+<p>Pipeline command execution functionality for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_pipeline">
+<span class="target" id="exec__pipeline_8c_1aa9becfac7b10806d638c7f6f4076eb9b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">collect_pipeline</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmds</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">max</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_pipeline" title="Link to this definition"></a><br /></dt>
+<dd><p>Flatten nested PIPE nodes left-to-right into a flat array. </p>
+<p>Example: (A | B) | C =&gt; [A, B, C] </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.close_pipes">
+<span class="target" id="exec__pipeline_8c_1ac4d917a062f6c9624413fe1cd0f22a9f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">close_pipes</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">pipes</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.close_pipes" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.pipe_child">
+<span class="target" id="exec__pipeline_8c_1a47678259b9d6ae90ef46b98a60f77544"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pipe_child</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd_ast</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">pipes</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.pipe_child" title="Link to this definition"></a><br /></dt>
+<dd><p>Pipeline stage in the child: join the job pgrp, wire pipes, exec. </p>
+<p>info = { stage_index, stage_count, group_pgid }. When <code class="docutils literal notranslate"><span class="pre">group_pgid</span> <span class="pre">==</span> <span class="pre">0</span></code> this stage becomes the pgrp leader; the parent mirrors <code class="docutils literal notranslate"><span class="pre">setpgid</span></code> race-free. Expansion of NODE_COMMAND stages is done in the parent before forking (see expand_pipeline_stages) so the child inherits the already-expanded argv and debug output stays in one process. The child also clears <code class="docutils literal notranslate"><span class="pre">interactive</span></code> (a forked stage is not the interactive shell) and applies one-shot assignments before redirections, mirroring exec_child. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__pipeline_8c_1a1e840b718fac64602a3d83a42665aa31"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">exec_pipeline_external</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.open_pipes">
+<span class="target" id="exec__pipeline_8c_1ae775c45b8161333d1e6dd079b6a709b1"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">open_pipes</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">pipes</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.open_pipes" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.fork_stage">
+<span class="target" id="exec__pipeline_8c_1a73493ffd0747eb3d850d183874de67b0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fork_stage</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd_ast</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">pipes</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.fork_stage" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.spawn_pipeline">
+<span class="target" id="exec__pipeline_8c_1a78e1fcbb879be78181156da3f8b1320d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">spawn_pipeline</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmds</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">pipes</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span>, <a class="reference internal" href="job_control.html#c.t_job" title="t_job"><span class="n"><span class="pre">t_job</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.spawn_pipeline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.prewarm_pipeline_cache">
+<span class="target" id="exec__pipeline_8c_1a48c6f6d581010641da9e08f8b3959f78"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">prewarm_pipeline_cache</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmds</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.prewarm_pipeline_cache" title="Link to this definition"></a><br /></dt>
+<dd><p>Warm the command-path cache in the parent for each pipeline stage so cache hits survive the fork. </p>
+<p>Mirrors <a class="reference internal" href="#exec__command_8c_1a6979aa2b42fd1c6c12fc1c02f2f1245b"><span class="std std-ref">prewarm_cmd_cache()</span></a> in exec_command.c: skip builtins, absolute / relative paths, and stages with prefix assignments (the latter may shadow <code class="docutils literal notranslate"><span class="pre">PATH</span></code> for that stage only). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_pipeline_stages">
+<span class="target" id="exec__pipeline_8c_1a65f2b11cf622d1b5be84f83be501caf8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_pipeline_stages</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmds</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_pipeline_stages" title="Link to this definition"></a><br /></dt>
+<dd><p>Expand every NODE_COMMAND stage in the parent before forking. </p>
+<p>Runs the same expand_command pass that execute_simple_command uses, so each child inherits a fully-expanded argv. Compound stages (subshells etc.) are expanded later inside their own executor_execute call. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__pipeline_8c_1adae62001a7246c261ea395d8d432bbb9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_pipeline</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="subshell-block-background">
+<h2>Subshell, Block, Background<a class="headerlink" href="#subshell-block-background" title="Link to this heading"></a></h2>
+<p>Subshell, block, and background execution for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.subshell_child">
+<span class="target" id="exec__subshell_8c_1a5242c3cef55ffba765d70ba9e1a00a2d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">subshell_child</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.subshell_child" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.launch_subshell_job">
+<span class="target" id="exec__subshell_8c_1acd31dddc053256fd3126e38d5993391b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">launch_subshell_job</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span>, <span class="n"><span class="pre">pid_t</span></span><span class="w"> </span><span class="n"><span class="pre">pid</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.launch_subshell_job" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__subshell_8c_1af10e439a1c9f097556e96a9cc19a7cd5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_subshell</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>( cmd ) - runs in a forked child (subshell) with its own pgrp, routed through the job-control machinery so Ctrl-Z works. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__subshell_8c_1ae0997862cb76ea33f9dc08bf4f0c4fd4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_block</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>{ cmd; } - runs in the current shell, but with its own redirections. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.bg_child">
+<span class="target" id="exec__subshell_8c_1a58ea82f7a6269e105140ddbeac0042e0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">bg_child</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.bg_child" title="Link to this definition"></a><br /></dt>
+<dd><p>Execute a background command. </p>
+<p>cmd &amp; - runs in a forked child with its own process group. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>ast</strong> – The abstract syntax tree node. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The exit status of the command. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.bg_apply_assignments">
+<span class="target" id="exec__subshell_8c_1a17df0148d1e5dd1042314ddd0ee6b8b8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">bg_apply_assignments</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">assigns</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.bg_apply_assignments" title="Link to this definition"></a><br /></dt>
+<dd><p>Apply (and export) inline assignments in a bg subshell child. </p>
+<p>Equivalent to <code class="docutils literal notranslate"><span class="pre">apply_assignments(shell,</span> <span class="pre">...,</span> <span class="pre">1)</span></code> in exec_command, inlined here because that helper isn’t exported and pulling it in would over-couple the modules. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.bg_simple_child">
+<span class="target" id="exec__subshell_8c_1aca697e2a57d78dae2d1c0222744fa088"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">bg_simple_child</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">outer</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.bg_simple_child" title="Link to this definition"></a><br /></dt>
+<dd><p>Child path for <code class="docutils literal notranslate"><span class="pre">simple-command</span> <span class="pre">&amp;</span></code>: fork once, exec directly. </p>
+<p>Bypasses the bg_child → executor_execute → exec_command → exec_child double-fork. That chain put the actual program in its own pgrp (not the job’s pgrp) and made exec_child call tcsetpgrp from a background pgrp — both broken. This single fork keeps the program in the same pgrp the parent tracks and never claims the terminal. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__subshell_8c_1a19ddeeaa9a9fcf7e8dcc5eefc85c0d6e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute_background</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="i-o-redirections">
+<h2>I/O Redirections<a class="headerlink" href="#i-o-redirections" title="Link to this heading"></a></h2>
+<p>Redirection setup and restore for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.redir_get_fd">
+<span class="target" id="redirections_8c_1ab8cd909ad77f982d33bcb9a995465118"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">redir_get_fd</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="ast.html#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.redir_get_fd" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.redir_open_file">
+<span class="target" id="redirections_8c_1a45854f0507c8c0b2e6add52889280cc7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">redir_open_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="ast.html#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.redir_open_file" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.apply_dup_redir">
+<span class="target" id="redirections_8c_1ab5788aee9a6841de39f70a58ec56ae45"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_dup_redir</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="ast.html#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">target_fd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.apply_dup_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.apply_one_redir">
+<span class="target" id="redirections_8c_1ac034cc1e4190a15feb3cb3333f5e690a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_one_redir</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="ast.html#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.apply_one_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="redirections_8c_1a9b33cb188925fd4bdbfe0a0b67e063ab"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setup_redirections</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redirs</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">saved_fds</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>redirection setup </p>
+<p>If saved_fds is not NULL, save stdin/stdout/stderr first (for restore). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="redirections_8c_1a745761ea2f87e3968790c84e434b349e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">restore_redirections</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">saved_fds</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Restore redirections. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>saved_fds</strong> – Array of saved file descriptors </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="path-lookup">
+<h2>PATH Lookup<a class="headerlink" href="#path-lookup" title="Link to this heading"></a></h2>
+<p>Command search functionality for 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.build_path">
+<span class="target" id="command__search_8c_1a4a57afdae63ea2a5de9acfabae918db0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">build_path</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">dir</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.build_path" title="Link to this definition"></a><br /></dt>
+<dd><p>Build “dir/name” path. Caller must free the result. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dir</strong> – The directory path. </p></li>
+<li><p><strong>name</strong> – The file name. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The full path, or NULL if allocation fails. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.free_split">
+<span class="target" id="command__search_8c_1ab135685007f9e9ffeee5fb205b7d7528"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_split</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">arr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.free_split" title="Link to this definition"></a><br /></dt>
+<dd><p>Search each directory in PATH for an executable named <code class="docutils literal notranslate"><span class="pre">name</span></code>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_var</strong> – The PATH environment variable. </p></li>
+<li><p><strong>name</strong> – The command name. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Heap-allocated full path, or NULL if not found. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.search_path">
+<span class="target" id="command__search_8c_1a16dd2c32f3d366112ce418aebc4ea865"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">search_path</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path_var</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.search_path" title="Link to this definition"></a><br /></dt>
+<dd><p>Search each directory in PATH for an executable named <code class="docutils literal notranslate"><span class="pre">name</span></code>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_var</strong> – The PATH environment variable. </p></li>
+<li><p><strong>name</strong> – The command name. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Heap-allocated full path, or NULL if not found. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.lookup_cached">
+<span class="target" id="command__search_8c_1ac29ad9c67dcc80bce6ba0f55e8187edd"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">lookup_cached</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.lookup_cached" title="Link to this definition"></a><br /></dt>
+<dd><p>Consult the command-path cache before walking PATH. </p>
+<p>A cached path that no longer exists (file deleted, PATH changed, etc.) falls through to a fresh PATH walk. The hit counter is bumped only when the cache actually satisfies the lookup, so <code class="docutils literal notranslate"><span class="pre">hash</span></code> reflects real usage rather than just insertions. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="command__search_8c_1ad79217be95eb202fc741e699bb7c9cb4"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">find_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p><ul>
+<li><p>If name contains ‘/’, treat it as a path directly.</p>
+<p><ul class="simple">
+<li><p>Otherwise consult the hash cache, then search $PATH and remember the result on hit so the next lookup is O(1). </p></li>
+</ul>
+</p>
+</li>
+</ul>
+</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="command__search_8c_1a5ee9b55ed22911cbba049dcc3e94fa4e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">report_command_error</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Print the diagnostic for an unrunnable command and return its exit status. </p>
+<p>Print the diagnostic for an unrunnable command and return its exit status: 126 if the path exists but is not executable, 127 if it could not be found.</p>
+<p>Distinguishes “exists but not executable” (126, permission denied) from “not found” (127). Only a name containing ‘/’ can be probed for existence on disk; a bare name that PATH search failed to resolve is reported as not found. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The command name as typed. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>126 if the path exists but is not executable, 127 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="utilities">
+<h2>Utilities<a class="headerlink" href="#utilities" title="Link to this heading"></a></h2>
+<p>Utility functions for command execution in 42sh. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>wengzhang, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__utils_8c_1a1c76237e804221f0b304bb911f2d9871"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">get_exit_status</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">wstatus</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>get exit status from wait status </p>
+<p><ul>
+<li><p>Normal exit: WEXITSTATUS (0-255)</p>
+<p><ul class="simple">
+<li><p>Killed by signal: 128 + signal number </p></li>
+</ul>
+</p>
+</li>
+</ul>
+</p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="exec__utils_8c_1adfc974609bf3404693e579212d74e1f8"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">split_assignment</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">assign</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">value</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Caller must free both *name and *value.</p>
+<p>If no ‘=’ found, *name = dup of assign, *value = dup of “”. </p>
+</dd></dl>
+
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="builtins.html" class="btn btn-neutral float-left" title="Builtins" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="expander.html" class="btn btn-neutral float-right" title="Expander" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

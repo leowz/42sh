@@ -1,0 +1,1557 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builtins &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Executor" href="executor.html" />
+    <link rel="prev" title="AST (Abstract Syntax Tree)" href="ast.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Builtins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_shell"><code class="docutils literal notranslate"><span class="pre">t_shell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_builtin_fn"><code class="docutils literal notranslate"><span class="pre">t_builtin_fn</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_get"><code class="docutils literal notranslate"><span class="pre">builtin_get()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_is_builtin"><code class="docutils literal notranslate"><span class="pre">builtin_is_builtin()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_echo"><code class="docutils literal notranslate"><span class="pre">builtin_echo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_cd"><code class="docutils literal notranslate"><span class="pre">builtin_cd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_pwd"><code class="docutils literal notranslate"><span class="pre">builtin_pwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_exit"><code class="docutils literal notranslate"><span class="pre">builtin_exit()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_type"><code class="docutils literal notranslate"><span class="pre">builtin_type()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_jobs"><code class="docutils literal notranslate"><span class="pre">builtin_jobs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_fg"><code class="docutils literal notranslate"><span class="pre">builtin_fg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_bg"><code class="docutils literal notranslate"><span class="pre">builtin_bg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_kill"><code class="docutils literal notranslate"><span class="pre">builtin_kill()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_history"><code class="docutils literal notranslate"><span class="pre">builtin_history()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_set"><code class="docutils literal notranslate"><span class="pre">builtin_set()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_unset"><code class="docutils literal notranslate"><span class="pre">builtin_unset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_export"><code class="docutils literal notranslate"><span class="pre">builtin_export()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_hash"><code class="docutils literal notranslate"><span class="pre">builtin_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_alias"><code class="docutils literal notranslate"><span class="pre">builtin_alias()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_unalias"><code class="docutils literal notranslate"><span class="pre">builtin_unalias()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.builtin_test"><code class="docutils literal notranslate"><span class="pre">builtin_test()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_test_context"><code class="docutils literal notranslate"><span class="pre">t_test_context</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_test_context.argc"><code class="docutils literal notranslate"><span class="pre">argc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_test_context.argv"><code class="docutils literal notranslate"><span class="pre">argv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_test_context.pos"><code class="docutils literal notranslate"><span class="pre">pos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_test_context.syntax_error"><code class="docutils literal notranslate"><span class="pre">syntax_error</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#registry">registry</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_builtin_entry"><code class="docutils literal notranslate"><span class="pre">t_builtin_entry</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_builtin_entry.name"><code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_builtin_entry.fn"><code class="docutils literal notranslate"><span class="pre">fn</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bg"><code class="docutils literal notranslate"><span class="pre">bg</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.no_such_job"><code class="docutils literal notranslate"><span class="pre">no_such_job()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cd"><code class="docutils literal notranslate"><span class="pre">cd</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.join_paths"><code class="docutils literal notranslate"><span class="pre">join_paths()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.concatenate"><code class="docutils literal notranslate"><span class="pre">concatenate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.resolve_path"><code class="docutils literal notranslate"><span class="pre">resolve_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.access_failure"><code class="docutils literal notranslate"><span class="pre">access_failure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.no_such_file_or_directory"><code class="docutils literal notranslate"><span class="pre">no_such_file_or_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.not_a_directory"><code class="docutils literal notranslate"><span class="pre">not_a_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.permission_denied"><code class="docutils literal notranslate"><span class="pre">permission_denied()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.filename_too_long"><code class="docutils literal notranslate"><span class="pre">filename_too_long()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_invalid_path"><code class="docutils literal notranslate"><span class="pre">is_invalid_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.publish_pwd"><code class="docutils literal notranslate"><span class="pre">publish_pwd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.change_directory"><code class="docutils literal notranslate"><span class="pre">change_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.detect_option"><code class="docutils literal notranslate"><span class="pre">detect_option()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#echo"><code class="docutils literal notranslate"><span class="pre">echo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_valid_option"><code class="docutils literal notranslate"><span class="pre">is_valid_option()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_valid_symbol"><code class="docutils literal notranslate"><span class="pre">is_valid_symbol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.display_base"><code class="docutils literal notranslate"><span class="pre">display_base()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.display_token"><code class="docutils literal notranslate"><span class="pre">display_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.report_write_error"><code class="docutils literal notranslate"><span class="pre">report_write_error()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exit"><code class="docutils literal notranslate"><span class="pre">exit</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_numeric"><code class="docutils literal notranslate"><span class="pre">is_numeric()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fg"><code class="docutils literal notranslate"><span class="pre">fg</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#history"><code class="docutils literal notranslate"><span class="pre">history</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.print_entries"><code class="docutils literal notranslate"><span class="pre">print_entries()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#jobs"><code class="docutils literal notranslate"><span class="pre">jobs</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#type"><code class="docutils literal notranslate"><span class="pre">type</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.TYPE_F_T"><code class="docutils literal notranslate"><span class="pre">TYPE_F_T</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.TYPE_F_P"><code class="docutils literal notranslate"><span class="pre">TYPE_F_P</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.TYPE_F_A"><code class="docutils literal notranslate"><span class="pre">TYPE_F_A</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_invalid_option"><code class="docutils literal notranslate"><span class="pre">type_invalid_option()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_type_opts"><code class="docutils literal notranslate"><span class="pre">parse_type_opts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_free_dirs"><code class="docutils literal notranslate"><span class="pre">type_free_dirs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_join"><code class="docutils literal notranslate"><span class="pre">type_join()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_path_matches"><code class="docutils literal notranslate"><span class="pre">type_path_matches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_kind"><code class="docutils literal notranslate"><span class="pre">type_kind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_path"><code class="docutils literal notranslate"><span class="pre">type_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_all"><code class="docutils literal notranslate"><span class="pre">type_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_default"><code class="docutils literal notranslate"><span class="pre">type_default()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.type_dispatch"><code class="docutils literal notranslate"><span class="pre">type_dispatch()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Builtins</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="builtins">
+<h1>Builtins<a class="headerlink" href="#builtins" title="Link to this heading"></a></h1>
+<p>Header for builtin function registry and declarations. </p>
+<p>Defines the t_builtin_fn type and declares builtin functions. Also includes the builtin lookup function. <dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>zweng, jguillem, pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="c type">
+<dt class="sig sig-object c" id="c.t_shell">
+<span class="target" id="builtins_8h_1ae4cfb7c093350dca726786f683b6aca3"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_shell</span></span></span><br /></dt>
+<dd><p>Forward declaration to avoid circular dependency with 42sh.h</p>
+</dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.t_builtin_fn">
+<span class="target" id="builtins_8h_1ac8cd553bb18027ffff282e381d33c601"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">t_builtin_fn</span></span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#c.t_builtin_fn" title="Link to this definition"></a><br /></dt>
+<dd><p>Builtin function type. </p>
+<p>Every builtin shares this signature. <code class="docutils literal notranslate"><span class="pre">argv[0]</span></code> is the builtin name itself, <code class="docutils literal notranslate"><span class="pre">argv[argc]</span></code> is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>. Return value is the exit status the shell should observe. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Param shell<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pointer to the central shell state, for accessing variables, jobs, etc. </p>
+</dd>
+<dt class="field-even">Param argc<span class="colon">:</span></dt>
+<dd class="field-even"><p>Argument count (number of elements in <code class="docutils literal notranslate"><span class="pre">argv</span></code>). </p>
+</dd>
+<dt class="field-odd">Param argv<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Argument vector (<code class="docutils literal notranslate"><span class="pre">argv[0]</span></code> is the command name). </p>
+</dd>
+<dt class="field-even">Return<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exit status code (0 for success, non-zero for failure). </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_get">
+<span class="target" id="builtins_8h_1af7cec1ad3b2a77ab22f75eb271f8eb14"></span><a class="reference internal" href="#c.t_builtin_fn" title="t_builtin_fn"><span class="n"><span class="pre">t_builtin_fn</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_get</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_get" title="Link to this definition"></a><br /></dt>
+<dd><p>Look up a builtin function by name. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the builtin function to retrieve </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to the builtin function, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if <code class="docutils literal notranslate"><span class="pre">name</span></code> is not a registered builtin.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pointer to the builtin function, or NULL if not found </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_is_builtin">
+<span class="target" id="builtins_8h_1ac1eabf401a69f21419b86f4cdd31ee7a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_is_builtin</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_is_builtin" title="Link to this definition"></a><br /></dt>
+<dd><p>Test whether <code class="docutils literal notranslate"><span class="pre">name</span></code> is a registered builtin. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Non-zero if <code class="docutils literal notranslate"><span class="pre">name</span></code> is a builtin, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_echo">
+<span class="target" id="builtins_8h_1a47be677357bd4408636f7e9f22f80d1e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_echo</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_echo" title="Link to this definition"></a><br /></dt>
+<dd><p>Print arguments separated by spaces, followed by a newline. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">echo</span> <span class="pre">[-neE]</span> <span class="pre">[arg</span> <span class="pre">...]</span></code></p>
+<p>Options may be combined (e.g. <code class="docutils literal notranslate"><span class="pre">-nE</span></code>). Unknown letters disable option parsing for that token, so <code class="docutils literal notranslate"><span class="pre">-x</span></code> is printed literally.</p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-n</span></code></p></td>
+<td><p>Suppress the trailing newline.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-e</span></code></p></td>
+<td><p>Interpret backslash escapes (<code class="docutils literal notranslate"><span class="pre">\n</span></code>, <code class="docutils literal notranslate"><span class="pre">\t</span></code>, <code class="docutils literal notranslate"><span class="pre">\xNN</span></code>, …).    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-E</span></code></p></td>
+<td><p>Disable backslash interpretation (default).   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span>hello<span class="w"> </span>world<span class="w">         </span><span class="c1"># hello world</span>
+<span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span>no-newline<span class="w">       </span><span class="c1"># no-newline</span>
+<span class="nb">echo</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;a\tb\nc&#39;</span><span class="w">        </span><span class="c1"># a&lt;TAB&gt;b&lt;NEWLINE&gt;c</span>
+<span class="nb">echo</span><span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;literal\\n&#39;</span><span class="w">     </span><span class="c1"># literal\n</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Always 0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_cd">
+<span class="target" id="builtins_8h_1a34ffc27526ee137982ad3efc5dc61518"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_cd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_cd" title="Link to this definition"></a><br /></dt>
+<dd><p>Change the shell’s current working directory. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">[-L|-P]</span> <span class="pre">[--]</span> <span class="pre">[dir]</span></code></p>
+<p>With no argument, changes to <code class="docutils literal notranslate"><span class="pre">$HOME</span></code>. The argument <code class="docutils literal notranslate"><span class="pre">-</span></code> switches to the previous directory (<code class="docutils literal notranslate"><span class="pre">$OLDPWD</span></code>) and prints the new path. <code class="docutils literal notranslate"><span class="pre">--</span></code> ends option parsing so a directory literally named <code class="docutils literal notranslate"><span class="pre">-foo</span></code> can be reached.</p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-L</span></code></p></td>
+<td><p>Logical: keep symlinks in <code class="docutils literal notranslate"><span class="pre">PWD</span></code> (default).    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-P</span></code></p></td>
+<td><p>Physical: resolve symlinks via <code class="docutils literal notranslate"><span class="pre">realpath</span></code>.   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p>After a successful change, <code class="docutils literal notranslate"><span class="pre">OLDPWD</span></code> is set to the previous <code class="docutils literal notranslate"><span class="pre">PWD</span></code> and <code class="docutils literal notranslate"><span class="pre">PWD</span></code> is updated.</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w">                       </span><span class="c1"># go to $HOME</span>
+<span class="nb">cd</span><span class="w"> </span>/tmp<span class="w">                  </span><span class="c1"># absolute path</span>
+<span class="nb">cd</span><span class="w"> </span>..<span class="w">                    </span><span class="c1"># parent directory</span>
+<span class="nb">cd</span><span class="w"> </span>-<span class="w">                     </span><span class="c1"># back to previous directory, prints it</span>
+<span class="nb">cd</span><span class="w"> </span>-P<span class="w"> </span>/var/run<span class="w">           </span><span class="c1"># follow symlinks</span>
+<span class="nb">cd</span><span class="w"> </span>--<span class="w"> </span>-weird-dir-name<span class="w">    </span><span class="c1"># directory whose name starts with &#39;-&#39;</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 on filesystem error (no such directory, not a directory, permission denied, name too long, <code class="docutils literal notranslate"><span class="pre">HOME</span></code>/<code class="docutils literal notranslate"><span class="pre">OLDPWD</span></code> unset), 2 on usage error (invalid option, too many arguments).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_pwd">
+<span class="target" id="builtins_8h_1a11b4f7afce0eb091546900a65a14b071"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_pwd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_pwd" title="Link to this definition"></a><br /></dt>
+<dd><p>Print the current working directory. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">pwd</span> <span class="pre">[-L|-P]</span></code></p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-L</span></code></p></td>
+<td><p>Logical: print <code class="docutils literal notranslate"><span class="pre">$PWD</span></code> (default).    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-P</span></code></p></td>
+<td><p>Physical: print <code class="docutils literal notranslate"><span class="pre">getcwd(3)</span></code> output (symlinks resolved).   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p>The default <code class="docutils literal notranslate"><span class="pre">-L</span></code> form is what makes <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/bin;</span> <span class="pre">pwd</span></code> report <code class="docutils literal notranslate"><span class="pre">/bin</span></code> even when <code class="docutils literal notranslate"><span class="pre">/bin</span></code> is a symlink to <code class="docutils literal notranslate"><span class="pre">/usr/bin</span></code> — the shell tracks the logical path the user typed, not what the kernel resolved. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 on getcwd failure or usage error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_exit">
+<span class="target" id="builtins_8h_1a8f562ae61cfa07fc7bee31ba73015bce"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_exit</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_exit" title="Link to this definition"></a><br /></dt>
+<dd><p>Exit the shell. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">exit</span> <span class="pre">[n]</span></code></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">n</span></code> is supplied, the shell exits with status <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">&amp;</span> <span class="pre">0xFF</span></code> (POSIX truncation to 8 bits). With no argument, exits with the status of the most recently executed command (<code class="docutils literal notranslate"><span class="pre">$?</span></code>).</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">exit</span><span class="w">                     </span><span class="c1"># exit with $?</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">0</span><span class="w">                   </span><span class="c1"># exit success</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">42</span><span class="w">                  </span><span class="c1"># exit with status 42</span>
+<span class="nb">exit</span><span class="w"> </span>-1<span class="w">                  </span><span class="c1"># exit with status 255 (-1 &amp; 0xFF)</span>
+<span class="nb">exit</span><span class="w"> </span>foo<span class="w">                 </span><span class="c1"># error: &quot;numeric argument required&quot;, exit 2</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w">                 </span><span class="c1"># error: &quot;too many arguments&quot;, returns 1</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>On success the shell terminates and never returns to the caller. On usage error: 2 (non-numeric argument) or 1 (more than one argument — the shell is <em>not</em> exited in this case).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_type">
+<span class="target" id="builtins_8h_1a603a73d20e506f6066f17f97c08a96d4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_type</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_type" title="Link to this definition"></a><br /></dt>
+<dd><p>Describe how each name would be interpreted as a command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">[-tpa]</span> <span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(none)   </p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">shell</span> <span class="pre">builtin</span></code> / <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">/path</span></code> / <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">not</span> <span class="pre">found</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-t</span></code></p></td>
+<td><p>Print one word: <code class="docutils literal notranslate"><span class="pre">builtin</span></code> or <code class="docutils literal notranslate"><span class="pre">file</span></code> (nothing if not found).    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-p</span></code></p></td>
+<td><p>Print the <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> resolution of a disk command only.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-a</span></code></p></td>
+<td><p>Print the builtin entry and every <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> match.   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p>Options may be combined (<code class="docutils literal notranslate"><span class="pre">-ta</span></code>); <code class="docutils literal notranslate"><span class="pre">--</span></code> ends option parsing. An unknown option is reported on stderr and yields exit status 2.</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ls<span class="w"> </span>bogus
+<span class="c1"># cd is a shell builtin</span>
+<span class="c1"># ls is /usr/bin/ls</span>
+<span class="c1"># bogus not found</span>
+<span class="nb">type</span><span class="w"> </span>-t<span class="w"> </span>ls<span class="w">        </span><span class="c1"># file</span>
+<span class="nb">type</span><span class="w"> </span>-p<span class="w"> </span>ls<span class="w">        </span><span class="c1"># /usr/bin/ls</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 if every name was identified, 1 if any name was not found, 2 on an invalid option.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_jobs">
+<span class="target" id="builtins_8h_1a069c7d671b2004eab383724bf1fb6b65"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_jobs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_jobs" title="Link to this definition"></a><br /></dt>
+<dd><p>List active jobs known to the shell. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">jobs</span></code></p>
+<p>Output format, one line per job: <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[&lt;id&gt;]  &lt;marker&gt; &lt;status&gt;\t&lt;command-line&gt;
+</pre></div>
+</div>
+</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;marker&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">+</span></code> for the current job and a space otherwise. <code class="docutils literal notranslate"><span class="pre">&lt;status&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">Running</span></code>, <code class="docutils literal notranslate"><span class="pre">Stopped</span></code>, or <code class="docutils literal notranslate"><span class="pre">Done</span></code>. Listing a job clears its pending notification flag.</p>
+<p><strong>Example</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sleep<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="p">&amp;</span>
+sleep<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="nb">jobs</span>
+<span class="c1"># [1]    Running        sleep 100</span>
+<span class="c1"># [2]  + Running        sleep 200</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Always 0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_fg">
+<span class="target" id="builtins_8h_1a4971c1b65b87f4b7505ef3235314da80"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_fg</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_fg" title="Link to this definition"></a><br /></dt>
+<dd><p>Resume a job in the foreground. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">fg</span> <span class="pre">[job_spec]</span></code></p>
+<p>Brings the selected job to the foreground, prints its command line, and waits for it to finish or stop. With no argument, acts on the current job (<code class="docutils literal notranslate"><span class="pre">%+</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">job_spec</span></code> accepts:</p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Spec   </p></th>
+<th class="head"><p>Meaning    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(omitted)   </p></td>
+<td><p>The current job.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">%</span></code>, <code class="docutils literal notranslate"><span class="pre">%%</span></code>, <code class="docutils literal notranslate"><span class="pre">%+</span></code></p></td>
+<td><p>The current job.    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">%-</span></code></p></td>
+<td><p>The previous current job.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">%&lt;n&gt;</span></code></p></td>
+<td><p>Job whose id is <code class="docutils literal notranslate"><span class="pre">&lt;n&gt;</span></code> (the number in <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code>).    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">%&lt;str&gt;</span></code></p></td>
+<td><p>Most recent job whose command line begins with <code class="docutils literal notranslate"><span class="pre">&lt;str&gt;</span></code>.   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sleep<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="p">&amp;</span><span class="w">              </span><span class="c1"># [1] 12345</span>
+<span class="nb">fg</span><span class="w"> </span>%1<span class="w">                    </span><span class="c1"># resume job 1 in foreground</span>
+<span class="nb">fg</span><span class="w">                       </span><span class="c1"># resume the current job</span>
+<span class="nb">fg</span><span class="w"> </span>%sleep<span class="w">                </span><span class="c1"># resume job whose command begins with &quot;sleep&quot;</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exit status of the resumed job, or 1 if no matching job exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_bg">
+<span class="target" id="builtins_8h_1ade77adf32e092e97d4536236badf9acc"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_bg</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_bg" title="Link to this definition"></a><br /></dt>
+<dd><p>Resume a stopped job in the background. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">bg</span> <span class="pre">[job_spec]</span></code></p>
+<p>Sends <code class="docutils literal notranslate"><span class="pre">SIGCONT</span></code> to the selected job and lets it continue without occupying the terminal. The job spec syntax is identical to <code class="docutils literal notranslate"><span class="pre">fg</span></code> (see <a class="reference internal" href="#builtins_8h_1a4971c1b65b87f4b7505ef3235314da80"><span class="std std-ref">builtin_fg</span></a>). With no argument, acts on the current job.</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sleep<span class="w"> </span><span class="m">100</span><span class="w">                </span><span class="c1"># ... press Ctrl-Z</span>
+<span class="c1"># [1]+  Stopped          sleep 100</span>
+<span class="nb">bg</span><span class="w">                       </span><span class="c1"># resume in background</span>
+<span class="nb">bg</span><span class="w"> </span>%1<span class="w">                    </span><span class="c1"># same, by job id</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 if no matching job exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_kill">
+<span class="target" id="builtins_8h_1a5afaeaa3af6833b44c2203437a677ed8"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_kill</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_kill" title="Link to this definition"></a><br /></dt>
+<dd><p>Send a signal to processes or <code class="docutils literal notranslate"><span class="pre">jobspec</span></code> jobs. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">kill</span> <span class="pre">[-l]</span> <span class="pre">[-s</span> <span class="pre">sig</span> <span class="pre">|</span> <span class="pre">-sig</span> <span class="pre">|</span> <span class="pre">-signum]</span> <span class="pre">pid|jobspec</span> <span class="pre">...</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">-l</span></code> with no further argument lists every recognised signal name. Without <code class="docutils literal notranslate"><span class="pre">-s</span></code>/<code class="docutils literal notranslate"><span class="pre">-signal</span></code>/<code class="docutils literal notranslate"><span class="pre">-signum</span></code>, the default signal is <code class="docutils literal notranslate"><span class="pre">SIGTERM</span></code> (15). <code class="docutils literal notranslate"><span class="pre">jobspec</span></code> resolves through <code class="docutils literal notranslate"><span class="pre">job_find_by_spec</span></code> and signals the whole process group (<code class="docutils literal notranslate"><span class="pre">-pgid</span></code>). Numeric arguments are passed verbatim to <code class="docutils literal notranslate"><span class="pre">kill(2)</span></code>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 if every target was signalled, 1 if any failed (no such job, invalid signal, unreachable pid).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_history">
+<span class="target" id="builtins_8h_1ab5fe6329be6040c5eab265bbf248e86a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_history</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_history" title="Link to this definition"></a><br /></dt>
+<dd><p>Print the command history. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">history</span> <span class="pre">[n]</span></code></p>
+<p>With no argument, prints every entry currently held by readline. With a positive integer <code class="docutils literal notranslate"><span class="pre">n</span></code>, prints only the last <code class="docutils literal notranslate"><span class="pre">n</span></code> entries. Non-positive <code class="docutils literal notranslate"><span class="pre">n</span></code> prints nothing. Each line is <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span> <span class="pre">&lt;command&gt;</span></code> where <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> starts at <code class="docutils literal notranslate"><span class="pre">history_base</span></code> (typically 1).</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">history</span><span class="w">                  </span><span class="c1"># print full history</span>
+<span class="nb">history</span><span class="w"> </span><span class="m">5</span><span class="w">                </span><span class="c1"># print last 5 commands</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Always 0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_set">
+<span class="target" id="builtins_8h_1a2ab8fcbf57b36ed41aecf19bfab563d5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_set" title="Link to this definition"></a><br /></dt>
+<dd><p>The set builtin command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">[NAME=VALUE</span> <span class="pre">...]</span></code></p>
+<p><ul class="simple">
+<li><p>With no arguments, displays all variables in <code class="docutils literal notranslate"><span class="pre">NAME=VALUE</span></code> format.</p></li>
+<li><p>Each <code class="docutils literal notranslate"><span class="pre">NAME=VALUE</span></code> argument sets a variable.</p></li>
+</ul>
+</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="w">                  </span><span class="c1"># display all variables</span>
+<span class="nb">set</span><span class="w"> </span><span class="nv">var1</span><span class="o">=</span>value1<span class="w">      </span><span class="c1"># set a variable</span>
+<span class="nb">set</span><span class="w"> </span><span class="nv">x</span><span class="o">=</span><span class="m">10</span><span class="w"> </span><span class="nv">y</span><span class="o">=</span>hello<span class="w">     </span><span class="c1"># set multiple variables</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the shell state </p></li>
+<li><p><strong>argc</strong> – Argument count </p></li>
+<li><p><strong>argv</strong> – Argument vector </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, 1 on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_unset">
+<span class="target" id="builtins_8h_1ac6edbaf965f4396bea6064e368a2f1a2"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_unset</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_unset" title="Link to this definition"></a><br /></dt>
+<dd><p>The unset builtin command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">unset</span> <span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p>
+<p>Removes one or more variables by name. Each argument should be a valid variable name (identifier). If a name is not found, unset succeeds silently (POSIX behavior).</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">unset</span><span class="w"> </span>var1<span class="w">           </span><span class="c1"># remove a variable</span>
+<span class="nb">unset</span><span class="w"> </span>x<span class="w"> </span>y<span class="w"> </span>z<span class="w">          </span><span class="c1"># remove multiple variables</span>
+<span class="nb">unset</span><span class="w"> </span>nonexistent<span class="w">    </span><span class="c1"># succeeds silently</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the shell state </p></li>
+<li><p><strong>argc</strong> – Argument count </p></li>
+<li><p><strong>argv</strong> – Argument vector </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, 1 on error (invalid identifier) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_export">
+<span class="target" id="builtins_8h_1ac14ac6dd01b65de220681e6d79f2e9ee"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_export</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_export" title="Link to this definition"></a><br /></dt>
+<dd><p>The export builtin command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">[name]</span> <span class="pre">[name=value</span> <span class="pre">...]</span></code></p>
+<p><ul class="simple">
+<li><p>With no arguments, displays all exported variables in exportable format.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">name</span></code> (identifier), marks the variable for export to child processes.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">NAME=VALUE</span></code> argument, sets the variable and marks it for export.</p></li>
+</ul>
+</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w">                       </span><span class="c1"># display all exported variables</span>
+<span class="nb">export</span><span class="w"> </span>PATH<span class="w">                  </span><span class="c1"># export existing PATH variable</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">var1</span><span class="o">=</span>value1<span class="w">           </span><span class="c1"># set and export a variable</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">x</span><span class="o">=</span><span class="m">10</span><span class="w"> </span><span class="nv">MYVAR</span><span class="o">=</span>hello<span class="w">      </span><span class="c1"># set and export multiple variables</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the shell state </p></li>
+<li><p><strong>argc</strong> – Argument count </p></li>
+<li><p><strong>argv</strong> – Argument vector </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, 1 on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_hash">
+<span class="target" id="builtins_8h_1a7ac0700712a171f1cd0fe5b95570b9e5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_hash</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_hash" title="Link to this definition"></a><br /></dt>
+<dd><p>Manage the shell’s PATH-lookup cache. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">hash</span> <span class="pre">[-r]</span> <span class="pre">[-p</span> <span class="pre">path]</span> <span class="pre">[-dt]</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Form   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(no args)   </p></td>
+<td><p>Print cached entries (<code class="docutils literal notranslate"><span class="pre">hits&lt;TAB&gt;command</span></code>).    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p></td>
+<td><p>Resolve each name through <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> and cache it.    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-r</span></code></p></td>
+<td><p>Forget every cached entry.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p></td>
+<td><p>Forget specific entries.    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">path</span> <span class="pre">name</span></code></p></td>
+<td><p>Cache <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">-&gt;</span> <span class="pre">path</span></code> without consulting <code class="docutils literal notranslate"><span class="pre">$PATH</span></code>.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p></td>
+<td><p>Print the cached path for each name.   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p>The cache powers <code class="docutils literal notranslate"><span class="pre">find_command</span></code>, which consults this table before walking <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> - so a frequent command costs one strcmp instead of a directory scan. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 on lookup failure (unknown name to resolve, delete, or print), 2 on usage error (unknown flag, missing operand, mutually-exclusive flags).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_alias">
+<span class="target" id="builtins_8h_1a43204c157f64f976ba20fb1286ea846a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_alias</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_alias" title="Link to this definition"></a><br /></dt>
+<dd><p>The alias builtin command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">alias</span> <span class="pre">[name[=value]</span> <span class="pre">...]</span></code></p>
+<p><ul class="simple">
+<li><p>With no arguments, lists every alias as alias name=’value<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">sorted</span> <span class="pre">by</span> <span class="pre">name,</span> <span class="pre">with</span> <span class="pre">embedded</span> <span class="pre">single</span> <span class="pre">quotes</span> <span class="pre">escaped</span> <span class="pre">as</span></code>’’’<code class="docutils literal notranslate"><span class="pre">.</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">With</span></code>name=value<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">defines</span> <span class="pre">or</span> <span class="pre">redefines</span> <span class="pre">an</span> <span class="pre">alias.</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">With</span></code>name`, prints that alias, or reports it as not found.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 if a queried name is not an alias. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_unalias">
+<span class="target" id="builtins_8h_1a087e27d2aeefed1cdc1d503f027088c0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_unalias</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_unalias" title="Link to this definition"></a><br /></dt>
+<dd><p>The unalias builtin command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">unalias</span> <span class="pre">[-a]</span> <span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p>
+<p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-a</span></code> removes every alias.</p></li>
+<li><p>Each <code class="docutils literal notranslate"><span class="pre">name</span></code> removes one alias; an unknown name is reported on stderr.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 if a name was not an alias or on usage error. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.builtin_test">
+<span class="target" id="builtins_8h_1ac827106a5230632ef845a4f6edb2d5f7"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_test</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.builtin_test" title="Link to this definition"></a><br /></dt>
+<dd><p>Execute the shell builtin <code class="docutils literal notranslate"><span class="pre">test</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – Pointer to the current shell state. </p></li>
+<li><p><strong>argc</strong> – Number of arguments in argv. </p></li>
+<li><p><strong>argv</strong> – Array of argument strings. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exit status for the builtin command. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_test_context">
+<span class="target" id="structt__test__context"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_test_context</span></span></span><a class="headerlink" href="#c.t_test_context" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;builtins.h&gt;</em></div>
+<p><a class="reference internal" href="#structt__test__context"><span class="std std-ref">t_test_context</span></a> - Context structure for test command execution &#64;argc: Argument count for the test command &#64;argv: Argument vector containing test command arguments &#64;pos: Current position or index within the argument parsing</p>
+<p>This structure maintains the state and arguments needed to execute and parse test builtin commands in the shell. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_test_context.argc">
+<span class="target" id="structt__test__context_1a8607c54ab6f067065f8db86290db3161"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">argc</span></span></span><a class="headerlink" href="#c.t_test_context.argc" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_test_context.argv">
+<span class="target" id="structt__test__context_1a2feedf72c5281c3575a94ea0665d2b5e"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">argv</span></span></span><a class="headerlink" href="#c.t_test_context.argv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_test_context.pos">
+<span class="target" id="structt__test__context_1a711b3327550bcc30a6c7e54c71b3b93d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pos</span></span></span><a class="headerlink" href="#c.t_test_context.pos" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_test_context.syntax_error">
+<span class="target" id="structt__test__context_1a4d98bd862d7e9d4dc5752848fcf58df6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">syntax_error</span></span></span><a class="headerlink" href="#c.t_test_context.syntax_error" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<section id="registry">
+<h2>registry<a class="headerlink" href="#registry" title="Link to this heading"></a></h2>
+<p>Builtin function registry and implementations. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtins_8c_1af7cec1ad3b2a77ab22f75eb271f8eb14"></span><a class="reference internal" href="#c.t_builtin_fn" title="t_builtin_fn"><span class="n"><span class="pre">t_builtin_fn</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_get</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Look up a builtin function by name. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the builtin function to retrieve </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to the builtin function, or NULL if not found </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtins_8c_1ac1eabf401a69f21419b86f4cdd31ee7a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_is_builtin</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Test whether <code class="docutils literal notranslate"><span class="pre">name</span></code> is a registered builtin. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Non-zero if <code class="docutils literal notranslate"><span class="pre">name</span></code> is a builtin, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="c var">
+<dt class="sig sig-object c">
+<span class="target" id="builtins_8c_1a288801be8090115a2cef9667e94e0811"></span><span class="sig-name descname"><span class="pre">static</span> <span class="pre">const</span> <span class="pre">t_builtin_entry</span> <span class="pre">g_builtins</span> <span class="pre">[]</span> <span class="pre">=</span> <span class="pre">{{&quot;history&quot;,builtin_history},{&quot;echo&quot;,builtin_echo},{&quot;cd&quot;,builtin_cd},{&quot;pwd&quot;,builtin_pwd},{&quot;jobs&quot;,builtin_jobs},{&quot;fg&quot;,builtin_fg},{&quot;bg&quot;,builtin_bg},{&quot;kill&quot;,builtin_kill},{&quot;exit&quot;,builtin_exit},{&quot;type&quot;,builtin_type},{&quot;set&quot;,builtin_set},{&quot;unset&quot;,builtin_unset},{&quot;export&quot;,builtin_export},{&quot;hash&quot;,builtin_hash},{&quot;alias&quot;,builtin_alias},{&quot;unalias&quot;,builtin_unalias},{&quot;test&quot;,builtin_test},{&quot;[&quot;,builtin_test},{NULL,</span> <span class="pre">NULL}}</span></span></dt>
+<dd><p>Builtin lookup table. </p>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_builtin_entry">
+<span class="target" id="structt__builtin__entry"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_builtin_entry</span></span></span><a class="headerlink" href="#c.t_builtin_entry" title="Link to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_builtin_entry.name">
+<span class="target" id="structt__builtin__entry_1a483aefab09f80961407288b52f20e6c3"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">name</span></span></span><a class="headerlink" href="#c.t_builtin_entry.name" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_builtin_entry.fn">
+<span class="target" id="structt__builtin__entry_1ae291335d64e8c07c0d993562aad0bce1"></span><a class="reference internal" href="#c.t_builtin_fn" title="t_builtin_fn"><span class="n"><span class="pre">t_builtin_fn</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fn</span></span></span><a class="headerlink" href="#c.t_builtin_entry.fn" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="bg">
+<h2><code class="docutils literal notranslate"><span class="pre">bg</span></code><a class="headerlink" href="#bg" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bg</span> <span class="pre">[spec]</span></code> - resume a stopped job in the background. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.no_such_job">
+<span class="target" id="builtin__bg_8c_1a2bfce28432dee5dbd4ad98509354e48d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">no_such_job</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.no_such_job" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__bg_8c_1a2888f6624046e62fe5a70921d5051172"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_bg</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="cd">
+<h2><code class="docutils literal notranslate"><span class="pre">cd</span></code><a class="headerlink" href="#cd" title="Link to this heading"></a></h2>
+<p>Implementation of the cd builtin command for the 42sh shell. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.join_paths">
+<span class="target" id="builtin__cd_8c_1afcdf083a43e1b257427ff1e7128487e7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">join_paths</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">old_path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">relative</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.join_paths" title="Link to this definition"></a><br /></dt>
+<dd><p>Join a base path with a relative path, ensuring proper ‘/’ separation. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_path</strong> – : the base path </p></li>
+<li><p><strong>relative</strong> – : the relative path to append </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The newly allocated combined path </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.concatenate">
+<span class="target" id="builtin__cd_8c_1ab12d8ba3dd722cd0a1e0983a9435d3b3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">concatenate</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">base</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">add</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.concatenate" title="Link to this definition"></a><br /></dt>
+<dd><p>Concatenate two paths, inserting ‘/’ when needed and freeing base. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base</strong> – : the base string </p></li>
+<li><p><strong>add</strong> – : the string to append </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting concatenated string </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.resolve_path">
+<span class="target" id="builtin__cd_8c_1aab6098884ba8173cf92c607e4cafc733"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">resolve_path</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.resolve_path" title="Link to this definition"></a><br /></dt>
+<dd><p>Normalize a path by resolving ‘.’, ‘..’ and redundant separators. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – : pointer to the path string to resolve </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, 1 if an error occurs (e.g. path too long) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.access_failure">
+<span class="target" id="builtin__cd_8c_1a91a46c257a500d3a0558f717c7cbcbdc"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">access_failure</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">directory</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.access_failure" title="Link to this definition"></a><br /></dt>
+<dd><p>Print a cd error message and free allocated resources. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – : the directory argument provided by the user </p></li>
+<li><p><strong>path</strong> – : the resolved path </p></li>
+<li><p><strong>oldpwd</strong> – : the previous working directory </p></li>
+<li><p><strong>msg</strong> – : the error message to display </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 (failure) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.no_such_file_or_directory">
+<span class="target" id="builtin__cd_8c_1a7d91bf2e9e93035cfd3f1ea4c7fdc9c7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">no_such_file_or_directory</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">directory</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.no_such_file_or_directory" title="Link to this definition"></a><br /></dt>
+<dd><p>Handle No such file or directory error. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – : the directory argument provided by the user </p></li>
+<li><p><strong>path</strong> – : the resolved path </p></li>
+<li><p><strong>oldpwd</strong> – : the previous working directory </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 (failure) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.not_a_directory">
+<span class="target" id="builtin__cd_8c_1a39c6e71898415efe517489beafadb33f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">not_a_directory</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">directory</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.not_a_directory" title="Link to this definition"></a><br /></dt>
+<dd><p>Handle Not a directory error. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – : the directory argument provided by the user </p></li>
+<li><p><strong>path</strong> – : the resolved path </p></li>
+<li><p><strong>oldpwd</strong> – : the previous working directory </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 (failure) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.permission_denied">
+<span class="target" id="builtin__cd_8c_1ab4a44671ab8945c57c63a50d87f8912a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">permission_denied</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">directory</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.permission_denied" title="Link to this definition"></a><br /></dt>
+<dd><p>Handle Permission denied error. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – : the directory argument provided by the user </p></li>
+<li><p><strong>path</strong> – : the resolved path </p></li>
+<li><p><strong>oldpwd</strong> – : the previous working directory </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 (failure) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.filename_too_long">
+<span class="target" id="builtin__cd_8c_1afb52688a1283da096eedfb9eb4059171"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">filename_too_long</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">directory</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.filename_too_long" title="Link to this definition"></a><br /></dt>
+<dd><p>Handle File name too long error. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – : the directory argument provided by the user </p></li>
+<li><p><strong>path</strong> – : the resolved path </p></li>
+<li><p><strong>oldpwd</strong> – : the previous working directory </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 (failure) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_invalid_path">
+<span class="target" id="builtin__cd_8c_1a271c137aed57c277220bbe5f7fb4848d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_invalid_path</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">directory</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">path</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_invalid_path" title="Link to this definition"></a><br /></dt>
+<dd><p>Validate the path (length, type, permissions) </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – : the directory argument provided by the user </p></li>
+<li><p><strong>path</strong> – : the resolved path </p></li>
+<li><p><strong>oldpwd</strong> – : the previous working directory </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 if valid, 1 if an error occurs </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.publish_pwd">
+<span class="target" id="builtin__cd_8c_1a12532acd96dfb54d95fd4013070e1d62"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">publish_pwd</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">new_pwd</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">oldpwd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.publish_pwd" title="Link to this definition"></a><br /></dt>
+<dd><p>Update PWD/OLDPWD in the shell variable table and mark exported. </p>
+<p>Using var_set (instead of setenv) is what makes <code class="docutils literal notranslate"><span class="pre">$PWD</span></code> visible to subsequent expansions and to the rebuilt child environ. var_set preserves the existing ‘exported’ flag, but PWD/OLDPWD may not have been inherited from the parent environment, so we call var_export to be safe. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.change_directory">
+<span class="target" id="builtin__cd_8c_1a4d4da9d69b95942e231ac4a2e353976d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">change_directory</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">target</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">physical</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.change_directory" title="Link to this definition"></a><br /></dt>
+<dd><p>Resolve and change the current working directory, updating PWD/OLDPWD. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – : the target directory argument </p></li>
+<li><p><strong>argc</strong> – : number of remaining arguments </p></li>
+<li><p><strong>physical</strong> – : flag indicating physical (-P) or logical (-L) resolution </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, 1 on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.detect_option">
+<span class="target" id="builtin__cd_8c_1a83fec5b4f8a0a65556677149373d715f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">detect_option</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">option</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.detect_option" title="Link to this definition"></a><br /></dt>
+<dd><p>detect if the string correspond to an option </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>option</strong> – : a string from *argv </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 | 1 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__cd_8c_1a34ffc27526ee137982ad3efc5dc61518"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_cd</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Change the shell’s current working directory. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">[-L|-P]</span> <span class="pre">[--]</span> <span class="pre">[dir]</span></code></p>
+<p>With no argument, changes to <code class="docutils literal notranslate"><span class="pre">$HOME</span></code>. The argument <code class="docutils literal notranslate"><span class="pre">-</span></code> switches to the previous directory (<code class="docutils literal notranslate"><span class="pre">$OLDPWD</span></code>) and prints the new path. <code class="docutils literal notranslate"><span class="pre">--</span></code> ends option parsing so a directory literally named <code class="docutils literal notranslate"><span class="pre">-foo</span></code> can be reached.</p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-L</span></code></p></td>
+<td><p>Logical: keep symlinks in <code class="docutils literal notranslate"><span class="pre">PWD</span></code> (default).    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-P</span></code></p></td>
+<td><p>Physical: resolve symlinks via <code class="docutils literal notranslate"><span class="pre">realpath</span></code>.   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p>After a successful change, <code class="docutils literal notranslate"><span class="pre">OLDPWD</span></code> is set to the previous <code class="docutils literal notranslate"><span class="pre">PWD</span></code> and <code class="docutils literal notranslate"><span class="pre">PWD</span></code> is updated.</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w">                       </span><span class="c1"># go to $HOME</span>
+<span class="nb">cd</span><span class="w"> </span>/tmp<span class="w">                  </span><span class="c1"># absolute path</span>
+<span class="nb">cd</span><span class="w"> </span>..<span class="w">                    </span><span class="c1"># parent directory</span>
+<span class="nb">cd</span><span class="w"> </span>-<span class="w">                     </span><span class="c1"># back to previous directory, prints it</span>
+<span class="nb">cd</span><span class="w"> </span>-P<span class="w"> </span>/var/run<span class="w">           </span><span class="c1"># follow symlinks</span>
+<span class="nb">cd</span><span class="w"> </span>--<span class="w"> </span>-weird-dir-name<span class="w">    </span><span class="c1"># directory whose name starts with &#39;-&#39;</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 on filesystem error (no such directory, not a directory, permission denied, name too long, <code class="docutils literal notranslate"><span class="pre">HOME</span></code>/<code class="docutils literal notranslate"><span class="pre">OLDPWD</span></code> unset), 2 on usage error (invalid option, too many arguments).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="echo">
+<h2><code class="docutils literal notranslate"><span class="pre">echo</span></code><a class="headerlink" href="#echo" title="Link to this heading"></a></h2>
+<p>Implementation of the echo builtin command for the 42sh shell. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_valid_option">
+<span class="target" id="builtin__echo_8c_1a63c6b798f62d9b8cd37d03065251225c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_valid_option</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">token</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">nl</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">escape</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_valid_option" title="Link to this definition"></a><br /></dt>
+<dd><p>check if the option is -e, -E, -N or a combination thereof </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> – : the token to analyze </p></li>
+<li><p><strong>nl</strong> – : pointer to int to know the trailing newline status </p></li>
+<li><p><strong>escape</strong> – : pointer to int to know the backslash interpretation status </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 | 0 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_valid_symbol">
+<span class="target" id="builtin__echo_8c_1a64793977995217bc36ceaa22e314e212"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_valid_symbol</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">symbols</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_valid_symbol" title="Link to this definition"></a><br /></dt>
+<dd><p>check if the symbol c own to the symbols list </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> – : symbol to check </p></li>
+<li><p><strong>symbols</strong> – : list of valid symbols </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 | 1 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.display_base">
+<span class="target" id="builtin__echo_8c_1a6cd162df690a7469fde177c81cb430b9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">display_base</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">scout</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">base</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.display_base" title="Link to this definition"></a><br /></dt>
+<dd><p>: display the char corresponding to the base number given </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scout</strong> – : the pointer of pointer on the number </p></li>
+<li><p><strong>base</strong> – : the input base </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.display_token">
+<span class="target" id="builtin__echo_8c_1a81810b937c663438ae507b4570cd4d75"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">display_token</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">token</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">last</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">escape</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.display_token" title="Link to this definition"></a><br /></dt>
+<dd><p>display the token </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> – : char * </p></li>
+<li><p><strong>last</strong> – : flag to know if a trailing space is necessary </p></li>
+<li><p><strong>escape</strong> – : flag to know if there is a backslash interpretation </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 | 1 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.report_write_error">
+<span class="target" id="builtin__echo_8c_1a2c852dc9feca6ce025dcdc6c230472a6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">report_write_error</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.report_write_error" title="Link to this definition"></a><br /></dt>
+<dd><p>Force buffered output to fd 1 and report any write failure. </p>
+<p>Bash-posix-compatible behaviour: fd 1 may have been closed by a <code class="docutils literal notranslate"><span class="pre">&gt;&amp;-</span></code> redirection, in which case the buffered stdio writes only surface as errors once we flush. clearerr() resets the stream so a later builtin (after the redirection is restored) can write again. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, 1 if a write error was detected. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__echo_8c_1a47be677357bd4408636f7e9f22f80d1e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_echo</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Print arguments separated by spaces, followed by a newline. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">echo</span> <span class="pre">[-neE]</span> <span class="pre">[arg</span> <span class="pre">...]</span></code></p>
+<p>Options may be combined (e.g. <code class="docutils literal notranslate"><span class="pre">-nE</span></code>). Unknown letters disable option parsing for that token, so <code class="docutils literal notranslate"><span class="pre">-x</span></code> is printed literally.</p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-n</span></code></p></td>
+<td><p>Suppress the trailing newline.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-e</span></code></p></td>
+<td><p>Interpret backslash escapes (<code class="docutils literal notranslate"><span class="pre">\n</span></code>, <code class="docutils literal notranslate"><span class="pre">\t</span></code>, <code class="docutils literal notranslate"><span class="pre">\xNN</span></code>, …).    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-E</span></code></p></td>
+<td><p>Disable backslash interpretation (default).   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span>hello<span class="w"> </span>world<span class="w">         </span><span class="c1"># hello world</span>
+<span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span>no-newline<span class="w">       </span><span class="c1"># no-newline</span>
+<span class="nb">echo</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;a\tb\nc&#39;</span><span class="w">        </span><span class="c1"># a&lt;TAB&gt;b&lt;NEWLINE&gt;c</span>
+<span class="nb">echo</span><span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;literal\\n&#39;</span><span class="w">     </span><span class="c1"># literal\n</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Always 0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="exit">
+<h2><code class="docutils literal notranslate"><span class="pre">exit</span></code><a class="headerlink" href="#exit" title="Link to this heading"></a></h2>
+<p>Implementation of the exit builtin command for the 42sh shell. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>zweng </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_numeric">
+<span class="target" id="builtin__exit_8c_1a2be48a5d3b0b9f9ee646af23e8122c90"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_numeric</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_numeric" title="Link to this definition"></a><br /></dt>
+<dd><p>Check if a string is a valid numeric argument. </p>
+<p>Allows optional leading ‘+’ or ‘-’, followed by digits only. Also rejects values that overflow long. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str</strong> – The string to check. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 if numeric, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__exit_8c_1a8f562ae61cfa07fc7bee31ba73015bce"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_exit</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Exit the shell. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">exit</span> <span class="pre">[n]</span></code></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">n</span></code> is supplied, the shell exits with status <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">&amp;</span> <span class="pre">0xFF</span></code> (POSIX truncation to 8 bits). With no argument, exits with the status of the most recently executed command (<code class="docutils literal notranslate"><span class="pre">$?</span></code>).</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">exit</span><span class="w">                     </span><span class="c1"># exit with $?</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">0</span><span class="w">                   </span><span class="c1"># exit success</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">42</span><span class="w">                  </span><span class="c1"># exit with status 42</span>
+<span class="nb">exit</span><span class="w"> </span>-1<span class="w">                  </span><span class="c1"># exit with status 255 (-1 &amp; 0xFF)</span>
+<span class="nb">exit</span><span class="w"> </span>foo<span class="w">                 </span><span class="c1"># error: &quot;numeric argument required&quot;, exit 2</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w">                 </span><span class="c1"># error: &quot;too many arguments&quot;, returns 1</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>On success the shell terminates and never returns to the caller. On usage error: 2 (non-numeric argument) or 1 (more than one argument — the shell is <em>not</em> exited in this case).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="fg">
+<h2><code class="docutils literal notranslate"><span class="pre">fg</span></code><a class="headerlink" href="#fg" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">fg</span> <span class="pre">[spec]</span></code> - resume a stopped job in the foreground. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__fg_8c_1a2bfce28432dee5dbd4ad98509354e48d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">no_such_job</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">spec</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__fg_8c_1ace9d8e1ff2ec7abe74114bf314fb7174"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_fg</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="history">
+<h2><code class="docutils literal notranslate"><span class="pre">history</span></code><a class="headerlink" href="#history" title="Link to this heading"></a></h2>
+<p>Implementation of the history builtin command for the 42sh shell. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica</p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.print_entries">
+<span class="target" id="builtin__history_8c_1a09b499e439c7d96579c3eef264971c53"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">print_entries</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">HIST_ENTRY</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">list</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">start</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">end</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.print_entries" title="Link to this definition"></a><br /></dt>
+<dd><p>Print the command history list. </p>
+<p>Prints all entries of the history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list</strong> – The list of history entries obtained from readline’s history_list() </p></li>
+<li><p><strong>start</strong> – The starting index in the history list to print from </p></li>
+<li><p><strong>end</strong> – The ending index in the history list to print to (exclusive) </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__history_8c_1ab5fe6329be6040c5eab265bbf248e86a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_history</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Print the command history. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">history</span> <span class="pre">[n]</span></code></p>
+<p>With no argument, prints every entry currently held by readline. With a positive integer <code class="docutils literal notranslate"><span class="pre">n</span></code>, prints only the last <code class="docutils literal notranslate"><span class="pre">n</span></code> entries. Non-positive <code class="docutils literal notranslate"><span class="pre">n</span></code> prints nothing. Each line is <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span> <span class="pre">&lt;command&gt;</span></code> where <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> starts at <code class="docutils literal notranslate"><span class="pre">history_base</span></code> (typically 1).</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">history</span><span class="w">                  </span><span class="c1"># print full history</span>
+<span class="nb">history</span><span class="w"> </span><span class="m">5</span><span class="w">                </span><span class="c1"># print last 5 commands</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Always 0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="jobs">
+<h2><code class="docutils literal notranslate"><span class="pre">jobs</span></code><a class="headerlink" href="#jobs" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">jobs</span></code> builtin - list active background jobs. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__jobs_8c_1a9e7e633853e0aa0d6c8cbb438efba4d1"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_jobs</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="type">
+<h2><code class="docutils literal notranslate"><span class="pre">type</span></code><a class="headerlink" href="#type" title="Link to this heading"></a></h2>
+<p>Implementation of the type builtin command for the 42sh shell. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>zweng </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.TYPE_F_T">
+<span class="target" id="builtin__type_8c_1aff624be4ef4171d13356683e3fdffdf8"></span><span class="sig-name descname"><span class="n"><span class="pre">TYPE_F_T</span></span></span><a class="headerlink" href="#c.TYPE_F_T" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.TYPE_F_P">
+<span class="target" id="builtin__type_8c_1a3bf93be8d76607f31ce95ef4584d96e9"></span><span class="sig-name descname"><span class="n"><span class="pre">TYPE_F_P</span></span></span><a class="headerlink" href="#c.TYPE_F_P" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.TYPE_F_A">
+<span class="target" id="builtin__type_8c_1ab5ffc90c8f94d92a34f7c39f03e7dc61"></span><span class="sig-name descname"><span class="n"><span class="pre">TYPE_F_A</span></span></span><a class="headerlink" href="#c.TYPE_F_A" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_invalid_option">
+<span class="target" id="builtin__type_8c_1a27d18a6296269d06329f1a9418270a3b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_invalid_option</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">opt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_invalid_option" title="Link to this definition"></a><br /></dt>
+<dd><p>Report an unrecognised option letter on stderr. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_type_opts">
+<span class="target" id="builtin__type_8c_1a2543b805f8660d419b5461556fb78691"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parse_type_opts</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_type_opts" title="Link to this definition"></a><br /></dt>
+<dd><p>Parse leading -t/-p/-a options (combinable; <code class="docutils literal notranslate"><span class="pre">--</span></code> ends parsing). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argc</strong> – Argument count. </p></li>
+<li><p><strong>argv</strong> – Argument vector. </p></li>
+<li><p><strong>flags</strong> – Out: bitmask of TYPE_F_* for the options seen. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Index of the first name argument, or -1 on an invalid option. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_free_dirs">
+<span class="target" id="builtin__type_8c_1a3284281b0a517ad821c0282d91dbe628"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_free_dirs</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">dirs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_free_dirs" title="Link to this definition"></a><br /></dt>
+<dd><p>Free a NULL-terminated string array. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_join">
+<span class="target" id="builtin__type_8c_1a8438d34aae6738a71c4fd274f846cde3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">type_join</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">dir</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_join" title="Link to this definition"></a><br /></dt>
+<dd><p>Build “dir/name”. Caller frees the result. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_path_matches">
+<span class="target" id="builtin__type_8c_1a409ebd56aa5d7d8fee5d1b8fadb234c7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_path_matches</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_path_matches" title="Link to this definition"></a><br /></dt>
+<dd><p>Print every location holding an executable <code class="docutils literal notranslate"><span class="pre">name</span></code>. </p>
+<p>A name containing ‘/’ is probed directly; otherwise every $PATH directory is walked and each match printed. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 if at least one match was printed, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_kind">
+<span class="target" id="builtin__type_8c_1af54a8fee67fb048ff52851e86a5792c5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_kind</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_kind" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">-t</span></code>: print the one-word category (builtin/file). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_path">
+<span class="target" id="builtin__type_8c_1a09e9458f45dffa123d887a036efded0d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_path</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_path" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">-p</span></code>: print the resolved path of a disk command only. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_all">
+<span class="target" id="builtin__type_8c_1aad684b84e4c6b4ca3f1f31041f7e238d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_all</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_all" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">-a</span></code>: print the builtin entry and every PATH match. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_default">
+<span class="target" id="builtin__type_8c_1a1a2c5a334b35d3e972c43a1ba1412c30"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_default</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_default" title="Link to this definition"></a><br /></dt>
+<dd><p>Default form: “&lt;name&gt; is a shell builtin” / “&lt;name&gt; is &lt;path&gt;”. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.type_dispatch">
+<span class="target" id="builtin__type_8c_1af237542e5b70c53348dd976dbd52cd1a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type_dispatch</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.type_dispatch" title="Link to this definition"></a><br /></dt>
+<dd><p>Route one name to the handler selected by the parsed flags. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="builtin__type_8c_1a603a73d20e506f6066f17f97c08a96d4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">builtin_type</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Describe how each name would be interpreted as a command. </p>
+<p><strong>Usage</strong>: <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">[-tpa]</span> <span class="pre">name</span> <span class="pre">[name</span> <span class="pre">...]</span></code></p>
+<p><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option   </p></th>
+<th class="head"><p>Effect    </p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(none)   </p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">shell</span> <span class="pre">builtin</span></code> / <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">/path</span></code> / <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">not</span> <span class="pre">found</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-t</span></code></p></td>
+<td><p>Print one word: <code class="docutils literal notranslate"><span class="pre">builtin</span></code> or <code class="docutils literal notranslate"><span class="pre">file</span></code> (nothing if not found).    </p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-p</span></code></p></td>
+<td><p>Print the <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> resolution of a disk command only.    </p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-a</span></code></p></td>
+<td><p>Print the builtin entry and every <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> match.   </p></td>
+</tr>
+</tbody>
+</table>
+</p>
+<p>Options may be combined (<code class="docutils literal notranslate"><span class="pre">-ta</span></code>); <code class="docutils literal notranslate"><span class="pre">--</span></code> ends option parsing. An unknown option is reported on stderr and yields exit status 2.</p>
+<p><strong>Examples</strong>: <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ls<span class="w"> </span>bogus
+<span class="c1"># cd is a shell builtin</span>
+<span class="c1"># ls is /usr/bin/ls</span>
+<span class="c1"># bogus not found</span>
+<span class="nb">type</span><span class="w"> </span>-t<span class="w"> </span>ls<span class="w">        </span><span class="c1"># file</span>
+<span class="nb">type</span><span class="w"> </span>-p<span class="w"> </span>ls<span class="w">        </span><span class="c1"># /usr/bin/ls</span>
+</pre></div>
+</div>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 if every name was identified, 1 if any name was not found, 2 on an invalid option.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ast.html" class="btn btn-neutral float-left" title="AST (Abstract Syntax Tree)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="executor.html" class="btn btn-neutral float-right" title="Executor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

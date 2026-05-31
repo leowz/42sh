@@ -1,0 +1,13 @@
+{
+  "input": "./42sh",
+  "tok_file": "viz/tokenizations/tok_1780137234_803378.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["./42sh"],
+    "argc": 1,
+    "assignments": [],
+    "redirs": [
+
+    ]
+  }
+}

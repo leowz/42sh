@@ -1,0 +1,706 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expander &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="History" href="history.html" />
+    <link rel="prev" title="Executor" href="executor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">AST (Abstract Syntax Tree)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Expander</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_word"><code class="docutils literal notranslate"><span class="pre">expand_word()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_word_to_fields"><code class="docutils literal notranslate"><span class="pre">expand_word_to_fields()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_command"><code class="docutils literal notranslate"><span class="pre">expand_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.xbuf_init"><code class="docutils literal notranslate"><span class="pre">xbuf_init()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.xbuf_free"><code class="docutils literal notranslate"><span class="pre">xbuf_free()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.xbuf_putc"><code class="docutils literal notranslate"><span class="pre">xbuf_putc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.xbuf_puts"><code class="docutils literal notranslate"><span class="pre">xbuf_puts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_word_into"><code class="docutils literal notranslate"><span class="pre">expand_word_into()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_dollar"><code class="docutils literal notranslate"><span class="pre">expand_dollar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_tilde_at"><code class="docutils literal notranslate"><span class="pre">expand_tilde_at()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.field_split"><code class="docutils literal notranslate"><span class="pre">field_split()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_arithmetic"><code class="docutils literal notranslate"><span class="pre">expand_arithmetic()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.expand_cmdsub"><code class="docutils literal notranslate"><span class="pre">expand_cmdsub()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.arith_eval"><code class="docutils literal notranslate"><span class="pre">arith_eval()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.parse_expr"><code class="docutils literal notranslate"><span class="pre">parse_expr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_arith"><code class="docutils literal notranslate"><span class="pre">t_arith</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_arith.s"><code class="docutils literal notranslate"><span class="pre">s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_arith.i"><code class="docutils literal notranslate"><span class="pre">i</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_arith.error"><code class="docutils literal notranslate"><span class="pre">error</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_xbuf"><code class="docutils literal notranslate"><span class="pre">t_xbuf</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_xbuf.data"><code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_xbuf.mask"><code class="docutils literal notranslate"><span class="pre">mask</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_xbuf.len"><code class="docutils literal notranslate"><span class="pre">len</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_xbuf.cap"><code class="docutils literal notranslate"><span class="pre">cap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Expander</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.word_has_quote"><code class="docutils literal notranslate"><span class="pre">word_has_quote()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.one_empty_field"><code class="docutils literal notranslate"><span class="pre">one_empty_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.free_argv"><code class="docutils literal notranslate"><span class="pre">free_argv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.argv_append_all"><code class="docutils literal notranslate"><span class="pre">argv_append_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.expand_argv"><code class="docutils literal notranslate"><span class="pre">expand_argv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.expand_assignment"><code class="docutils literal notranslate"><span class="pre">expand_assignment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.expand_assignments"><code class="docutils literal notranslate"><span class="pre">expand_assignments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_heredoc"><code class="docutils literal notranslate"><span class="pre">is_heredoc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.report_ambiguous_redir"><code class="docutils literal notranslate"><span class="pre">report_ambiguous_redir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.expand_redir_target"><code class="docutils literal notranslate"><span class="pre">expand_redir_target()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.expand_redirs"><code class="docutils literal notranslate"><span class="pre">expand_redirs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#field-split">Field Split</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_ifs_split"><code class="docutils literal notranslate"><span class="pre">is_ifs_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_ifs_ws"><code class="docutils literal notranslate"><span class="pre">is_ifs_ws()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.push_field"><code class="docutils literal notranslate"><span class="pre">push_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.skip_ifs_ws"><code class="docutils literal notranslate"><span class="pre">skip_ifs_ws()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.consume_delimiter"><code class="docutils literal notranslate"><span class="pre">consume_delimiter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_fields"><code class="docutils literal notranslate"><span class="pre">collect_fields()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.materialise"><code class="docutils literal notranslate"><span class="pre">materialise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.single_field"><code class="docutils literal notranslate"><span class="pre">single_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.empty_array"><code class="docutils literal notranslate"><span class="pre">empty_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_field"><code class="docutils literal notranslate"><span class="pre">t_field</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_field.start"><code class="docutils literal notranslate"><span class="pre">start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_field.len"><code class="docutils literal notranslate"><span class="pre">len</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Expander</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="expander">
+<h1>Expander<a class="headerlink" href="#expander" title="Link to this heading"></a></h1>
+<p>Word expansion: quotes, parameter, tilde, field splitting. </p>
+<p>
+The expander is invoked by the executor right before a simple command runs. It performs the POSIX expansion pipeline on the raw token strings produced by the lexer/parser:<dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica</p>
+</dd>
+</dl>
+</p>
+<p><ol class="arabic simple">
+<li><p>Tilde expansion ~ ~user</p></li>
+<li><p>Parameter expansion $VAR ${VAR} $? $$ $0</p></li>
+<li><p>Quote handling ‘ “ \ semantics</p></li>
+<li><p>Field splitting on $IFS (only on unquoted expansion output)</p></li>
+<li><p>Quote removal done in-line during the char-by-char loop</p></li>
+</ol>
+</p>
+<p>Command substitution <code class="docutils literal notranslate"><span class="pre">$()</span></code>, arithmetic <code class="docutils literal notranslate"><span class="pre">$(())</span></code> and pathname (glob) expansion are listed as modular features in plan/04_expander.md and are not implemented in this module yet. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_word">
+<span class="target" id="expander_8h_1ada9cec41d992160afe3c5d53e484aadd"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">expand_word</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_word" title="Link to this definition"></a><br /></dt>
+<dd><p>Expand a word to a single string (no field splitting, no globbing). </p>
+<p>Used for assignment values and redirection targets. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>word</strong> – The raw token string from the parser. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Newly-allocated string. Caller frees. NULL on allocation failure or when <code class="docutils literal notranslate"><span class="pre">word</span></code> is NULL. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_word_to_fields">
+<span class="target" id="expander_8h_1a8634ebdbcb6318b8c5fa38f3f45268a8"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">expand_word_to_fields</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_word_to_fields" title="Link to this definition"></a><br /></dt>
+<dd><p>Expand a word to multiple fields (argv words). </p>
+<p>Performs all expansions plus field splitting on $IFS. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>word</strong> – The raw token string from the parser. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Newly-allocated NULL-terminated array of strings. Caller frees each element and the array itself. May return a zero-element array (just a NULL terminator) when the word expanded to nothing splittable. NULL on allocation failure or when <code class="docutils literal notranslate"><span class="pre">word</span></code> is NULL. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_command">
+<span class="target" id="expander_8h_1aa734ed5b5c9cc36156b1bd86db5a64de"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_command</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_command" title="Link to this definition"></a><br /></dt>
+<dd><p>Expand a whole simple command in place: argv, assignments, redirs. </p>
+<p>Replaces <code class="docutils literal notranslate"><span class="pre">cmd-&gt;argv</span></code> with a new array containing the expanded fields, updates <code class="docutils literal notranslate"><span class="pre">cmd-&gt;argc</span></code>, rewrites each “NAME=value” in <code class="docutils literal notranslate"><span class="pre">cmd-&gt;assignments</span></code>, and rewrites <code class="docutils literal notranslate"><span class="pre">redir-&gt;target</span></code> on every non-heredoc redirection. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance. </p></li>
+<li><p><strong>cmd</strong> – The command node to expand. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xbuf_init">
+<span class="target" id="expander_8h_1a61d8298ac0cb5f41d7b2f4ca2ad0143d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xbuf_init</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xbuf_init" title="Link to this definition"></a><br /></dt>
+<dd><p>Initialise an empty expansion buffer. Returns 0 / -1. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xbuf_free">
+<span class="target" id="expander_8h_1a1f2f22088615efc685e72b778ae2702c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xbuf_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xbuf_free" title="Link to this definition"></a><br /></dt>
+<dd><p>Release a buffer’s storage. Safe to call on a NULL/empty buf. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xbuf_putc">
+<span class="target" id="expander_8h_1aa2eca285b0dfe5268e0464b56dde10a9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xbuf_putc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">split</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xbuf_putc" title="Link to this definition"></a><br /></dt>
+<dd><p>Append one byte plus its split-mask flag. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>buf</strong> – The buffer to append to. </p></li>
+<li><p><strong>c</strong> – The character to append. </p></li>
+<li><p><strong>split</strong> – 1 if <code class="docutils literal notranslate"><span class="pre">c</span></code> is subject to IFS splitting, 0 if literal. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.xbuf_puts">
+<span class="target" id="expander_8h_1a20e02b90e2289609d976599dea68afcb"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">xbuf_puts</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">split</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.xbuf_puts" title="Link to this definition"></a><br /></dt>
+<dd><p>Append a NUL-terminated string with a uniform split flag. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>buf</strong> – The buffer to append to. </p></li>
+<li><p><strong>s</strong> – The string to append (may be NULL → no-op success). </p></li>
+<li><p><strong>split</strong> – 1 if every byte of <code class="docutils literal notranslate"><span class="pre">s</span></code> is splittable, 0 if literal. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_word_into">
+<span class="target" id="expander_8h_1a5c17a2f2df9a65b4d6dd835ad23a9097"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_word_into</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span>, <a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_word_into" title="Link to this definition"></a><br /></dt>
+<dd><p>Run the char-by-char expansion loop on <code class="docutils literal notranslate"><span class="pre">word</span></code> into <code class="docutils literal notranslate"><span class="pre">out</span></code>. </p>
+<p>Handles single quotes (no expansion), double quotes (parameter expansion only), tilde at word start, $-expansions, and backslash escapes per POSIX. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, -1 on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_dollar">
+<span class="target" id="expander_8h_1a6992e009d04c4f432b063493b2602274"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_dollar</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dq</span></span>, <a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_dollar" title="Link to this definition"></a><br /></dt>
+<dd><p>Read a $… sequence beginning at <code class="docutils literal notranslate"><span class="pre">input</span></code>[*pos]. </p>
+<p>Supports $?, $$, $0, $NAME and ${NAME} (including ${?}, ${$}, ${0}). Unknown variables expand to the empty string. A bare $ followed by no recognised form is emitted literally. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shell</strong> – The shell instance (for variable lookup and $?). </p></li>
+<li><p><strong>input</strong> – The full word string. </p></li>
+<li><p><strong>pos</strong> – In/out: byte index, advanced past the consumed sequence. </p></li>
+<li><p><strong>dq</strong> – 1 when the $-sequence is inside double quotes (suppresses split). </p></li>
+<li><p><strong>out</strong> – Buffer to append the expanded value to. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_tilde_at">
+<span class="target" id="expander_8h_1ae38d8d62dde53b7883fb36df83c4a6ba"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_tilde_at</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span>, <a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_tilde_at" title="Link to this definition"></a><br /></dt>
+<dd><p>Read a tilde sequence beginning at <code class="docutils literal notranslate"><span class="pre">input</span></code>[*pos]. </p>
+<p>Recognises a leading “~” or “~user” and replaces it with $HOME or the named user’s home directory. If neither resolves, the original text is emitted literally. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, -1 on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.field_split">
+<span class="target" id="expander_8h_1a693dc903c67f941e871103870126c0ae"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">field_split</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">expanded</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.field_split" title="Link to this definition"></a><br /></dt>
+<dd><p>Field-split an already-expanded buffer on $IFS. </p>
+<p>Honours the buffer’s split mask: a character is a candidate delimiter only when both (a) it appears in $IFS and (b) its mask byte is 1. Empty $IFS disables splitting entirely. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Newly-allocated NULL-terminated array of strings, or NULL on allocation failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_arithmetic">
+<span class="target" id="expander_8h_1a2b5b4886024eadd75b7679dae426dd45"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_arithmetic</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dq</span></span>, <a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_arithmetic" title="Link to this definition"></a><br /></dt>
+<dd><p>expand arithmetic expression $((expr)) </p>
+<p>check the depth of double parenthesis and call arith_eval </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>if OK 0 - else -1 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_cmdsub">
+<span class="target" id="expander_8h_1a4455b5e241338f1cbd6b926d20484f1f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_cmdsub</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_shell</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dq</span></span>, <a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_cmdsub" title="Link to this definition"></a><br /></dt>
+<dd><p>Expand a <code class="docutils literal notranslate"><span class="pre">$(</span> <span class="pre">...</span> <span class="pre">)</span></code> command substitution. </p>
+<p>Forks a child whose stdout is captured via a pipe; the inner script runs through the same lexer/parser/executor as a normal command line. Trailing newlines are stripped per POSIX 2.6.3. Unquoted (<code class="docutils literal notranslate"><span class="pre">dq</span></code> == 0) output is pushed with split=1 so field splitting still runs. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, -1 on allocation / unmatched-paren errors. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.arith_eval">
+<span class="target" id="expander_8h_1a9ea7b194a0525a81c60525eb7b174314"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">arith_eval</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">expr</span></span>, <span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">result</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.arith_eval" title="Link to this definition"></a><br /></dt>
+<dd><p>Evaluate a plain arithmetic expression string to a long long int. </p>
+<p>Implements a recursive descent parser for the following grammar: expr -&gt; term ((‘+’ | ‘-’) term)* term -&gt; factor ((‘*’ | ‘/’ | ‘’) factor)* factor -&gt; ‘(’ expr ‘)’ | [‘-’] NUMBER Operator precedence and left-associativity are handled naturally by the call chain. Whitespace between tokens is ignored. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success or -1 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_expr">
+<span class="target" id="expander_8h_1a7e8871f19cc0874d3c430c3a93d7b8f1"></span><span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="kt"><span class="pre">long</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parse_expr</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_arith" title="t_arith"><span class="n"><span class="pre">t_arith</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">a</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_expr" title="Link to this definition"></a><br /></dt>
+<dd><p>Parse and evaluate the top-level arithmetic expression. </p>
+<p>Handles additive operators (‘+’ and ‘-’) with left-to-right associativity by repeatedly calling parse_term() for each operand. Stops as soon as a non-additive token is encountered or the end of the string is reached. Short-circuits immediately if a-&gt;error is set by a deeper call, leaving the position unchanged so <a class="reference internal" href="#expander_8h_1a9ea7b194a0525a81c60525eb7b174314"><span class="std std-ref">arith_eval()</span></a> can detect and report trailing garbage. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The computed value of the expression parsed </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_arith">
+<span class="target" id="structt__arith"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_arith</span></span></span><a class="headerlink" href="#c.t_arith" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;expander.h&gt;</em></div>
+<p>Helper structure to handle arithmetic expression. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_arith.s">
+<span class="target" id="structt__arith_1a4bf195b74d4e56b3bee0bb7415312e8e"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">s</span></span></span><a class="headerlink" href="#c.t_arith.s" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_arith.i">
+<span class="target" id="structt__arith_1ad774683ad6de3c7a5142f3c365379945"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">i</span></span></span><a class="headerlink" href="#c.t_arith.i" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_arith.error">
+<span class="target" id="structt__arith_1aec26e79e5ec6ab2fe82ff46e7f127314"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><a class="headerlink" href="#c.t_arith.error" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_xbuf">
+<span class="target" id="structt__xbuf"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_xbuf</span></span></span><a class="headerlink" href="#c.t_xbuf" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;expander.h&gt;</em></div>
+<p>Expansion buffer with a parallel “splittable” mask. </p>
+<p>Phase 1 of expansion writes into a <a class="reference internal" href="#structt__xbuf"><span class="std std-ref">t_xbuf</span></a> instead of a plain C string so that field splitting can later distinguish IFS characters that came from an unquoted expansion (splittable) from IFS characters that were literal-quoted in the source word (not splittable).</p>
+<p>For every byte stored in <code class="docutils literal notranslate"><span class="pre">data</span></code> there is a parallel byte in <code class="docutils literal notranslate"><span class="pre">mask:</span></code> 1 means “IFS-splittable”, 0 means “literal - never a field boundary”. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both buffers are NUL-terminated so the payload can be inspected with the regular string functions. </p>
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_xbuf.data">
+<span class="target" id="structt__xbuf_1ad9eeb3c283bbcd332597eaf42a9f7c7a"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">data</span></span></span><a class="headerlink" href="#c.t_xbuf.data" title="Link to this definition"></a><br /></dt>
+<dd><p>NUL-terminated expanded text. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_xbuf.mask">
+<span class="target" id="structt__xbuf_1a6961086171d667cf08bce4471d24538a"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">mask</span></span></span><a class="headerlink" href="#c.t_xbuf.mask" title="Link to this definition"></a><br /></dt>
+<dd><p>Parallel mask: 1 = splittable, 0 = literal. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_xbuf.len">
+<span class="target" id="structt__xbuf_1ad3de20824e0068c57ce21722924c441f"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">len</span></span></span><a class="headerlink" href="#c.t_xbuf.len" title="Link to this definition"></a><br /></dt>
+<dd><p>Number of bytes currently stored (excluding NUL). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_xbuf.cap">
+<span class="target" id="structt__xbuf_1abed6dc19c50ac235c8088427d78d0da4"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cap</span></span></span><a class="headerlink" href="#c.t_xbuf.cap" title="Link to this definition"></a><br /></dt>
+<dd><p>Allocated capacity of <code class="docutils literal notranslate"><span class="pre">data</span></code> and <code class="docutils literal notranslate"><span class="pre">mask</span></code>. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<section id="id1">
+<h2>Expander<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>Public expander API: expand_word, expand_word_to_fields, expand_command. </p>
+<p>
+Thin glue between the executor and the lower-level expansion helpers. All allocation/error contracts are documented in expander.h; this file only implements them on top of the <a class="reference internal" href="#structt__xbuf"><span class="std std-ref">t_xbuf</span></a> and helpers from expand_word.c, expand_parameter.c, expand_tilde.c and field_split.c. <dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica</p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="expander_8c_1a6b5fa30f5f520cbf1ad40138de8146a2"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">expand_word</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.word_has_quote">
+<span class="target" id="expander_8c_1a81bea6b6c4c32892104e225820858a0e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">word_has_quote</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.word_has_quote" title="Link to this definition"></a><br /></dt>
+<dd><p>True if the raw token <code class="docutils literal notranslate"><span class="pre">word</span></code> contains at least one quote (<code class="docutils literal notranslate"><p><span class="pre">or</span> <span class="pre">&quot;</span> <span class="pre">),</span></p>
+<p><span class="pre">skipping</span> <span class="pre">past</span> <span class="pre">backslash-escapes</span> <span class="pre">so&lt;/tt&gt;\&quot;`</span> <span class="pre">doesn't</span> <span class="pre">count.</span></p>
+</code></p>
+<p>Used to detect words like `””` or `”$X”<code class="docutils literal notranslate"><span class="pre">(X</span> <span class="pre">unset):</span> <span class="pre">their</span> <span class="pre">expansion</span> <span class="pre">is</span> <span class="pre">empty</span> <span class="pre">bytes-wise,</span> <span class="pre">yet</span> <span class="pre">POSIX</span> <span class="pre">2.6.5</span> <span class="pre">requires</span> <span class="pre">one</span> <span class="pre">empty</span> <span class="pre">argv</span> <span class="pre">field</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">emitted</span> <span class="pre">(so</span></code>printf “[%s]” “$X” foo<code class="docutils literal notranslate"> <span class="pre">prints</span></code>[][foo]<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">not</span></code>[foo]`). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.one_empty_field">
+<span class="target" id="expander_8c_1a2a88aed31f2bb2e15a27bad0bfea9494"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">one_empty_field</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.one_empty_field" title="Link to this definition"></a><br /></dt>
+<dd><p>Produce an argv array of exactly one empty string (<code class="docutils literal notranslate"><span class="pre">{&quot;&quot;,</span> <span class="pre">NULL}</span></code>). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="expander_8c_1a901ddaaa408f1e37d0bc85e2ce27db2c"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">expand_word_to_fields</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.free_argv">
+<span class="target" id="expander_8c_1a88bf459338083bc606110e873a89c5ad"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_argv</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Free a NULL-terminated argv array (each string + the array). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.argv_append_all">
+<span class="target" id="expander_8c_1aedf62b98b58fd09602c3ecc6212e9bab"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">argv_append_all</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">dst</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">dst_count</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">src</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.argv_append_all" title="Link to this definition"></a><br /></dt>
+<dd><p>Append <code class="docutils literal notranslate"><span class="pre">src</span></code> (a NULL-terminated array) onto <code class="docutils literal notranslate"><span class="pre">*dst</span></code>, growing. </p>
+<p>Takes ownership of <code class="docutils literal notranslate"><span class="pre">src's</span></code> elements; frees <code class="docutils literal notranslate"><span class="pre">src</span></code> itself. On failure both arrays are left in a recoverable state (<code class="docutils literal notranslate"><span class="pre">src</span></code> is freed, <code class="docutils literal notranslate"><span class="pre">*dst</span></code> keeps the elements collected so far so the caller can free it via free_argv). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>New element count of <code class="docutils literal notranslate"><span class="pre">*dst</span></code>, or -1 on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_argv">
+<span class="target" id="expander_8c_1a9df804ba2be7bbd5a4621336dbc42e30"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_argv</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_argv" title="Link to this definition"></a><br /></dt>
+<dd><p>Replace cmd-&gt;argv with the field-split expansion of every word. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_assignment">
+<span class="target" id="expander_8c_1a854bfc00320dae59fbece2cfaf2a85ee"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">expand_assignment</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">original</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_assignment" title="Link to this definition"></a><br /></dt>
+<dd><p>Rebuild “NAME=value” with <code class="docutils literal notranslate"><span class="pre">value</span></code> expanded as a single string. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_assignments">
+<span class="target" id="expander_8c_1a00d5dde43d1a83b949af6e047f57ac9d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_assignments</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_assignments" title="Link to this definition"></a><br /></dt>
+<dd><p>Walk cmd-&gt;assignments and expand each value in place. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_heredoc">
+<span class="target" id="expander_8c_1a05e901614910e2d3e44d9f7bf3f4867a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_heredoc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_heredoc" title="Link to this definition"></a><br /></dt>
+<dd><p>True if <code class="docutils literal notranslate"><span class="pre">type</span></code> names a heredoc operator (whose target is the delimiter and must NOT be expanded as a filename). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.report_ambiguous_redir">
+<span class="target" id="expander_8c_1ad652361d5e298c99a30234460d6c9d99"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">report_ambiguous_redir</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">target</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.report_ambiguous_redir" title="Link to this definition"></a><br /></dt>
+<dd><p>Report “&lt;target&gt;: ambiguous redirect” to stderr. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_redir_target">
+<span class="target" id="expander_8c_1a6fcbce0afdff86317e603e339b1241fe"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">expand_redir_target</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">word</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_redir_target" title="Link to this definition"></a><br /></dt>
+<dd><p>Expand a redir target with field splitting and reject ambiguity. </p>
+<p>After full expansion + field splitting, the target must collapse to exactly one field. Zero fields (e.g. an empty unquoted variable) and &gt;1 fields are both rejected as ambiguous, matching bash behaviour. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Newly-allocated single-field string on success, or NULL on allocation failure / ambiguity (error already reported). </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.expand_redirs">
+<span class="target" id="expander_8c_1a693c32ce852282a17cd9192609fb6462"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_redirs</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.expand_redirs" title="Link to this definition"></a><br /></dt>
+<dd><p>Walk cmd-&gt;redirs and expand each non-heredoc target in place. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="expander_8c_1ad18ed5cd9d635d199199277fcdbc486c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">expand_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <a class="reference internal" href="ast.html#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="field-split">
+<h2>Field Split<a class="headerlink" href="#field-split" title="Link to this heading"></a></h2>
+<p>Split an expanded buffer on $IFS, honouring the split mask. </p>
+<p>
+Field splitting (POSIX 2.6.5) only applies to bytes that came from an unquoted expansion - exactly the bytes whose mask byte is 1 in <a class="reference internal" href="#structt__xbuf"><span class="std std-ref">t_xbuf</span></a>. Literal bytes (including spaces inside “…” or ‘…’) are preserved unconditionally.<dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica</p>
+</dd>
+</dl>
+</p>
+<p>Splitting rules implemented (matching dash / bash):<ul class="simple">
+<li><p>Default IFS is “ \t\n”.</p></li>
+<li><p>Leading IFS whitespace is dropped; a run of IFS whitespace between two values is one delimiter (no empty field generated).</p></li>
+<li><p>Each non-whitespace IFS byte is a delimiter. IFS whitespace adjacent to it is consumed with it.</p></li>
+<li><p>Adjacent non-whitespace IFS delimiters produce an empty field between them.</p></li>
+<li><p>A trailing delimiter does NOT produce a trailing empty field.</p></li>
+<li><p>IFS = “” disables splitting entirely (single field).</p></li>
+<li><p>An empty buffer yields zero fields. </p></li>
+</ul>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_ifs_split">
+<span class="target" id="field__split_8c_1ae8d79778049df54520ed5f5ea313ac80"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_ifs_split</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">i</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ifs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_ifs_split" title="Link to this definition"></a><br /></dt>
+<dd><p>True if <code class="docutils literal notranslate"><span class="pre">buf-&gt;data</span></code>[i] is in <code class="docutils literal notranslate"><span class="pre">ifs</span></code> and the mask allows splitting. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_ifs_ws">
+<span class="target" id="field__split_8c_1ae7cedf7b5f4bc19802ac40328cff224f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_ifs_ws</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ifs</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="n"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_ifs_ws" title="Link to this definition"></a><br /></dt>
+<dd><p>True if <code class="docutils literal notranslate"><span class="pre">c</span></code> is one of POSIX’s three IFS-whitespace bytes AND it appears in <code class="docutils literal notranslate"><span class="pre">ifs</span></code>. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.push_field">
+<span class="target" id="field__split_8c_1a45ab0fba15cecd64f697974e17889770"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">push_field</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_field" title="t_field"><span class="n"><span class="pre">t_field</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fields</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">count</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">cap</span></span>, <a class="reference internal" href="#c.t_field" title="t_field"><span class="n"><span class="pre">t_field</span></span></a><span class="w"> </span><span class="n"><span class="pre">f</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.push_field" title="Link to this definition"></a><br /></dt>
+<dd><p>Append a field record to a growing array. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>New capacity, or 0 on allocation failure (caller frees). </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.skip_ifs_ws">
+<span class="target" id="field__split_8c_1af95dae9b65f1aebd6a2410f0f6ac4527"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">skip_ifs_ws</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ifs</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">i</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.skip_ifs_ws" title="Link to this definition"></a><br /></dt>
+<dd><p>Skip a run of IFS whitespace starting at *i. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.consume_delimiter">
+<span class="target" id="field__split_8c_1af3028614c30afa65f26fcaa69bbc664b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">consume_delimiter</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ifs</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">i</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.consume_delimiter" title="Link to this definition"></a><br /></dt>
+<dd><p>Consume one delimiter at *i: optional non-ws byte plus any surrounding IFS whitespace. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_fields">
+<span class="target" id="field__split_8c_1a4b486a03f4d0108b4ceca958ba7ccbd2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.t_field" title="t_field"><span class="n"><span class="pre">t_field</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">collect_fields</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ifs</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_fields" title="Link to this definition"></a><br /></dt>
+<dd><p>Walk the buffer and record each field. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Field array (caller frees) or NULL on allocation failure. When the buffer expands to zero fields, *out_count is 0 and the returned pointer is NULL - that is not an error. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.materialise">
+<span class="target" id="field__split_8c_1ac6e378033a35eca59405e5f179c8a1f1"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">materialise</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span>, <a class="reference internal" href="#c.t_field" title="t_field"><span class="n"><span class="pre">t_field</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fields</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.materialise" title="Link to this definition"></a><br /></dt>
+<dd><p>Convert collected (start, len) records to a NULL-terminated array. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.single_field">
+<span class="target" id="field__split_8c_1a8834c8d2e31780b5d51e033725988a31"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">single_field</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.single_field" title="Link to this definition"></a><br /></dt>
+<dd><p>Build a single-field array holding the buffer verbatim. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.empty_array">
+<span class="target" id="field__split_8c_1a90656737db77ebde62057cdb2c17a6b0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">empty_array</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.empty_array" title="Link to this definition"></a><br /></dt>
+<dd><p>Build a zero-field result (single NULL pointer). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="field__split_8c_1a186aec45b7e7fd07538895b22b580a1f"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">field_split</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.t_xbuf" title="t_xbuf"><span class="n"><span class="pre">t_xbuf</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">expanded</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_field">
+<span class="target" id="structt__field"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_field</span></span></span><a class="headerlink" href="#c.t_field" title="Link to this definition"></a><br /></dt>
+<dd><p>Field record (offset, length) into the expansion buffer. </p>
+<p>We collect these first and only allocate the t_strdup-style char* array once we know the final count. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_field.start">
+<span class="target" id="structt__field_1a5a5f68fc7697b328d8fdc099dc36062c"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">start</span></span></span><a class="headerlink" href="#c.t_field.start" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_field.len">
+<span class="target" id="structt__field_1af3c06d7c5d87bee67c85e0f75bf19d9e"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">len</span></span></span><a class="headerlink" href="#c.t_field.len" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="executor.html" class="btn btn-neutral float-left" title="Executor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="history.html" class="btn btn-neutral float-right" title="History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

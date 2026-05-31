@@ -1,0 +1,1254 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AST (Abstract Syntax Tree) &mdash; 42sh Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Builtins" href="builtins.html" />
+    <link rel="prev" title="42sh (Shell State)" href="42sh.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            42sh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Core</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="42sh.html">42sh (Shell State)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">AST (Abstract Syntax Tree)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#c.REDIR"><code class="docutils literal notranslate"><span class="pre">REDIR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_node_type"><code class="docutils literal notranslate"><span class="pre">t_node_type</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_COMMAND"><code class="docutils literal notranslate"><span class="pre">NODE_COMMAND</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_PIPE"><code class="docutils literal notranslate"><span class="pre">NODE_PIPE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_AND"><code class="docutils literal notranslate"><span class="pre">NODE_AND</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_OR"><code class="docutils literal notranslate"><span class="pre">NODE_OR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_SEQUENCE"><code class="docutils literal notranslate"><span class="pre">NODE_SEQUENCE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_SUBSHELL"><code class="docutils literal notranslate"><span class="pre">NODE_SUBSHELL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_BLOCK"><code class="docutils literal notranslate"><span class="pre">NODE_BLOCK</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_node_type.NODE_BACKGROUND"><code class="docutils literal notranslate"><span class="pre">NODE_BACKGROUND</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.ast_to_string"><code class="docutils literal notranslate"><span class="pre">ast_to_string()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.cmd_to_string"><code class="docutils literal notranslate"><span class="pre">cmd_to_string()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.ast_new_command"><code class="docutils literal notranslate"><span class="pre">ast_new_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.ast_new_binary"><code class="docutils literal notranslate"><span class="pre">ast_new_binary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.ast_new_group"><code class="docutils literal notranslate"><span class="pre">ast_new_group()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.ast_free"><code class="docutils literal notranslate"><span class="pre">ast_free()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.redir_new"><code class="docutils literal notranslate"><span class="pre">redir_new()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.redir_free"><code class="docutils literal notranslate"><span class="pre">redir_free()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_redir"><code class="docutils literal notranslate"><span class="pre">t_redir</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_redir.type"><code class="docutils literal notranslate"><span class="pre">type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_redir.fd"><code class="docutils literal notranslate"><span class="pre">fd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_redir.target"><code class="docutils literal notranslate"><span class="pre">target</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_redir.heredoc_delim"><code class="docutils literal notranslate"><span class="pre">heredoc_delim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_redir.heredoc_fd"><code class="docutils literal notranslate"><span class="pre">heredoc_fd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_redir.heredoc_quoted"><code class="docutils literal notranslate"><span class="pre">heredoc_quoted</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_cmd"><code class="docutils literal notranslate"><span class="pre">t_cmd</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_cmd.argv"><code class="docutils literal notranslate"><span class="pre">argv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_cmd.argc"><code class="docutils literal notranslate"><span class="pre">argc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_cmd.assignments"><code class="docutils literal notranslate"><span class="pre">assignments</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_cmd.redirs"><code class="docutils literal notranslate"><span class="pre">redirs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_binary"><code class="docutils literal notranslate"><span class="pre">t_binary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_binary.left"><code class="docutils literal notranslate"><span class="pre">left</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_binary.right"><code class="docutils literal notranslate"><span class="pre">right</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_group"><code class="docutils literal notranslate"><span class="pre">t_group</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_group.child"><code class="docutils literal notranslate"><span class="pre">child</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_group.redirs"><code class="docutils literal notranslate"><span class="pre">redirs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#c.t_ast"><code class="docutils literal notranslate"><span class="pre">t_ast</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_ast.type"><code class="docutils literal notranslate"><span class="pre">type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_ast.cmd"><code class="docutils literal notranslate"><span class="pre">cmd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_ast.binary"><code class="docutils literal notranslate"><span class="pre">binary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_ast.group"><code class="docutils literal notranslate"><span class="pre">group</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_ast.data"><code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#how-is-the-t-ast-generated">How is the t_ast generated?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ast-to-string">Ast to string</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.join_free"><code class="docutils literal notranslate"><span class="pre">join_free()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.append_redirs"><code class="docutils literal notranslate"><span class="pre">append_redirs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#parser">Parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.parser_parse"><code class="docutils literal notranslate"><span class="pre">parser_parse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parser_collect_heredocs"><code class="docutils literal notranslate"><span class="pre">parser_collect_heredocs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.heredoc_expand_config"><code class="docutils literal notranslate"><span class="pre">heredoc_expand_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parser_accept"><code class="docutils literal notranslate"><span class="pre">parser_accept()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_redir"><code class="docutils literal notranslate"><span class="pre">is_redir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parser_peek"><code class="docutils literal notranslate"><span class="pre">parser_peek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parser_next"><code class="docutils literal notranslate"><span class="pre">parser_next()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_subshell"><code class="docutils literal notranslate"><span class="pre">parse_subshell()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_block"><code class="docutils literal notranslate"><span class="pre">parse_block()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_command"><code class="docutils literal notranslate"><span class="pre">parse_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_simple_command"><code class="docutils literal notranslate"><span class="pre">parse_simple_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_pipeline"><code class="docutils literal notranslate"><span class="pre">parse_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_and_or"><code class="docutils literal notranslate"><span class="pre">parse_and_or()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_list"><code class="docutils literal notranslate"><span class="pre">parse_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.cmd_free"><code class="docutils literal notranslate"><span class="pre">cmd_free()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.t_parser"><code class="docutils literal notranslate"><span class="pre">t_parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_parser.tokens"><code class="docutils literal notranslate"><span class="pre">tokens</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_parser.current"><code class="docutils literal notranslate"><span class="pre">current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c.t_parser.error"><code class="docutils literal notranslate"><span class="pre">error</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#parser-entry-point">Parser Entry Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-commands">Simple Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.command_init"><code class="docutils literal notranslate"><span class="pre">command_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parser_error_unexpected"><code class="docutils literal notranslate"><span class="pre">parser_error_unexpected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.command_size"><code class="docutils literal notranslate"><span class="pre">command_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_arith_token"><code class="docutils literal notranslate"><span class="pre">collect_arith_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.command_build"><code class="docutils literal notranslate"><span class="pre">command_build()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.is_assignment"><code class="docutils literal notranslate"><span class="pre">is_assignment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_assignment"><code class="docutils literal notranslate"><span class="pre">parse_assignment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pipes">Pipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logical-operators">Logical Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.detect_and_or"><code class="docutils literal notranslate"><span class="pre">detect_and_or()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sequences-and-background">Sequences and Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.detect_separator"><code class="docutils literal notranslate"><span class="pre">detect_separator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#subshells-and-blocks">Subshells and Blocks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_group_cleanup"><code class="docutils literal notranslate"><span class="pre">parse_group_cleanup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.parse_group"><code class="docutils literal notranslate"><span class="pre">parse_group()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#here-documents">Here-documents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.strip_tab"><code class="docutils literal notranslate"><span class="pre">strip_tab()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.write_line"><code class="docutils literal notranslate"><span class="pre">write_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.pop_queued_heredoc"><code class="docutils literal notranslate"><span class="pre">pop_queued_heredoc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.read_heredoc"><code class="docutils literal notranslate"><span class="pre">read_heredoc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_heredoc"><code class="docutils literal notranslate"><span class="pre">collect_heredoc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_heredocs_from_list"><code class="docutils literal notranslate"><span class="pre">collect_heredocs_from_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_heredocs_from_command"><code class="docutils literal notranslate"><span class="pre">collect_heredocs_from_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.collect_heredocs_from_group"><code class="docutils literal notranslate"><span class="pre">collect_heredocs_from_group()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.ast_walk"><code class="docutils literal notranslate"><span class="pre">ast_walk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.heredoc_sigint_handler"><code class="docutils literal notranslate"><span class="pre">heredoc_sigint_handler()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c.g_sigint_heredoc"><code class="docutils literal notranslate"><span class="pre">g_sigint_heredoc</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ast-memory-management">AST Memory Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c.free_argv"><code class="docutils literal notranslate"><span class="pre">free_argv()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="builtins.html">Builtins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="executor.html">Executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expander.html">Expander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job_control.html">Job Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lexer.html">Lexer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signals.html">Signals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Variables</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tests</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tests/minunit.html">minunit.h - Test Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_runner.html">test_runner.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_btree.html">test_btree.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_dlist.html">test_dlist.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_history.html">test_history.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_lexer.html">test_lexer.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_list.html">test_list.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_parser.html">test_parser.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_executor.html">test_executor.c</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests/test_stubs.html">test_stubs.c</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">42sh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AST (Abstract Syntax Tree)</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ast-abstract-syntax-tree">
+<h1>AST (Abstract Syntax Tree)<a class="headerlink" href="#ast-abstract-syntax-tree" title="Link to this heading"></a></h1>
+<p>Abstract Syntax Tree. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.REDIR">
+<span class="target" id="ast_8h_1ac5e86e10f9fe8628f152edec1fda7e3f"></span><span class="sig-name descname"><span class="n"><span class="pre">REDIR</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">node</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.REDIR" title="Link to this definition"></a><br /></dt>
+<dd><p>Convenience accessor: get <code class="docutils literal notranslate"><a class="reference internal" href="#structt__redir"><span class="std std-ref"><span class="pre">t_redir</span></span></a> <span class="pre">*</span></code> from a <code class="docutils literal notranslate"><span class="pre">t_list</span></code> node. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-enums">Enums</p>
+<dl class="c enum">
+<dt class="sig sig-object c" id="c.t_node_type">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_node_type</span></span></span><a class="headerlink" href="#c.t_node_type" title="Link to this definition"></a><br /></dt>
+<dd><p><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example</span>
+$&gt;<span class="w"> </span><span class="o">(</span>which<span class="w"> </span>ls<span class="o">)</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;dude&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>which<span class="w"> </span>top
+</pre></div>
+</div>
+ <img alt="https://raw.githubusercontent.com/leowz/42sh/main/docs/assets/ast_1.png" src="https://raw.githubusercontent.com/leowz/42sh/main/docs/assets/ast_1.png" /></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Important to don’t change the order </p>
+</div>
+<p><em>Values:</em></p>
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_COMMAND">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560a4a6220ccfd02a146984172245ed3dda9"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_COMMAND</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_COMMAND" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_PIPE">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560a6938e1e206751eeefe7ba32566a11163"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_PIPE</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_PIPE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_AND">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560a30b149965195b9b32fb610f422cb40db"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_AND</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_AND" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_OR">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560a0059a650dfaae31973ad76d879c527ae"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_OR</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_OR" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_SEQUENCE">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560a67411cc78c779fefe2c203b4a6fdc76f"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_SEQUENCE</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_SEQUENCE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_SUBSHELL">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560ae5bc4717b339aac7455bcc74feb06e64"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_SUBSHELL</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_SUBSHELL" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_BLOCK">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560a77fdb1940dc1c2af0c7f70a90af0a73f"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_BLOCK</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_BLOCK" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c enumerator">
+<dt class="sig sig-object c" id="c.t_node_type.NODE_BACKGROUND">
+<span class="target" id="ast_8h_1a558d39e133892b51662d558b4545f560ac81703543d64fb672abcfb149b3ab55e"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NODE_BACKGROUND</span></span></span><a class="headerlink" href="#c.t_node_type.NODE_BACKGROUND" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ast_to_string">
+<span class="target" id="ast_8h_1a34805b31c39ec71ea3c8d2fe0b4d66f3"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_to_string</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ast_to_string" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_to_string">
+<span class="target" id="ast_8h_1a308eaad8654c3bbea35bda4250642125"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">cmd_to_string</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_to_string" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ast_new_command">
+<span class="target" id="ast_8h_1a8b4de3181f55347fdf05dc1c0c2e1a41"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_new_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ast_new_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ast_new_binary">
+<span class="target" id="ast_8h_1a7e2808e9794fe583059905719704dbfb"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_new_binary</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ast_new_binary" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ast_new_group">
+<span class="target" id="ast_8h_1a4a3464c9dd944f70087dcffc011083a5"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_new_group</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">child</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redirs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ast_new_group" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ast_free">
+<span class="target" id="ast_8h_1a96b9a3527fbec066242ed2fec5c436ef"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ast_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">node</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ast_free" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.redir_new">
+<span class="target" id="ast_8h_1a73505eb5ad8abd70ef3447ca9a67de45"></span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">redir_new</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">fd</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">target</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.redir_new" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.redir_free">
+<span class="target" id="ast_8h_1aae0fa788dadad55b86a2b12ebc8abc77"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">redir_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.redir_free" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_redir">
+<span class="target" id="structt__redir"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_redir</span></span></span><a class="headerlink" href="#c.t_redir" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;ast.h&gt;</em></div>
+<p>Redirection data node. </p>
+<p>Stored in <a class="reference internal" href="#structt__cmd_1a62d15c067e1edc8b42fd3d62102e6607"><span class="std std-ref">t_cmd.redirs</span></a> and <a class="reference internal" href="#structt__group_1afa6f6f3413e80364bd824335331d3589"><span class="std std-ref">t_group.redirs</span></a> as t_list* (each node-&gt;content is a <a class="reference internal" href="#structt__redir"><span class="std std-ref">t_redir</span></a> *). </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_redir.type">
+<span class="target" id="structt__redir_1abc37987ae0057fd814c03b89ec18be2d"></span><a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><a class="headerlink" href="#c.t_redir.type" title="Link to this definition"></a><br /></dt>
+<dd><p>Operator kind (TOK_REDIR_IN/OUT/APPEND/HEREDOC/…). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_redir.fd">
+<span class="target" id="structt__redir_1a2ba4d3fb2b008b83518f9fbd708f4f76"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fd</span></span></span><a class="headerlink" href="#c.t_redir.fd" title="Link to this definition"></a><br /></dt>
+<dd><p>Source fd (-1 = default for the operator type). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_redir.target">
+<span class="target" id="structt__redir_1acfba6c82b8af4f75cd2d393bc7b40bec"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">target</span></span></span><a class="headerlink" href="#c.t_redir.target" title="Link to this definition"></a><br /></dt>
+<dd><p>Raw filename or fd-number string (unexpanded). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_redir.heredoc_delim">
+<span class="target" id="structt__redir_1ae6383c9a0a572267350659c93c559b44"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">heredoc_delim</span></span></span><a class="headerlink" href="#c.t_redir.heredoc_delim" title="Link to this definition"></a><br /></dt>
+<dd><p>Delimiter word for &lt;&lt; (raw, may be quoted). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_redir.heredoc_fd">
+<span class="target" id="structt__redir_1accfc28ddacc2c3cf4b6ff3936504f2da"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">heredoc_fd</span></span></span><a class="headerlink" href="#c.t_redir.heredoc_fd" title="Link to this definition"></a><br /></dt>
+<dd><p>Read end of pipe holding collected heredoc body. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_redir.heredoc_quoted">
+<span class="target" id="structt__redir_1adb842f749e4e0ea928a8337f19548a11"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">heredoc_quoted</span></span></span><a class="headerlink" href="#c.t_redir.heredoc_quoted" title="Link to this definition"></a><br /></dt>
+<dd><p>1 if delimiter was quoted (suppresses expansion). </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_cmd">
+<span class="target" id="structt__cmd"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_cmd</span></span></span><a class="headerlink" href="#c.t_cmd" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;ast.h&gt;</em></div>
+<p>Simple command data. </p>
+<p>Stored in <a class="reference internal" href="#structt__ast_1ae2696ef94788234645598054861482e7"><span class="std std-ref">t_ast.data</span></a> as a union with further access <code class="docutils literal notranslate"><span class="pre">t_ast-&gt;data.cmd</span></code></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_cmd.argv">
+<span class="target" id="structt__cmd_1a145f34b80e07535bae32877e5371d23d"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">argv</span></span></span><a class="headerlink" href="#c.t_cmd.argv" title="Link to this definition"></a><br /></dt>
+<dd><p>NULL-terminated array of raw/unexpanded argument strings. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_cmd.argc">
+<span class="target" id="structt__cmd_1aa66e8d33e6b58df85d9b6e3b26b6bb78"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">argc</span></span></span><a class="headerlink" href="#c.t_cmd.argc" title="Link to this definition"></a><br /></dt>
+<dd><p>Number of elements in argv (excluding NULL terminator). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_cmd.assignments">
+<span class="target" id="structt__cmd_1afc8e8307825d5323e6d480e0a84b65e6"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">assignments</span></span></span><a class="headerlink" href="#c.t_cmd.assignments" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of char* “NAME=value” (unexpanded). </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_cmd.redirs">
+<span class="target" id="structt__cmd_1a62d15c067e1edc8b42fd3d62102e6607"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">redirs</span></span></span><a class="headerlink" href="#c.t_cmd.redirs" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of <code class="docutils literal notranslate"><span class="pre">t_redir*</span></code> in source order (left-to-right). </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_binary">
+<span class="target" id="structt__binary"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_binary</span></span></span><a class="headerlink" href="#c.t_binary" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;ast.h&gt;</em></div>
+<p>Binary operation data (pipe, &amp;&amp;, ||, ;). </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_binary.left">
+<span class="target" id="structt__binary_1ae3846be8b43d7d9d4e0cfe9c2786d67b"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_ast</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">left</span></span></span><a class="headerlink" href="#c.t_binary.left" title="Link to this definition"></a><br /></dt>
+<dd><p>Left-hand operand subtree. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_binary.right">
+<span class="target" id="structt__binary_1a84ecb9a74c814a34782a621a9dc9f446"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_ast</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">right</span></span></span><a class="headerlink" href="#c.t_binary.right" title="Link to this definition"></a><br /></dt>
+<dd><p>Right-hand operand subtree. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_group">
+<span class="target" id="structt__group"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_group</span></span></span><a class="headerlink" href="#c.t_group" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;ast.h&gt;</em></div>
+<p>Group data (subshell, block, background). </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_group.child">
+<span class="target" id="structt__group_1a23f41a35a760f96cdaf0b95a10ca8d76"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">s_ast</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">child</span></span></span><a class="headerlink" href="#c.t_group.child" title="Link to this definition"></a><br /></dt>
+<dd><p>Subtree wrapped by the group. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_group.redirs">
+<span class="target" id="structt__group_1afa6f6f3413e80364bd824335331d3589"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">redirs</span></span></span><a class="headerlink" href="#c.t_group.redirs" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of <code class="docutils literal notranslate"><span class="pre">t_redir*</span></code> applied to the whole group, e.g. <code class="docutils literal notranslate"><span class="pre">(cmd)</span> <span class="pre">&gt;</span> <span class="pre">file</span></code> or <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">cmd;</span> <span class="pre">}</span> <span class="pre">2&gt;&amp;1</span></code>. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_ast">
+<span class="target" id="structt__ast"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_ast</span></span></span><a class="headerlink" href="#c.t_ast" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;ast.h&gt;</em></div>
+<p>AST node - union-based for zero-overhead dispatch. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_ast.type">
+<span class="target" id="structt__ast_1a97e6eaa9a8e79d8a26d5c12305752424"></span><a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><a class="headerlink" href="#c.t_ast.type" title="Link to this definition"></a><br /></dt>
+<dd><p>Discriminator selecting which arm of <code class="docutils literal notranslate"><span class="pre">data</span></code> is live. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_ast.cmd">
+<span class="target" id="structt__ast_1a2fb7352bb95ad45b856a07679d2d4bf8"></span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">cmd</span></span></span><a class="headerlink" href="#c.t_ast.cmd" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">data.cmd</span></code> Live when <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">==</span> <span class="pre">NODE_COMMAND</span></code>. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_ast.binary">
+<span class="target" id="structt__ast_1a78b257b6eeecca3228092a3013323bc9"></span><a class="reference internal" href="#c.t_binary" title="t_binary"><span class="n"><span class="pre">t_binary</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">binary</span></span></span><a class="headerlink" href="#c.t_ast.binary" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">data.binary</span></code> Live when <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">==</span> <span class="pre">NODE_PIPE/AND/OR/SEQUENCE</span></code>. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_ast.group">
+<span class="target" id="structt__ast_1a48c797f0ee2874941033d6f55e2f2df4"></span><a class="reference internal" href="#c.t_group" title="t_group"><span class="n"><span class="pre">t_group</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">group</span></span></span><a class="headerlink" href="#c.t_ast.group" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">data.group</span></code> Live when <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">==</span> <span class="pre">NODE_SUBSHELL/BLOCK/BACKGROUND</span></code>. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_ast.data">
+<span class="target" id="structt__ast_1ae2696ef94788234645598054861482e7"></span><span class="k"><span class="pre">union</span></span><span class="w"> </span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">data</span></span></span><a class="headerlink" href="#c.t_ast.data" title="Link to this definition"></a><br /></dt>
+<dd><p>Per-node payload selected by <code class="docutils literal notranslate"><span class="pre">type</span></code>. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<section id="how-is-the-t-ast-generated">
+<h2>How is the t_ast generated?<a class="headerlink" href="#how-is-the-t-ast-generated" title="Link to this heading"></a></h2>
+<p>The abstract syntax tree is generated from the tokenized line.
+note: The <cite>shell</cite> must be provided in order to handle the heredoc, no other reason.</p>
+<p><code class="docutils literal notranslate"><span class="pre">t_ast</span> <span class="pre">*parser_parse(t_list</span> <span class="pre">*tokens,</span> <span class="pre">t_shell</span> <span class="pre">*shell)</span></code></p>
+</section>
+<section id="ast-to-string">
+<h2>Ast to string<a class="headerlink" href="#ast-to-string" title="Link to this heading"></a></h2>
+<p>Stringify an AST subtree for human-readable job listings (<code class="docutils literal notranslate"><span class="pre">t_jobs</span></code>). </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.join_free">
+<span class="target" id="ast__to__string_8c_1a7dc2faa754f71a1cde7f7c52f2a4642c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">join_free</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">a</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.join_free" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.append_redirs">
+<span class="target" id="ast__to__string_8c_1aca79466d9fbf142cd5d10d623a48ed29"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">append_redirs</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redirs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.append_redirs" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="ast__to__string_8c_1a308eaad8654c3bbea35bda4250642125"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">cmd_to_string</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="ast__to__string_8c_1a34805b31c39ec71ea3c8d2fe0b4d66f3"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_to_string</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="parser">
+<h2>Parser<a class="headerlink" href="#parser" title="Link to this heading"></a></h2>
+<p>Recursive-descent parser: transforms the token stream into an AST. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem pulgamecanica </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parser_parse">
+<span class="target" id="parser_8h_1abf01edcae0f1c7b5ebbf02c057a80b34"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parser_parse</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parser_parse" title="Link to this definition"></a><br /></dt>
+<dd><p>consume a t_list* of tokens and return the AST root. </p>
+<p>Returns NULL on syntax error (error printed to stderr).</p>
+<p>The token list is NOT freed here, caller frees it with <a class="reference internal" href="lexer.html#lexer_8h_1a78eed3104c1d85c0017c610628083912"><span class="std std-ref">lexer_free_tokens()</span></a>.</p>
+<p>this is the main function of the parser module</p>
+<p>call parse list which wrap all the layers and check for EOF</p>
+<p>parse_list (“;” and “&amp;” separators) -&gt; parse_and_or</p>
+<p>parse_and_or (”&amp;&amp;” and “||” separators) -&gt; parse_pipeline</p>
+<p>parse_pipeline (“|” separator) -&gt; parse_command</p>
+<p>parse_command (read simple command) -&gt; parse_subshell</p>
+<p>parse_subshell recurse on parse_list</p>
+<p>parse_heredoc walk ast and collect heredocs </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parser_collect_heredocs">
+<span class="target" id="parser_8h_1aaf4a3fe3e0b91c5f6ef5f95a3f63fd7d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parser_collect_heredocs</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parser_collect_heredocs" title="Link to this definition"></a><br /></dt>
+<dd><p>walk the AST after parsing and read heredoc content </p>
+<p>from stdin for each &lt;&lt; redirection.</p>
+<p>shell is needed to read from the correct fd and to check SIGINT.</p>
+<p>Returns 0 on success, -1 if SIGINT aborted heredoc input. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.heredoc_expand_config">
+<span class="target" id="parser_8h_1a9357af7a2a5d385680599a5c16b7937f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">heredoc_expand_config</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.heredoc_expand_config" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parser_accept">
+<span class="target" id="parser_8h_1a01b8957f39b6603996033a3bf833c35c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parser_accept</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parser_accept" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_redir">
+<span class="target" id="parser_8h_1a36b73f616466507248093aa32310d64f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_redir</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_redir" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parser_peek">
+<span class="target" id="parser_8h_1a77019b77e12c1d90f99167db165679b1"></span><a class="reference internal" href="lexer.html#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parser_peek</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parser_peek" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parser_next">
+<span class="target" id="parser_8h_1ae5c3cc52523f2cb4b86ab4baddf5c752"></span><a class="reference internal" href="lexer.html#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parser_next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parser_next" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_subshell">
+<span class="target" id="parser_8h_1af6d880df642b7232315cc59c77469b13"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_subshell</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_subshell" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_block">
+<span class="target" id="parser_8h_1a0d5710c09e64c457099cac08d26231a8"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_block</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_block" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_command">
+<span class="target" id="parser_8h_1ab389d60d943a7f20f35a6a8f5f9e89a1"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_simple_command">
+<span class="target" id="parser_8h_1a23078b8c605345f83867df1071a2be6d"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_simple_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_simple_command" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_pipeline">
+<span class="target" id="parser_8h_1a920dcce565b801ecd9798514974f22ed"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_pipeline</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_pipeline" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_and_or">
+<span class="target" id="parser_8h_1a551801be22770575f2a4696842cddb6e"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_and_or</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_and_or" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_list">
+<span class="target" id="parser_8h_1a251fe5df5603fc9df7ff432e44f9d9d0"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_list</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_list" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.cmd_free">
+<span class="target" id="parser_8h_1a27c2af228e3e9e2e0b3794e6e88dea41"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.cmd_free" title="Link to this definition"></a><br /></dt>
+<dd><p>Free a partially-built <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> on a parse error. </p>
+<p>Releases argv (and every strdup’d entry), assignments list, redirs list (via <code class="docutils literal notranslate"><span class="pre">redir_free</span></code>), and the struct itself. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser_8h_1aae0fa788dadad55b86a2b12ebc8abc77"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">redir_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.t_parser">
+<span class="target" id="structt__parser"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">t_parser</span></span></span><a class="headerlink" href="#c.t_parser" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;parser.h&gt;</em></div>
+<p>Parser internal state. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_parser.tokens">
+<span class="target" id="structt__parser_1a3a0ab08e98827e38ccf004072c73c829"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">tokens</span></span></span><a class="headerlink" href="#c.t_parser.tokens" title="Link to this definition"></a><br /></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">t_list*</span></code> of <code class="docutils literal notranslate"><span class="pre">t_token*</span></code> produced by the lexer. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_parser.current">
+<span class="target" id="structt__parser_1a4474346aaa6b781cbecfe15fb4840cdf"></span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">current</span></span></span><a class="headerlink" href="#c.t_parser.current" title="Link to this definition"></a><br /></dt>
+<dd><p>List node the parser is currently examining. </p>
+</dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.t_parser.error">
+<span class="target" id="structt__parser_1a440fd376e3ff1786a44bef492aba5f17"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><a class="headerlink" href="#c.t_parser.error" title="Link to this definition"></a><br /></dt>
+<dd><p>Human-readable error string (set on syntax error, freed by parser). </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="parser-entry-point">
+<h2>Parser Entry Point<a class="headerlink" href="#parser-entry-point" title="Link to this heading"></a></h2>
+<p>main file of parser module </p>
+<p>file for parser utils functions</p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem, pulgamecanica</p>
+</dd>
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser_8c_1abf01edcae0f1c7b5ebbf02c057a80b34"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parser_parse</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">tokens</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>consume a t_list* of tokens and return the AST root. </p>
+<p>this is the main function of the parser module</p>
+<p>call parse list which wrap all the layers and check for EOF</p>
+<p>parse_list (“;” and “&amp;” separators) -&gt; parse_and_or</p>
+<p>parse_and_or (”&amp;&amp;” and “||” separators) -&gt; parse_pipeline</p>
+<p>parse_pipeline (“|” separator) -&gt; parse_command</p>
+<p>parse_command (read simple command) -&gt; parse_subshell</p>
+<p>parse_subshell recurse on parse_list</p>
+<p>parse_heredoc walk ast and collect heredocs </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="simple-commands">
+<h2>Simple Commands<a class="headerlink" href="#simple-commands" title="Link to this heading"></a></h2>
+<p>file for parse command </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__command_8c_1a8b4de3181f55347fdf05dc1c0c2e1a41"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_new_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__command_8c_1ab389d60d943a7f20f35a6a8f5f9e89a1"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.command_init">
+<span class="target" id="parser__command_8c_1affc7bcc73fd789332d2743ff7d10bd7f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">command_init</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.command_init" title="Link to this definition"></a><br /></dt>
+<dd><p>initialize <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parser_error_unexpected">
+<span class="target" id="parser__command_8c_1a873ea582cdd6d11acc20c011bfa0145a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parser_error_unexpected</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="lexer.html#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">token</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parser_error_unexpected" title="Link to this definition"></a><br /></dt>
+<dd><p>handle <a class="reference internal" href="#structt__parser"><span class="std std-ref">t_parser</span></a> error field </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – <a class="reference internal" href="#structt__parser"><span class="std std-ref">t_parser</span></a> struct </p></li>
+<li><p><strong>token</strong> – <a class="reference internal" href="lexer.html#structt__token"><span class="std std-ref">t_token</span></a> struct </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.command_size">
+<span class="target" id="parser__command_8c_1aebb4a622046b5876398ec7b989750d51"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">command_size</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">command</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.command_size" title="Link to this definition"></a><br /></dt>
+<dd><p>allocate memory of <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct argv field </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – <a class="reference internal" href="#structt__parser"><span class="std std-ref">t_parser</span></a> struct </p></li>
+<li><p><strong>command</strong> – <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>char **argv </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_arith_token">
+<span class="target" id="parser__command_8c_1ad75884c0eb779d4c7d345f24d3b36eb6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">collect_arith_token</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_arith_token" title="Link to this definition"></a><br /></dt>
+<dd><p>helper to reconstruct “$((a + b)” from token into one string </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – <a class="reference internal" href="#structt__parser"><span class="std std-ref">t_parser</span></a> struct </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>char *string reconstructed </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.command_build">
+<span class="target" id="parser__command_8c_1aa5c5026c4c01960558346676c393c005"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">command_build</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">command</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.command_build" title="Link to this definition"></a><br /></dt>
+<dd><p>fill the <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – <a class="reference internal" href="#structt__parser"><span class="std std-ref">t_parser</span></a> struct </p></li>
+<li><p><strong>command</strong> – <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#structt__ast"><span class="std std-ref">t_ast</span></a> struct </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.is_assignment">
+<span class="target" id="parser__command_8c_1a0be583f2f02cfb7e3d4a27df5d3fbbe3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_assignment</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.is_assignment" title="Link to this definition"></a><br /></dt>
+<dd><p>Check whether <code class="docutils literal notranslate"><span class="pre">str</span></code> is a POSIX assignment word. </p>
+<p>
+The portion BEFORE the first ‘=’ must be a valid identifier (alpha or ‘_’ first, then alnum or ‘_’). The portion AFTER the ‘=’ is the value and may contain any characters, including quotes - quote handling is the expander’s job. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str</strong> – char *</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 if <code class="docutils literal notranslate"><span class="pre">str</span></code> is a NAME=VALUE assignment, 0 otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_assignment">
+<span class="target" id="parser__command_8c_1add0fd809cf4e31666fc3b7b6e1c9fcaf"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parse_assignment</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">command</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_assignment" title="Link to this definition"></a><br /></dt>
+<dd><p>append assignments to <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – <a class="reference internal" href="#structt__parser"><span class="std std-ref">t_parser</span></a> struct </p></li>
+<li><p><strong>command</strong> – <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> struct </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__command_8c_1a23078b8c605345f83867df1071a2be6d"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_simple_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="pipes">
+<h2>Pipes<a class="headerlink" href="#pipes" title="Link to this heading"></a></h2>
+<p>file for pipeline parser </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__pipeline_8c_1a920dcce565b801ecd9798514974f22ed"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_pipeline</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="logical-operators">
+<h2>Logical Operators<a class="headerlink" href="#logical-operators" title="Link to this heading"></a></h2>
+<p>file for &amp;&amp; and || parser </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.detect_and_or">
+<span class="target" id="parser__and__or_8c_1a1a3ff3e4191062ccffb758bb70a0f72c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">detect_and_or</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.detect_and_or" title="Link to this definition"></a><br /></dt>
+<dd><p>helper function to detect TOK_AND and TOK_OR </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – struct s_parser </p></li>
+<li><p><strong>type</strong> – enum e_node_type </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 (no one), 1 (TOK_AND), 2 (TOK_OR) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__and__or_8c_1a551801be22770575f2a4696842cddb6e"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_and_or</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="sequences-and-background">
+<h2>Sequences and Background<a class="headerlink" href="#sequences-and-background" title="Link to this heading"></a></h2>
+<p>file for parse list </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.detect_separator">
+<span class="target" id="parser__list_8c_1a97696aa77480a49afcc0f7c1c4ffb706"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">detect_separator</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">operator</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.detect_separator" title="Link to this definition"></a><br /></dt>
+<dd><p>helper function for parse_list. Newlines act as command terminators (POSIX 2.10) so <code class="docutils literal notranslate"><span class="pre">;</span></code> and a literal <code class="docutils literal notranslate"><span class="pre">\n</span></code> between commands are equivalent. This matters for multi-line <code class="docutils literal notranslate"><span class="pre">()</span></code> / <code class="docutils literal notranslate"><span class="pre">{}</span></code> groups and for any input that came through <code class="docutils literal notranslate"><span class="pre">shell_read_logical_line</span></code>, which joins physical lines with <code class="docutils literal notranslate"><span class="pre">\n</span></code> to preserve quote interiors and paren grouping. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – struc s_parser pointer </p></li>
+<li><p><strong>operator</strong> – enum e_node_type pointer </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>0 (no separator), 1 (; or</p>
+<p>separator), 2 (&amp; separator)</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__list_8c_1a251fe5df5603fc9df7ff432e44f9d9d0"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_list</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="subshells-and-blocks">
+<h2>Subshells and Blocks<a class="headerlink" href="#subshells-and-blocks" title="Link to this heading"></a></h2>
+<p>file for parse group </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__group_8c_1a4a3464c9dd944f70087dcffc011083a5"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_new_group</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">child</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redirs</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_group_cleanup">
+<span class="target" id="parser__group_8c_1a1b01cdf7f91c79d9a9448b00473cda05"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parse_group_cleanup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">child</span></span>, <span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redirs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_group_cleanup" title="Link to this definition"></a><br /></dt>
+<dd><p>Free the <code class="docutils literal notranslate"><span class="pre">child</span></code> AST and any partially-built <code class="docutils literal notranslate"><span class="pre">redirs</span></code> list. </p>
+<p>Called from every error path in <code class="docutils literal notranslate"><span class="pre">parse_group</span></code>, <code class="docutils literal notranslate"><span class="pre">parse_subshell</span></code> and <code class="docutils literal notranslate"><span class="pre">parse_block</span></code> so a half-built subshell/block cannot leak its inner AST plus accumulated redirections on a syntax error (e.g. random-binary input that parses partway then dies). </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.parse_group">
+<span class="target" id="parser__group_8c_1ab8daf2442bcafd1d80206541a7f40d25"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_group</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">child</span></span>, <a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">node</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.parse_group" title="Link to this definition"></a><br /></dt>
+<dd><p>factorization of the end of parse_subshell and parse_block </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – struct s_parser pointer </p></li>
+<li><p><strong>child</strong> – struct s_ast pointer </p></li>
+<li><p><strong>node</strong> – enum e_node_type </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pointer on struct s_ast </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__group_8c_1af6d880df642b7232315cc59c77469b13"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_subshell</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__group_8c_1a0d5710c09e64c457099cac08d26231a8"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parse_block</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="here-documents">
+<h2>Here-documents<a class="headerlink" href="#here-documents" title="Link to this heading"></a></h2>
+<p>file to handle heredoc </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.strip_tab">
+<span class="target" id="parser__heredoc_8c_1aadb7d363ab3bbf67d7a60dbb4fae3fd3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">strip_tab</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">origin</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.strip_tab" title="Link to this definition"></a><br /></dt>
+<dd><p>strip the leading tabulations of origin </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin</strong> – : raw string </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an allocated cleaned string </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.write_line">
+<span class="target" id="parser__heredoc_8c_1a313721106bf49f4afcf241325ab72e8f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_line</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">fd</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">line</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n"><span class="pre">len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.write_line" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.pop_queued_heredoc">
+<span class="target" id="parser__heredoc_8c_1a701a590a212109421ad70c2309dd48fc"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pop_queued_heredoc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">fd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.pop_queued_heredoc" title="Link to this definition"></a><br /></dt>
+<dd><p>Pop the next pre-collected heredoc body from <code class="docutils literal notranslate"><span class="pre">shell-&gt;heredoc_body_queue</span></code> and write it to <code class="docutils literal notranslate"><span class="pre">fd</span></code>. </p>
+<p>The REPL’s <code class="docutils literal notranslate"><span class="pre">shell_read_logical_line</span></code> scans command lines for <code class="docutils literal notranslate"><span class="pre">&lt;&lt;DELIM</span></code> operators and pushes one body per heredoc onto the queue, in declaration order. The parser’s AST walk visits heredocs in the same order, so a plain FIFO pop is correct. Bodies are already tab-stripped per <code class="docutils literal notranslate"><span class="pre">&lt;&lt;-</span></code> rules and contain newline-terminated lines (or “” for empty bodies). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0 on success, -1 on write failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.read_heredoc">
+<span class="target" id="parser__heredoc_8c_1a26aa3c2daa7e32f5a2a189c4bfc27893"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_heredoc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">fd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.read_heredoc" title="Link to this definition"></a><br /></dt>
+<dd><p>Read or recover the heredoc body. If the REPL already pre-collected the body into <code class="docutils literal notranslate"><span class="pre">shell-&gt;heredoc_body_queue</span></code> (the case for any input that came through <code class="docutils literal notranslate"><span class="pre">shell_read_logical_line</span></code>, i.e. both interactive and piped stdin), we pop it. Otherwise we fall back to reading line-by-line via <code class="docutils literal notranslate"><span class="pre">shell_read_line</span></code> (used when <code class="docutils literal notranslate"><span class="pre">parser_parse</span></code> is called outside the REPL, e.g. unit tests or <code class="docutils literal notranslate"><span class="pre">-c</span></code> mode &amp;#8212; though <code class="docutils literal notranslate"><span class="pre">-c</span></code> mode doesn’t yet handle heredocs since the lexer doesn’t recognise body lines inline). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>redir</strong> – : a pointer on struct s_redir </p></li>
+<li><p><strong>shell</strong> – : shell state, used to reach the shared input reader </p></li>
+<li><p><strong>fd</strong> – : the backing-store fd the heredoc body is written to </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 (success) | -1 (failure or SIGINT) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_heredoc">
+<span class="target" id="parser__heredoc_8c_1a7aac5d05d8956078b6073a9bc2ed99e9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">collect_heredoc</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_heredoc" title="Link to this definition"></a><br /></dt>
+<dd><p>collect one heredoc body into an unlinked temp file and store the readable fd (rewound to offset 0) in redir-&gt;heredoc_fd. There is no fork: the collector runs in the shell process and therefore shares the one stdin cursor used to read command lines. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>redir</strong> – : pointer on a struct s_redir </p></li>
+<li><p><strong>shell</strong> – : shell state </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 | -1 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_heredocs_from_list">
+<span class="target" id="parser__heredoc_8c_1ae0889b735b7a6d629d0c17552920f177"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">collect_heredocs_from_list</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">t_list</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">lst</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_heredocs_from_list" title="Link to this definition"></a><br /></dt>
+<dd><p>helper function for collect heredocs from command or subshell </p>
+<p>
+store redirections </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lst</strong> – : a struct s_list pointer </p></li>
+<li><p><strong>shell</strong> – : shell state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_heredocs_from_command">
+<span class="target" id="parser__heredoc_8c_1a4a95248c7ff79db3a786ea77dfa10fd4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">collect_heredocs_from_command</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_heredocs_from_command" title="Link to this definition"></a><br /></dt>
+<dd><p>collect redirections of commands </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – : struct s_cmd pointer </p></li>
+<li><p><strong>shell</strong> – : shell state </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.collect_heredocs_from_group">
+<span class="target" id="parser__heredoc_8c_1af5ae468cb82ea931d29f4a1667ca883a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">collect_heredocs_from_group</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_group" title="t_group"><span class="n"><span class="pre">t_group</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">group</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.collect_heredocs_from_group" title="Link to this definition"></a><br /></dt>
+<dd><p>collect redirections of group </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group</strong> – : struct s_group pointer </p></li>
+<li><p><strong>shell</strong> – : shell state </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__heredoc_8c_1a9357af7a2a5d385680599a5c16b7937f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">heredoc_expand_config</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.ast_walk">
+<span class="target" id="parser__heredoc_8c_1ac773c57b78d4744b57ca230402b497a3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ast_walk</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.ast_walk" title="Link to this definition"></a><br /></dt>
+<dd><p>traverses the ast tree and collect heredocs content, stopping on SIGINT </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ast</strong> – : a pointer on a struct s_ast </p></li>
+<li><p><strong>shell</strong> – : the shell struct </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 on success, -1 on SIGINT </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.heredoc_sigint_handler">
+<span class="target" id="parser__heredoc_8c_1abc9bb04f2f100d73bad325915af7af8b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">heredoc_sigint_handler</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n"><span class="pre">signal</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.heredoc_sigint_handler" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__heredoc_8c_1aaf4a3fe3e0b91c5f6ef5f95a3f63fd7d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parser_collect_heredocs</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">ast</span></span>, <a class="reference internal" href="42sh.html#c.t_shell" title="t_shell"><span class="n"><span class="pre">t_shell</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">shell</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>walk the AST after parsing and read heredoc content </p>
+<p>from stdin for each &lt;&lt; redirection.</p>
+<p>shell is needed to read from the correct fd and to check SIGINT.</p>
+<p>Returns 0 on success, -1 if SIGINT aborted heredoc input. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="c var">
+<dt class="sig sig-object c" id="c.g_sigint_heredoc">
+<span class="target" id="parser__heredoc_8c_1a9fece3de57048fd897fc1108529b7f97"></span><span class="k"><span class="pre">volatile</span></span><span class="w"> </span><span class="n"><span class="pre">sig_atomic_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">g_sigint_heredoc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#c.g_sigint_heredoc" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="utilities">
+<h2>Utilities<a class="headerlink" href="#utilities" title="Link to this heading"></a></h2>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__utils_8c_1a7e2808e9794fe583059905719704dbfb"></span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">ast_new_binary</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_node_type" title="t_node_type"><span class="n"><span class="pre">t_node_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__utils_8c_1a36b73f616466507248093aa32310d64f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_redir</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__utils_8c_1a77019b77e12c1d90f99167db165679b1"></span><a class="reference internal" href="lexer.html#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parser_peek</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__utils_8c_1ae5c3cc52523f2cb4b86ab4baddf5c752"></span><a class="reference internal" href="lexer.html#c.t_token" title="t_token"><span class="n"><span class="pre">t_token</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">parser_next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="parser__utils_8c_1a01b8957f39b6603996033a3bf833c35c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parser_accept</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_parser" title="t_parser"><span class="n"><span class="pre">t_parser</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span>, <a class="reference internal" href="lexer.html#c.t_token_type" title="t_token_type"><span class="n"><span class="pre">t_token_type</span></span></a><span class="w"> </span><span class="n"><span class="pre">type</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+<section id="ast-memory-management">
+<h2>AST Memory Management<a class="headerlink" href="#ast-memory-management" title="Link to this heading"></a></h2>
+<p>file for free memory functions </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>jguillem </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="memory_8c_1aae0fa788dadad55b86a2b12ebc8abc77"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">redir_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_redir" title="t_redir"><span class="n"><span class="pre">t_redir</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">redir</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.free_argv">
+<span class="target" id="memory_8c_1a88bf459338083bc606110e873a89c5ad"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_argv</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.free_argv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="memory_8c_1a27c2af228e3e9e2e0b3794e6e88dea41"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cmd_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_cmd" title="t_cmd"><span class="n"><span class="pre">t_cmd</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">cmd</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Free a partially-built <a class="reference internal" href="#structt__cmd"><span class="std std-ref">t_cmd</span></a> on a parse error. </p>
+<p>Releases argv (and every strdup’d entry), assignments list, redirs list (via <code class="docutils literal notranslate"><span class="pre">redir_free</span></code>), and the struct itself. </p>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c">
+<span class="target" id="memory_8c_1a96b9a3527fbec066242ed2fec5c436ef"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ast_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.t_ast" title="t_ast"><span class="n"><span class="pre">t_ast</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">node</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="42sh.html" class="btn btn-neutral float-left" title="42sh (Shell State)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="builtins.html" class="btn btn-neutral float-right" title="Builtins" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, 42sh contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

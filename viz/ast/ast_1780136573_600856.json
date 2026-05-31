@@ -1,0 +1,19 @@
+{
+  "input": "echo abc >redir",
+  "tok_file": "viz/tokenizations/tok_1780136573_600412.json",
+  "tree": {
+    "type": "NODE_COMMAND",
+    "argv": ["echo", "abc"],
+    "argc": 2,
+    "assignments": [],
+    "redirs": [
+      {
+        "type": ">",
+        "fd": -1,
+        "target": "redir",
+        "heredoc_delim": null,
+        "heredoc_quoted": 0
+      }
+    ]
+  }
+}

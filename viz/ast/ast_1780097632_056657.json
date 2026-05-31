@@ -1,0 +1,67 @@
+{
+  "input": "ls | grep \"file\" && echo \"yes that did it\" ; ( L=\"som'ssstring\" ; echo $L \"_ _\" $(( 5+42 )) )",
+  "tok_file": "viz/tokenizations/tok_1780097632_056429.json",
+  "tree": {
+    "type": "NODE_SEQUENCE",
+    "left": {
+      "type": "NODE_AND",
+      "left": {
+        "type": "NODE_PIPE",
+        "left": {
+          "type": "NODE_COMMAND",
+          "argv": ["ls"],
+          "argc": 1,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        },
+        "right": {
+          "type": "NODE_COMMAND",
+          "argv": ["grep", "\"file\""],
+          "argc": 2,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        }
+      },
+      "right": {
+        "type": "NODE_COMMAND",
+        "argv": ["echo", "\"yes that did it\""],
+        "argc": 2,
+        "assignments": [],
+        "redirs": [
+
+        ]
+      }
+    },
+    "right": {
+      "type": "NODE_SUBSHELL",
+      "child": {
+        "type": "NODE_SEQUENCE",
+        "left": {
+          "type": "NODE_COMMAND",
+          "argv": [],
+          "argc": 0,
+          "assignments": ["L=\"som'ssstring\""],
+          "redirs": [
+
+          ]
+        },
+        "right": {
+          "type": "NODE_COMMAND",
+          "argv": ["echo", "$L", "\"_ _\"", "$((5+42))"],
+          "argc": 4,
+          "assignments": [],
+          "redirs": [
+
+          ]
+        }
+      },
+      "redirs": [
+
+      ]
+    }
+  }
+}
